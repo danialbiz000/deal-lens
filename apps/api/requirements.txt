@@ -1,0 +1,13 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+sqlalchemy>=2.0
+pydantic>=2.6
+pydantic-settings>=2.2
+httpx>=0.27
+python-dotenv>=1.0
+anthropic>=0.40  # Phase 4 AI layer (apps/api/app/ai/ only -- see docs/phase4-ai-layer-design.md)
+
+# dev / test
+pytest>=8.0
+
+-e ../../packages/finance_engine

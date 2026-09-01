@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+.pytest_cache/
+
+# Local SQLite dev DB
+apps/api/deal_lens.db
+*.db
+
+# Env files (never commit secrets/keys)
+.env
+.env.local
+
+# Node / Next.js
+node_modules/
+apps/web/.next/
+apps/web/next-env.d.ts

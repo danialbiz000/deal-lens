@@ -1,0 +1,19 @@
+[project]
+name = "finance_engine"
+version = "0.1.0"
+description = "DealLens deterministic PE screening math (zero FastAPI/DB deps)"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["finance_engine*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
