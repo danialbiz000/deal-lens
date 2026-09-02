@@ -182,7 +182,7 @@ pip install -r requirements.txt
 pytest
 ```
 
-Both suites are green (73 + 106 tests, 2 of the apps/api tests skipping
+Both suites are green (73 + 113 tests, 2 of the apps/api tests skipping
 gracefully without `ANTHROPIC_API_KEY`). `packages/finance_engine`'s
 screening tests cover the normal case, missing-period case,
 negative-EBITDA case, zero-revenue case, and zero-interest-expense case for
@@ -209,10 +209,19 @@ fails the IRR floor, then asserts the persisted `recommendation` is
 `HOLD`, `override_fired` is `true`, and `llm_recommendation` still shows
 the original `PROCEED_TO_DD` untouched. Two optional live tests
 (`test_memo_live.py`, `test_ic_simulation_live.py`) skip automatically
-without `ANTHROPIC_API_KEY` and were not run against the real API as part
-of this implementation (no key was available in the environment this was
-built in) -- they're written and gated correctly, but exercising them
-against a real key is left to whoever has one.
+without `ANTHROPIC_API_KEY`. They were run for real once a key was
+configured -- and both failed with a `503`, but for a reason that has
+nothing to do with this codebase: `Your credit balance is too low to
+access the Anthropic API`, straight from Anthropic's own API response.
+The key authenticates fine and `ClaudeClient` forms the request correctly
+(confirmed directly against the SDK, independent of pytest) -- the account
+behind it simply has no credits, which is an account/billing action only
+whoever holds that key can take, not something fixable in code. This
+incidentally still exercised something real: `ClaudeApiError` correctly
+wrapped Anthropic's 400 and the router correctly turned it into the
+documented `503` with a clear message -- just not the "happy path" these
+two tests exist to prove. They remain written and correctly gated; running
+them again once the account has credits requires no code changes.
 
 ## The screening score, honestly
 
@@ -286,6 +295,81 @@ explain. Python owns the financial math."* Concretely, in this codebase:
   is a new version; nothing is ever overwritten, matching the spec's own
   requirement that a memo's output be reproducible later from its stored
   inputs.
+
+## Rate limiting
+
+Added once a real `ANTHROPIC_API_KEY` was configured and the repo went
+public on GitHub (`docs/phase4-ai-layer-design.md` section 12). `POST
+.../memo` and `POST .../ic-simulation` (1 and 5 paid Claude calls per
+invocation respectively) each carry two independent, stacked limits:
+
+- **Per-company** (the real cost control): keyed on the `{company_id}` path
+  parameter, not caller identity -- default `5/hour;20/day` per company per
+  endpoint, capping worst-case spend for a single company at roughly
+  $1/hour.
+- **Per-IP** (abuse/blast-radius backstop): keyed on remote address,
+  combined across both AI endpoints -- default `10/minute`.
+
+`POST .../ingest` gets the same two dimensions at a lighter touch (`20/
+minute` per IP, `10/hour` per company) purely as good-citizenship
+throttling toward SEC EDGAR/FMP, not a cost issue. Everything else (reads,
+screening score, comps/LBO computation) is pure local computation and
+carries no limit at all.
+
+Exceeding a limit returns `429` with `{ "error": "rate_limit_exceeded",
+"scope": "ai_per_company" | "ai_per_ip" | "ingest_per_ip" |
+"ingest_per_company", "message": "...", "retry_after_seconds": N }` and,
+where obtainable, a `Retry-After` header. All 5 limit values are env vars
+(`RATE_LIMIT_ENABLED`, `RATE_LIMIT_AI_PER_IP`, `RATE_LIMIT_AI_PER_COMPANY`,
+`RATE_LIMIT_INGEST_PER_IP`, `RATE_LIMIT_INGEST_PER_COMPANY`), never
+hardcoded; set `RATE_LIMIT_ENABLED=false` for local dev convenience. The
+test suite always runs with it disabled by default (`tests/conftest.py`)
+regardless of what's in `.env` -- otherwise its many repeated calls to
+these same endpoints would start failing with `429`s partway through a
+run -- with a small set of dedicated tests (`tests/test_rate_limit.py`)
+that explicitly re-enable it with low override limits to prove a `429`
+actually fires, on both dimensions independently, for both the AI and
+ingest endpoints.
+
+**Two real bugs were caught building this, not just design nuances --
+both found by testing actual cross-request behavior, not by reading
+slowapi's docs and assuming.**
+
+1. slowapi's `Limiter` defaults to `key_style="url"`, which folds the raw
+   request path into every rate-limit storage key. For a route like
+   `/companies/{company_id}/memo`, that path is *different for every
+   company* -- so with the default, the per-IP limit was silently being
+   scoped to one company at a time too, completely defeating its purpose
+   as a limit that combines usage "across all companies from this
+   address." A dedicated test (`test_ai_per_ip_limit_fires_independently_of_company`)
+   caught this immediately: hitting two different companies from the same
+   client only tripped the per-IP limit after the fix
+   (`key_style="endpoint"` in `app/rate_limit.py`, keying on the route's
+   function name instead of its URL).
+2. That fix wasn't enough on its own: `key_style="endpoint"` still
+   differentiates `/memo` from `/ic-simulation` as two separate buckets
+   (different view-function names), so the per-IP limit -- which the
+   design doc specifies as "10/minute **across both AI endpoints
+   combined**" -- was still being enforced independently per route rather
+   than as one shared counter. Alternating calls between the two routes
+   never tripped it at all. The actual fix needed a second, distinct
+   slowapi mechanism: `shared_limit(..., scope="ai_per_ip")` instead of a
+   plain `.limit()` call, on *both* routes' per-IP decorator --
+   `scope=` overrides slowapi's per-endpoint differentiation entirely
+   (confirmed by reading slowapi's own `__evaluate_limits`: `limit_scope =
+   lim.scope or endpoint`), which `key_style` alone cannot do. The
+   per-company decorators never set `scope`, so they're untouched and
+   correctly keep their separate-per-endpoint behavior (design doc section
+   12.2: per-company limits are "per company, per endpoint" *deliberately*
+   -- a dedicated test
+   (`test_ai_per_company_limit_still_separate_per_endpoint_after_shared_ip_fix`)
+   confirms the second fix didn't accidentally erase that distinction too).
+
+Both bugs were caught by dedicated tests, not incidental coverage, and
+both were verified twice over: once via `TestClient`, once again against a
+live `uvicorn` server over real HTTP with deliberately low override
+limits, confirming the exact documented `429` JSON shape and `Retry-After`
+header end-to-end in both cases.
 
 ## Data sources
 

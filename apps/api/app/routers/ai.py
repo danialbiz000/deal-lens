@@ -3,13 +3,15 @@
 These POST endpoints are the only two in the whole codebase that make
 outbound network calls to a third-party API (design doc section 8). Both
 are documented plainly: a Claude API error/timeout is surfaced as 503 with
-a clear message, never a raw stack trace.
+a clear message, never a raw stack trace. Both also carry the two stacked
+rate-limit dimensions from design doc section 12 (per-company cost control
++ per-IP abuse backstop) -- the most expensive actions in the whole app.
 """
 
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.ai.bundle import build_source_bundle
@@ -17,12 +19,14 @@ from app.ai.client import ClaudeApiError, ClaudeClient, get_claude_client
 from app.ai.ic_simulation import run_ic_simulation
 from app.ai.memo import generate_memo
 from app.ai.prompts.memo_sections import PROMPT_VERSION as MEMO_PROMPT_VERSION
+from app.config import settings
 from app.db import get_db
 from app.models.company import Company
 from app.models.ic_simulation import IcSimulation
 from app.models.lbo_case import LboCase
 from app.models.memo import Memo
 from app.models.scenario import Scenario
+from app.rate_limit import SCOPE_AI_PER_COMPANY, SCOPE_AI_PER_IP, company_id_key, limiter
 from app.schemas.ic_simulation import IcSimulationResponse, IcSimulationSummary
 from app.schemas.memo import MemoResponse, MemoSummary
 from finance_engine.ic_gate import BearCaseInput, BearCaseYear
@@ -113,7 +117,10 @@ def _bear_case_gate_input(bear_case: LboCase) -> BearCaseInput:
 
 
 @router.post("/{company_id}/memo", response_model=MemoResponse)
+@limiter.shared_limit(lambda: settings.rate_limit_ai_per_ip, scope=SCOPE_AI_PER_IP, error_message=SCOPE_AI_PER_IP)
+@limiter.limit(lambda: settings.rate_limit_ai_per_company, key_func=company_id_key, error_message=SCOPE_AI_PER_COMPANY)
 def create_memo(
+    request: Request,
     company_id: str,
     db: Session = Depends(get_db),
     client: ClaudeClient = Depends(get_claude_client),
@@ -175,7 +182,10 @@ def get_memo(company_id: str, version: int, db: Session = Depends(get_db)) -> Me
 
 
 @router.post("/{company_id}/ic-simulation", response_model=IcSimulationResponse)
+@limiter.shared_limit(lambda: settings.rate_limit_ai_per_ip, scope=SCOPE_AI_PER_IP, error_message=SCOPE_AI_PER_IP)
+@limiter.limit(lambda: settings.rate_limit_ai_per_company, key_func=company_id_key, error_message=SCOPE_AI_PER_COMPANY)
 def create_ic_simulation(
+    request: Request,
     company_id: str,
     db: Session = Depends(get_db),
     client: ClaudeClient = Depends(get_claude_client),

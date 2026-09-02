@@ -28,6 +28,20 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     anthropic_model: str = "claude-sonnet-4-5"
 
+    # Rate limiting (docs/phase4-ai-layer-design.md section 12) -- cost
+    # control on the two paid-Claude-API endpoints, good-citizenship
+    # throttling on ingest. Values use the `limits` package's own string
+    # syntax (e.g. "5/hour;20/day"), enforced in-memory via slowapi --
+    # correct for this single-instance FastAPI + SQLite app, no distributed
+    # store anywhere in scope. RATE_LIMIT_ENABLED=false is the test default
+    # (set in tests/conftest.py) so the existing suite's many repeated
+    # calls to these endpoints don't start failing with 429s.
+    rate_limit_enabled: bool = True
+    rate_limit_ai_per_ip: str = "10/minute"
+    rate_limit_ai_per_company: str = "5/hour;20/day"
+    rate_limit_ingest_per_ip: str = "20/minute"
+    rate_limit_ingest_per_company: str = "10/hour"
+
     request_timeout_seconds: float = 30.0
 
 

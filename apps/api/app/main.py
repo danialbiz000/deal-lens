@@ -10,15 +10,21 @@ physically incapable of gaining any: `app/ai/` imports from
 (docs/phase4-ai-layer-design.md) is the first phase to make real Claude API
 calls, and confines every one of them to `app/ai/` -- `POST .../memo` and
 `POST .../ic-simulation` are the only two endpoints in the whole codebase
-that make outbound network calls to a third-party API.
+that make outbound network calls to a third-party API. Those two plus
+`POST .../ingest` carry rate limits (`app/rate_limit.py`,
+docs/phase4-ai-layer-design.md section 12) as cost/abuse control now that a
+real API key is configured and the repo is public.
 """
 
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from app.db import init_db
+from app.rate_limit import limiter, rate_limit_exceeded_handler
 from app.routers import ai, assumptions, comps, companies, financials, lbo, scenarios, screening
 
 
@@ -29,6 +35,10 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="DealLens API", version="0.1.0", lifespan=lifespan)
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

@@ -1,7 +1,7 @@
 from datetime import date
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -9,6 +9,7 @@ from app.db import get_db
 from app.ingestion import edgar_client, market_data_client, normalize
 from app.models.company import Company
 from app.models.financial_period import FinancialPeriod
+from app.rate_limit import SCOPE_INGEST_PER_COMPANY, SCOPE_INGEST_PER_IP, company_id_key, limiter
 from app.schemas.financial_period import FinancialPeriodRead, IngestRequest, IngestResponse
 
 router = APIRouter(prefix="/companies", tags=["financials"])
@@ -38,8 +39,10 @@ def _upsert_period(db: Session, company_id: str, normalized: dict) -> FinancialP
 
 
 @router.post("/{company_id}/ingest", response_model=IngestResponse)
+@limiter.limit(lambda: settings.rate_limit_ingest_per_ip, error_message=SCOPE_INGEST_PER_IP)
+@limiter.limit(lambda: settings.rate_limit_ingest_per_company, key_func=company_id_key, error_message=SCOPE_INGEST_PER_COMPANY)
 def ingest_financials(
-    company_id: str, payload: IngestRequest, db: Session = Depends(get_db)
+    request: Request, company_id: str, payload: IngestRequest, db: Session = Depends(get_db)
 ) -> IngestResponse:
     company = db.get(Company, company_id)
     if company is None:

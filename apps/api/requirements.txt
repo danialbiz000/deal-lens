@@ -6,6 +6,7 @@ pydantic-settings>=2.2
 httpx>=0.27
 python-dotenv>=1.0
 anthropic>=0.40  # Phase 4 AI layer (apps/api/app/ai/ only -- see docs/phase4-ai-layer-design.md)
+slowapi>=0.1.9  # rate limiting on /memo, /ic-simulation, /ingest -- see docs/phase4-ai-layer-design.md section 12
 
 # dev / test
 pytest>=8.0

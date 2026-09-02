@@ -277,6 +277,73 @@ Both `POST` endpoints are the only two in the whole codebase that make outbound 
 
 ---
 
+## 12. Rate limiting (added post-review — cost control)
+
+Added after Phase 4 review: a real `ANTHROPIC_API_KEY` is now configured, and the repo is public on GitHub, so the two AI endpoints need a hard ceiling on paid API usage before anyone (including a future publicly-deployed instance) can run up cost by hitting them repeatedly. This is a small addition to the already-built Phase 4 surface, not a new phase — no new entities, no new business logic, just guards in front of existing endpoints.
+
+### 12.1 Which endpoints, and why
+
+| Endpoint | Priority | Why |
+|---|---|---|
+| `POST /companies/{id}/memo` | **High** | 1 paid Claude call per invocation |
+| `POST /companies/{id}/ic-simulation` | **High** | 5 sequential paid Claude calls per invocation — the single most expensive action in the whole app |
+| `POST /companies/{id}/ingest` | Low | Calls external SEC EDGAR/FMP APIs — free, but both have courtesy-request expectations worth respecting; not a cost-control issue, just good citizenship |
+| Everything else (reads, screening score, comps/LBO computation) | None | Pure local computation or local DB reads — no external cost, no reason to limit; do not over-apply this |
+
+### 12.2 Two independent limit dimensions on the AI endpoints
+
+A single dimension isn't enough: a per-IP limit alone doesn't stop one company's memo/IC-simulation from being regenerated endlessly by different callers, and a per-company limit alone doesn't stop one client hammering many different companies. Both `POST /companies/{id}/memo` and `POST /companies/{id}/ic-simulation` get **both**, stacked:
+
+- **Per-company limit** (business-cost control — this is the one that actually matters): keyed on the `{id}` path parameter, not on caller identity. Default **`5/hour` and `20/day`** per company, per endpoint. Rationale: at the documented ~$0.15–0.20 for one memo + one IC-simulation run, 5 full regenerations/hour/company caps worst-case spend for a single company at roughly $1/hour — generous for genuine iterative demo use (tweaking an assumption and re-running), well below "someone is scripting this in a loop."
+- **Per-IP limit** (abuse/backstop): keyed on remote address. Default **`10/minute`** across both AI endpoints combined. This is the blast-radius cap if something loops or a public instance gets hit repeatedly from one source — independent of which company is targeted.
+
+### 12.3 Ingestion endpoint (lighter touch)
+
+`POST /companies/{id}/ingest` gets a lighter pair of limits, same two dimensions, purely as good API citizenship toward EDGAR/FMP rather than cost control: default **`20/minute` per IP** and **`10/hour` per company**.
+
+### 12.4 Mechanism
+
+In-memory rate limiting is the right call here, not a distributed store — this is a single-instance FastAPI app backed by SQLite, and there is no multi-process/multi-node deployment in scope anywhere in this project. Use `slowapi` (wraps the `limits` package, integrates with FastAPI via a decorator + a registered exception handler) rather than hand-rolling a token bucket — it directly supports everything needed here: multiple named limiter instances with different key functions (one keyed by `get_remote_address`, one by a custom function reading `request.path_params["id"]`), multi-window limit strings (`"5/hour;20/day"` in one decorator), and a `RateLimitExceeded` exception with enough information to build a `429` response and a `Retry-After` header. If stacking two independent `Limiter` instances' decorators on one route proves awkward in practice, a small hand-rolled in-memory fixed-window counter (a `dict[key, deque[timestamp]]` guarded by a lock) is an acceptable fallback for the exact same two-dimension scheme — implementer's judgment, the *behavior* specified above is what matters, not the specific library.
+
+New module: `apps/api/app/rate_limit.py` — defines the limiter instance(s), the company-id key function, and the `429` response shape:
+```json
+{ "error": "rate_limit_exceeded", "scope": "ai_per_company" | "ai_per_ip" | "ingest_per_ip" | "ingest_per_company",
+  "message": "Rate limit exceeded: 5 per hour for this company. Try again later.",
+  "retry_after_seconds": 1234 }
+```
+Set the `Retry-After` header on the response whenever the underlying limiter can supply the window reset time; a missing header is acceptable if that turns out to be awkward to extract, but the JSON body's `retry_after_seconds` should always be attempted.
+
+### 12.5 Configuration — env vars, not hardcoded constants
+
+Following the same "named, documented, overridable" pattern as every other calibration constant in this project:
+
+| Env var | Default | Meaning |
+|---|---|---|
+| `RATE_LIMIT_ENABLED` | `true` | Global on/off switch — set `false` for local dev convenience without touching code |
+| `RATE_LIMIT_AI_PER_IP` | `10/minute` | Backstop, both AI endpoints combined |
+| `RATE_LIMIT_AI_PER_COMPANY` | `5/hour;20/day` | Business cost control, per AI endpoint per company |
+| `RATE_LIMIT_INGEST_PER_IP` | `20/minute` | |
+| `RATE_LIMIT_INGEST_PER_COMPANY` | `10/hour` | |
+
+Values use the `limits` package's own string syntax directly (e.g. `"5/hour;20/day"`) rather than separate numeric env vars per window — fewer env vars, and directly parseable by the library doing the enforcement. Add all 5 to `.env.example` with the defaults above.
+
+### 12.6 Testing implication — do not let this break the existing suite
+
+The in-memory limiter's state persists for the lifetime of the test process, and the existing Phase 0/2/4 test suites call these same endpoints many times across many test functions in one run. Without accounting for this, the full suite would start failing with `429`s partway through a run — a real, easy-to-miss regression. Required approach: the test configuration sets `RATE_LIMIT_ENABLED=false` by default (e.g. in `conftest.py` / the test settings override), so the existing suite is unaffected, with a small number of **dedicated** rate-limit tests that explicitly set `RATE_LIMIT_ENABLED=true` and use very low limits (e.g. `2/minute`) to prove a `429` actually fires on the 3rd call and that the response includes the documented fields.
+
+### 12.7 Acceptance criteria — rate limiting
+
+- [ ] `POST /companies/{id}/memo` and `POST /companies/{id}/ic-simulation` each enforce both the per-company and per-IP limits from §12.2.
+- [ ] `POST /companies/{id}/ingest` enforces both limits from §12.3.
+- [ ] All limit values are read from the 5 env vars in §12.5, not hardcoded in route code; `RATE_LIMIT_ENABLED=false` fully disables enforcement.
+- [ ] Exceeding a limit returns `429` with the documented JSON body shape and, where feasible, a `Retry-After` header.
+- [ ] A dedicated test proves the per-company AI limit fires (low override limit, 3rd call in the window returns 429) and a separate test proves the per-IP limit fires independently of company.
+- [ ] The full existing test suite (Phases 0, 2, 4) still passes unmodified in behavior with rate limiting wired in — confirmed via `RATE_LIMIT_ENABLED=false` in test config, per §12.6.
+- [ ] `.env.example` updated with the 5 new env vars and their defaults.
+- [ ] `requirements.txt` updated if `slowapi` is added (or no new dependency if the hand-rolled fallback is used instead).
+
+---
+
 ## 11. Explicitly deferred (not this phase)
 
 Document parser for arbitrary uploaded filings/PDFs; news research synthesizer; peer-classifier narrative explanations (Phase 2's algorithmic similarity already covers this); formatted PDF/document export of the memo (structured content only); in-place manual editing of generated text (regenerate a new version instead); streaming responses; sophisticated cost/rate-limit management; multi-tenant auth; cloud deployment; UI polish beyond a functional trigger-and-view page. All consistent with the spec's own MVP/v1.0 split (slide 20) and this project's running discipline of building exactly the vertical slice in front of it before adding the next layer.

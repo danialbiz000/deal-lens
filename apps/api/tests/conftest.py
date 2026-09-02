@@ -2,6 +2,12 @@ import os
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("FMP_API_KEY", "")
+# Design doc section 12.6: the in-memory limiter's state persists for the
+# test process's lifetime, and the existing suites call these endpoints
+# many times across many tests -- without this default, the full suite
+# would start failing with 429s partway through. Only the dedicated
+# tests in test_rate_limit.py explicitly flip this on.
+os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
@@ -92,3 +98,42 @@ def fake_claude_client():
 
     yield _factory
     app.dependency_overrides.pop(get_claude_client, None)
+
+
+@pytest.fixture
+def rate_limiting_enabled():
+    """Enables the real slowapi limiter for one test, with a clean
+    in-memory counter state, then restores the disabled default (design
+    doc section 12.6). Only test_rate_limit.py's dedicated tests use this.
+    """
+    from app.rate_limit import limiter
+
+    limiter.reset()
+    limiter.enabled = True
+    try:
+        yield limiter
+    finally:
+        limiter.enabled = False
+        limiter.reset()
+
+
+@pytest.fixture
+def override_setting():
+    """Returns `set(name, value)` to temporarily override a `settings`
+    attribute for one test -- works because rate-limit values are read
+    live via zero-arg lambdas in the route decorators, not resolved once
+    at import time (see app/rate_limit.py's module docstring).
+    """
+    from app.config import settings
+
+    originals: dict = {}
+
+    def _set(name: str, value):
+        if name not in originals:
+            originals[name] = getattr(settings, name)
+        setattr(settings, name, value)
+
+    yield _set
+
+    for name, value in originals.items():
+        setattr(settings, name, value)
