@@ -20,6 +20,14 @@ rate/schedule, and the cash sweep pays tranches down strictly in
 `priority` order (lower first) -- a tranche only starts receiving sweep
 cash once every higher-priority tranche is fully repaid, matching how a
 real credit agreement's mandatory prepayment waterfall works.
+
+v1.0 addition (section 11): full tornado sensitivity across all 6 of the
+spec's variables (growth, margin, entry multiple, leverage, interest rate,
+exit multiple) via `run_tornado_analysis`, alongside the existing
+entry x exit 2D grid (`run_sensitivity_grid`, unchanged). Each variable is
+perturbed independently -- everything else held at the base case -- by
+re-running the full `run_lbo` waterfall low/high, never a separate/
+duplicated sensitivity formula, exactly like the 2D grid already does.
 """
 
 from dataclasses import asdict, dataclass, replace

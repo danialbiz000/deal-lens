@@ -235,6 +235,27 @@ export interface SensitivityResponse {
   moic_grid: number[][];
 }
 
+export interface TornadoVariable {
+  variable: string;
+  label: string;
+  base_value: number;
+  low_value: number;
+  high_value: number;
+  base_irr: number;
+  low_irr: number;
+  high_irr: number;
+  base_moic: number;
+  low_moic: number;
+  high_moic: number;
+  spread: number;
+}
+
+export interface TornadoResponse {
+  company_id: string;
+  case_type: string;
+  variables: TornadoVariable[];
+}
+
 // --- Phase 4: AI layer (memo writer + IC simulator) ---
 
 export interface MemoSection {
@@ -406,6 +427,9 @@ export const api = {
 
   getLboSensitivity: (id: string, caseType: CaseType, step = 1.0, size = 4) =>
     request<SensitivityResponse>(`/companies/${id}/lbo/${caseType}/sensitivity?step=${step}&size=${size}`),
+
+  getLboTornado: (id: string, caseType: CaseType) =>
+    request<TornadoResponse>(`/companies/${id}/lbo/${caseType}/tornado`),
 
   // --- Phase 4 ---
 

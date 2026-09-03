@@ -134,3 +134,39 @@ EXIT_MULTIPLE_DEPENDENT_THRESHOLD = 0.50
 # Sensitivity grid defaults (design doc section 6).
 SENSITIVITY_DEFAULT_STEP = 1.0
 SENSITIVITY_DEFAULT_SIZE = 4
+
+# Full tornado sensitivity (v1.0, design doc section 11): default +/- swing
+# applied around the base case for each of the spec's 6 variables. Each is
+# on its own natural scale (a leverage "turn", a rate in absolute
+# percentage points, a valuation multiple in "x"), not a uniform percentage
+# -- a uniform relative swing would make a 5% growth rate swing by an
+# implausibly tiny absolute amount while swinging a 12x entry multiple by
+# an enormous one.
+TORNADO_DEFAULT_DELTAS = {
+    "revenue_growth_rate": 0.05,  # +/- 5 percentage points
+    "ebitda_margin_delta": 0.03,  # +/- 3 percentage points of margin trajectory
+    "entry_multiple": 1.0,  # +/- 1.0x
+    "exit_multiple": 1.0,  # +/- 1.0x
+    "leverage": 1.0,  # +/- 1.0 turn of EBITDA
+    "interest_rate": 0.02,  # +/- 2 percentage points
+}
+
+TORNADO_VARIABLE_LABELS = {
+    "revenue_growth_rate": "Revenue growth",
+    "ebitda_margin_delta": "Margin expansion",
+    "entry_multiple": "Entry multiple",
+    "exit_multiple": "Exit multiple",
+    "leverage": "Leverage",
+    "interest_rate": "Interest rate",
+}
+
+# Floors preventing an aggressive delta from pushing a variable into an
+# economically meaningless region (negative leverage, a sub-1x multiple).
+# Growth and margin deltas are deliberately NOT floored -- negative growth
+# and margin compression are valid, meaningful bear-case territory.
+TORNADO_VARIABLE_FLOORS = {
+    "entry_multiple": 0.5,
+    "exit_multiple": 0.5,
+    "leverage": 0.0,
+    "interest_rate": 0.0,
+}

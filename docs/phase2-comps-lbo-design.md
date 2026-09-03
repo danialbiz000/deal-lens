@@ -360,7 +360,7 @@ A monotonicity unit test is required in addition to golden-value tests: holding 
 
 ## 9. Explicitly deferred (not this phase)
 
-`Transaction`/precedent-transactions entity and its own comps cross-check; `Memo`/IC-memo generator; any AI/LLM functionality (document parsing, IC agents, synthesis); ~~multi-tranche debt / debt sculpting (single blended tranche only, per §4)~~ **built, see §10**; full tornado sensitivity across growth/margin/leverage/interest-rate (entry×exit multiple grid only, per §6); granular AR/AP/inventory ingestion for a precise NWC diagnostic (flat-percentage simplification per §4.3 stands until then); automated peer/market screening beyond "companies already ingested" (§2.1); auth; cloud deployment; UI polish. All per spec slide 20's MVP/v1.0 split and slide 17's phased roadmap.
+`Transaction`/precedent-transactions entity and its own comps cross-check; `Memo`/IC-memo generator; any AI/LLM functionality (document parsing, IC agents, synthesis); ~~multi-tranche debt / debt sculpting (single blended tranche only, per §4)~~ **built, see §10**; ~~full tornado sensitivity across growth/margin/leverage/interest-rate (entry×exit multiple grid only, per §6)~~ **built, see §11**; granular AR/AP/inventory ingestion for a precise NWC diagnostic (flat-percentage simplification per §4.3 stands until then); automated peer/market screening beyond "companies already ingested" (§2.1); auth; cloud deployment; UI polish. All per spec slide 20's MVP/v1.0 split and slide 17's phased roadmap.
 
 ## 10. Debt sculpting: multiple tranches (v1.0)
 
@@ -376,3 +376,24 @@ Aggregate scalars (`ScheduleYear.interest/mandatory_amort/sweep/ending_debt`) ar
 **API**: `LboRunRequest.debt_tranches: Optional[List[DebtTrancheIn]]` opts in per run; the resolved tranche list (implicit or explicit) is always recorded in `inputs_json.debt_tranches` for the audit trail. The sensitivity endpoint rehydrates `LboInputs` from a stored case's `inputs_json` — since JSON has no dataclass concept, the stored `debt_tranches` (plain dicts) must be converted back into `DebtTranche` instances before re-entering the engine (`apps/api/app/routers/lbo.py`); this round-trip is covered by `test_lbo_sensitivity_grid_works_when_stored_case_used_custom_tranches`.
 
 **UI**: the LBO page's existing debt-schedule table is unchanged; a second "Debt tranches" table renders below it only when a case actually used more than one tranche, showing beginning/interest/mandatory-amort/sweep/ending per tranche per year.
+
+## 11. Full tornado sensitivity (v1.0)
+
+The existing entry×exit 2D grid (§6) is unchanged. `run_tornado_analysis` (`packages/finance_engine/finance_engine/tornado.py` — a separate module purely to keep `lbo.py` under this project's file-size convention, not new financial math) adds the spec's remaining 4 variables, perturbing all 6 independently and low/high around the base case by re-running the full `run_lbo` waterfall each time — never a separate/duplicated sensitivity formula:
+
+| Variable | Default swing | Mechanism |
+|---|---|---|
+| `revenue_growth_rate` | ±5pp | direct field override |
+| `ebitda_margin_delta` | ±3pp | direct field override |
+| `entry_multiple` | ±1.0x | `entry_ev` recomputed; `exit_multiple_delta` adjusted to hold the *absolute* exit multiple fixed, isolating "pay more/less to get in" from the exit assumption |
+| `exit_multiple` | ±1.0x | same `exit_multiple_delta` mechanism the 2D grid already uses |
+| `leverage` | ±1.0 turn | every tranche's `leverage_multiple` scaled by the same factor, preserving the capital-structure mix (e.g. 70/30 senior/mezz stays 70/30) |
+| `interest_rate` | ±2pp | every tranche's `interest_rate` shifted by the same absolute delta, preserving each tranche's spread to the others (models a rate-environment move, not a change to one tranche's spread) |
+
+`leverage`/`interest_rate` are floored at 0 (can't go negative); `entry_multiple`/`exit_multiple` are floored at 0.5x. `revenue_growth_rate`/`ebitda_margin_delta` are deliberately unfloored — negative growth and margin compression are valid bear-case territory, not errors.
+
+Each variable's result records `base/low/high` for both the perturbed value and the resulting IRR/MOIC, plus `spread = abs(high_irr - low_irr)`; the full result list is sorted by `spread` descending, the conventional tornado-chart ordering (widest bar = most sensitive, on top).
+
+**API**: `GET /companies/{id}/lbo/{case_type}/tornado` — same base-inputs resolution as `/sensitivity` (§6), including a factored-out helper (`_inputs_for_grid_endpoint`) shared by both endpoints so the debt-tranches rehydration logic isn't duplicated a third time.
+
+**UI**: a horizontal tornado chart on the LBO page, one bar per variable, split at the base-case IRR into a red (downside) and green (upside) segment on a shared x-axis across all 6 bars so widths are directly comparable.

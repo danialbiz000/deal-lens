@@ -251,3 +251,64 @@ def test_lbo_tranche_with_invalid_leverage_multiple_returns_422(client, db_sessi
     payload["debt_tranches"][0]["leverage_multiple"] = -1.0  # must be > 0
     response = client.post(f"/companies/{company['id']}/lbo/base/run", json=payload)
     assert response.status_code == 422
+
+
+# --- full tornado sensitivity (v1.0), via the API ---
+
+
+def test_lbo_tornado_returns_all_six_variables_sorted_by_spread(client, db_session):
+    company = _create_company(client, "TORNADO1")
+    _add_fy_period(db_session, company["id"])
+    client.post(f"/companies/{company['id']}/scenarios/generate")
+    client.post(f"/companies/{company['id']}/lbo/base/run", json={"entry_ev": 1000.0})
+
+    response = client.get(f"/companies/{company['id']}/lbo/base/tornado")
+    assert response.status_code == 200
+    body = response.json()
+
+    assert body["case_type"] == "BASE"
+    variables = body["variables"]
+    assert {v["variable"] for v in variables} == {
+        "revenue_growth_rate", "ebitda_margin_delta", "entry_multiple",
+        "exit_multiple", "leverage", "interest_rate",
+    }
+    spreads = [v["spread"] for v in variables]
+    assert spreads == sorted(spreads, reverse=True)
+
+
+def test_lbo_tornado_uses_the_same_entry_ev_the_run_used(client, db_session):
+    company = _create_company(client, "TORNADO2")
+    _add_fy_period(db_session, company["id"])
+    client.post(f"/companies/{company['id']}/scenarios/generate")
+    run_result = client.post(f"/companies/{company['id']}/lbo/base/run", json={"entry_ev": 1234.0}).json()
+
+    response = client.get(f"/companies/{company['id']}/lbo/base/tornado")
+    body = response.json()
+    leverage_row = next(v for v in body["variables"] if v["variable"] == "leverage")
+    assert leverage_row["base_irr"] == pytest.approx(run_result["irr"], abs=1e-6)
+
+
+def test_lbo_tornado_works_when_stored_case_used_custom_tranches(client, db_session):
+    # Same regression concern as the sensitivity grid: inputs_json stores
+    # debt_tranches as plain dicts, which must be rehydrated into
+    # DebtTranche instances before re-entering the engine.
+    company = _create_company(client, "TORNADOTRANCHE")
+    _add_fy_period(db_session, company["id"])
+    client.post(f"/companies/{company['id']}/scenarios/generate")
+    client.post(f"/companies/{company['id']}/lbo/base/run", json=_two_tranche_payload())
+
+    response = client.get(f"/companies/{company['id']}/lbo/base/tornado")
+    assert response.status_code == 200
+    body = response.json()
+    leverage_row = next(v for v in body["variables"] if v["variable"] == "leverage")
+    assert leverage_row["base_value"] == pytest.approx(5.0)  # 3.5 + 1.5 from _two_tranche_payload
+
+
+def test_lbo_tornado_requires_a_run_or_valid_comps_first(client, db_session):
+    company = _create_company(client, "TORNADONORUN")
+    _add_fy_period(db_session, company["id"])
+    client.post(f"/companies/{company['id']}/scenarios/generate")
+
+    # No prior /run and no peers/entry_ev on file -- same 422 path as /sensitivity.
+    response = client.get(f"/companies/{company['id']}/lbo/base/tornado")
+    assert response.status_code == 422

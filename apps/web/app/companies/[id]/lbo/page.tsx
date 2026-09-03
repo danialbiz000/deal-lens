@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { api, ApiError, type CaseType, type LboCaseResponse, type SensitivityResponse } from "@/lib/api";
+import {
+  api,
+  ApiError,
+  type CaseType,
+  type LboCaseResponse,
+  type SensitivityResponse,
+  type TornadoResponse,
+  type TornadoVariable,
+} from "@/lib/api";
 import {
   Badge,
   Banner,
@@ -39,6 +47,7 @@ export default function LboPage({ params }: { params: { id: string } }) {
   const [caseType, setCaseType] = useState<CaseType>("base");
   const [lboCase, setLboCase] = useState<LboCaseResponse | null>(null);
   const [sensitivity, setSensitivity] = useState<SensitivityResponse | null>(null);
+  const [tornado, setTornado] = useState<TornadoResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -55,6 +64,11 @@ export default function LboPage({ params }: { params: { id: string } }) {
       setSensitivity(await api.getLboSensitivity(companyId, selectedCase));
     } catch {
       setSensitivity(null);
+    }
+    try {
+      setTornado(await api.getLboTornado(companyId, selectedCase));
+    } catch {
+      setTornado(null);
     }
     setLoaded(true);
   }
@@ -359,6 +373,84 @@ export default function LboPage({ params }: { params: { id: string } }) {
           </div>
         </Card>
       )}
+
+      {tornado && tornado.variables.length > 0 && (
+        <Card>
+          <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Tornado sensitivity (IRR)</h2>
+          <p style={{ color: colors.textFaint, fontSize: "0.8rem", marginTop: 0 }}>
+            Each variable is perturbed independently, everything else held at the base case. Widest bar = most
+            sensitive. Red segment = downside vs. base case, green = upside.
+          </p>
+          <TornadoChart variables={tornado.variables} />
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function TornadoChart({ variables }: { variables: TornadoVariable[] }) {
+  const globalMin = Math.min(...variables.flatMap((v) => [v.low_irr, v.high_irr, v.base_irr]));
+  const globalMax = Math.max(...variables.flatMap((v) => [v.low_irr, v.high_irr, v.base_irr]));
+  const span = globalMax - globalMin || 1;
+  const pct = (irr: number) => ((irr - globalMin) / span) * 100;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+      {variables.map((v) => {
+        const downsideIrr = Math.min(v.low_irr, v.high_irr);
+        const upsideIrr = Math.max(v.low_irr, v.high_irr);
+        const basePct = pct(v.base_irr);
+        const downPct = pct(downsideIrr);
+        const upPct = pct(upsideIrr);
+        const downsideIsLow = v.low_irr <= v.high_irr;
+
+        return (
+          <div key={v.variable} style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <div style={{ width: "130px", fontSize: "0.8rem", color: colors.textMuted, flexShrink: 0 }}>{v.label}</div>
+            <div style={{ flex: 1, position: "relative", height: "22px", background: colors.surfaceRaised, borderRadius: "4px" }}>
+              <div
+                style={{
+                  position: "absolute",
+                  left: `${downPct}%`,
+                  width: `${basePct - downPct}%`,
+                  height: "100%",
+                  background: colors.dangerSoft,
+                  borderRadius: "4px 0 0 4px",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  left: `${basePct}%`,
+                  width: `${upPct - basePct}%`,
+                  height: "100%",
+                  background: colors.successSoft,
+                  borderRadius: "0 4px 4px 0",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  left: `${basePct}%`,
+                  top: 0,
+                  bottom: 0,
+                  width: "2px",
+                  background: colors.text,
+                }}
+                title={`Base: ${formatPercent(v.base_irr)}`}
+              />
+            </div>
+            <div style={{ width: "150px", fontSize: "0.75rem", color: colors.textFaint, flexShrink: 0 }}>
+              <span style={{ color: colors.danger }}>{formatPercent(downsideIrr)}</span>
+              {" ↔ "}
+              <span style={{ color: colors.success }}>{formatPercent(upsideIrr)}</span>
+              <span style={{ marginLeft: "0.4rem" }}>
+                ({downsideIsLow ? "low" : "high"}&nbsp;&rarr;&nbsp;{downsideIsLow ? "high" : "low"})
+              </span>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -21,6 +21,7 @@ from .lbo import (
     run_sensitivity_grid,
 )
 from .screening import ScoredFactor, ScreeningResult, score_company
+from .tornado import TornadoVariableResult, run_tornado_analysis
 from .types import AssumptionInput, CompanySnapshotInput, FactorResult, FinancialPeriodInput
 
 __all__ = [
@@ -42,6 +43,7 @@ __all__ = [
     "ScoredFactor",
     "ScreeningResult",
     "SourcesUses",
+    "TornadoVariableResult",
     "TrancheYear",
     "ValuationResult",
     "ValueCreationBridge",
@@ -50,6 +52,7 @@ __all__ = [
     "evaluate_peer",
     "run_lbo",
     "run_sensitivity_grid",
+    "run_tornado_analysis",
     "score_company",
     "select_top_peers",
 ]

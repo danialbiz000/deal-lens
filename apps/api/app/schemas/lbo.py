@@ -98,3 +98,24 @@ class SensitivityResponse(BaseModel):
     exit_multiples: List[float]
     irr_grid: List[List[float]]
     moic_grid: List[List[float]]
+
+
+class TornadoVariableOut(BaseModel):
+    variable: str
+    label: str
+    base_value: float
+    low_value: float
+    high_value: float
+    base_irr: float
+    low_irr: float
+    high_irr: float
+    base_moic: float
+    low_moic: float
+    high_moic: float
+    spread: float
+
+
+class TornadoResponse(BaseModel):
+    company_id: str
+    case_type: str
+    variables: List[TornadoVariableOut]

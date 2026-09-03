@@ -1,6 +1,7 @@
-"""LBO run/fetch + entry x exit multiple sensitivity grid.
+"""LBO run/fetch, entry x exit multiple sensitivity grid, and full tornado
+sensitivity across all 6 spec variables.
 
-Design doc: docs/phase2-comps-lbo-design.md sections 4-6.
+Design doc: docs/phase2-comps-lbo-design.md sections 4-6, 10-11.
 """
 
 from dataclasses import asdict
@@ -24,9 +25,18 @@ from app.schemas.lbo import (
     ScheduleYearOut,
     SensitivityResponse,
     SourcesUsesOut,
+    TornadoResponse,
+    TornadoVariableOut,
     ValueCreationBridgeOut,
 )
-from finance_engine import DebtTranche, LboInputs, compute_valuation, run_lbo, run_sensitivity_grid
+from finance_engine import (
+    DebtTranche,
+    LboInputs,
+    compute_valuation,
+    run_lbo,
+    run_sensitivity_grid,
+    run_tornado_analysis,
+)
 from finance_engine.constants import (
     COMPS_MIN_PEERS_FOR_VALUATION,
     LBO_DEFAULT_CAPEX_PCT_REVENUE,
@@ -310,6 +320,33 @@ def get_lbo_case(company_id: str, case_type: str, db: Session = Depends(get_db))
     return _response_from_stored_case(case)
 
 
+def _inputs_for_grid_endpoint(db: Session, company: Company, scenario: Scenario, company_id: str) -> LboInputs:
+    """Shared by /sensitivity and /tornado: center the grid on the same
+    resolved inputs as "the main run" (design doc sections 6 and 11),
+    including any entry_ev override or debt_tranches that run actually
+    used -- not freshly re-derived every time, which would silently diverge
+    from what /run produced whenever an override was passed.
+    """
+    existing_case = (
+        db.query(LboCase)
+        .filter(LboCase.company_id == company_id, LboCase.scenario_id == scenario.id)
+        .first()
+    )
+    if existing_case is None:
+        return _resolve_lbo_inputs(db, company, scenario, entry_ev_override=None)
+
+    stored_inputs = dict(existing_case.inputs_json)
+    stored_inputs.pop("entry_multiple", None)  # derived field, not an LboInputs constructor arg
+    # inputs_json always stores debt_tranches as plain dicts (JSON has no
+    # dataclass concept) -- rehydrate into DebtTranche instances before
+    # handing back to LboInputs, which expects the real dataclass so
+    # attribute access (tr.leverage_multiple, etc.) works inside run_lbo.
+    stored_tranches = stored_inputs.pop("debt_tranches", None)
+    if stored_tranches:
+        stored_inputs["debt_tranches"] = tuple(DebtTranche(**t) for t in stored_tranches)
+    return LboInputs(**stored_inputs)
+
+
 @router.get("/{company_id}/lbo/{case_type}/sensitivity", response_model=SensitivityResponse)
 def get_lbo_sensitivity(
     company_id: str,
@@ -319,30 +356,7 @@ def get_lbo_sensitivity(
     db: Session = Depends(get_db),
 ) -> SensitivityResponse:
     company, scenario = _get_company_and_scenario(db, company_id, case_type)
-
-    # Center the grid on the same resolved inputs as "the main run" (design
-    # doc section 6), including any entry_ev override that run used --
-    # not a fresh comps-derived entry_ev every time, which would silently
-    # diverge from what /run actually used whenever an override was passed.
-    existing_case = (
-        db.query(LboCase)
-        .filter(LboCase.company_id == company_id, LboCase.scenario_id == scenario.id)
-        .first()
-    )
-    if existing_case is not None:
-        stored_inputs = dict(existing_case.inputs_json)
-        stored_inputs.pop("entry_multiple", None)  # derived field, not an LboInputs constructor arg
-        # inputs_json always stores debt_tranches as plain dicts (JSON has no
-        # dataclass concept) -- rehydrate into DebtTranche instances before
-        # handing back to LboInputs, which expects the real dataclass so
-        # attribute access (tr.leverage_multiple, etc.) works inside run_lbo.
-        stored_tranches = stored_inputs.pop("debt_tranches", None)
-        if stored_tranches:
-            stored_inputs["debt_tranches"] = tuple(DebtTranche(**t) for t in stored_tranches)
-        inputs = LboInputs(**stored_inputs)
-    else:
-        inputs = _resolve_lbo_inputs(db, company, scenario, entry_ev_override=None)
-
+    inputs = _inputs_for_grid_endpoint(db, company, scenario, company_id)
     grid = run_sensitivity_grid(inputs, step=step, size=size)
 
     return SensitivityResponse(
@@ -352,4 +366,21 @@ def get_lbo_sensitivity(
         exit_multiples=grid["exit_multiples"],
         irr_grid=grid["irr_grid"],
         moic_grid=grid["moic_grid"],
+    )
+
+
+@router.get("/{company_id}/lbo/{case_type}/tornado", response_model=TornadoResponse)
+def get_lbo_tornado(
+    company_id: str,
+    case_type: str,
+    db: Session = Depends(get_db),
+) -> TornadoResponse:
+    company, scenario = _get_company_and_scenario(db, company_id, case_type)
+    inputs = _inputs_for_grid_endpoint(db, company, scenario, company_id)
+    result = run_tornado_analysis(inputs)
+
+    return TornadoResponse(
+        company_id=company_id,
+        case_type=scenario.case_type,
+        variables=[TornadoVariableOut(**v) for v in result["variables"]],
     )
