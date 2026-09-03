@@ -173,6 +173,28 @@ def test_tn_abbreviation_scale_suffix_not_flagged():
     assert report.mismatched_citations == []
 
 
+def test_label_prefix_digit_not_mistaken_for_a_claimed_number():
+    # Regression test: found via a live memo generation. "Q1: 20.43x
+    # [[source: valuation.ev_ebitda.q1]]" is a fully correct citation, but
+    # the bare "1" inside the label "Q1" used to match as its own numeric
+    # token, land in the same citation's adjacency window as the real
+    # "20.43x", and get flagged as a mismatch (1 != 20.425) before the
+    # correct token was reached.
+    bundle = {"valuation": {"ev_ebitda": {"q1": 20.425, "q3": 22.875}}}
+    text = "Peer range (Q1: 20.43x [[source: valuation.ev_ebitda.q1]], Q3: 22.88x [[source: valuation.ev_ebitda.q3]])."
+    report = validate_citations(text, bundle)
+    assert report.mismatched_citations == []
+    assert report.invalid_citations == []
+    assert report.status == "ok"
+
+
+def test_fiscal_year_label_digits_not_mistaken_for_a_claimed_number():
+    bundle = {"financials": {"revenue": 416_160_000_000.0}}
+    text = "FY2025 revenue of $416.16bn [[source: financials.revenue]]."
+    report = validate_citations(text, bundle)
+    assert report.mismatched_citations == []
+
+
 def test_citation_to_non_numeric_value_is_never_treated_as_a_mismatch():
     # A number happening to sit near a citation to a *string* field (e.g.
     # sector) has nothing numeric to compare against -- must not crash or

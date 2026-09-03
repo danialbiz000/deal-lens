@@ -42,7 +42,15 @@ CITATION_PATTERN = re.compile(r"\[\[source:\s*([a-zA-Z0-9_.]+)\s*\]\]")
 # design (see module docstring): this is a heuristic aid, not a parser for
 # arbitrary natural-language quantities.
 NUMERIC_TOKEN_PATTERN = re.compile(
-    r"[-+]?\$?\d[\d,]*\.?\d*\s*(?:%|x|bn|billion|tn|trillion|mn|million)?",
+    # Leading `(?<![A-Za-z])` excludes digits glued to a preceding letter --
+    # e.g. the "1" in "Q1" or "FY2025" -- which are labels, not standalone
+    # numeric claims. Found via a live memo generation: "(Q1: 20.43x
+    # [[source: valuation.ev_ebitda.q1]], Q3: 22.88x [[source:
+    # valuation.ev_ebitda.q3]])" -- both correctly cited -- had the bare "1"
+    # in "Q1" match as its own token, land within the adjacency window of
+    # the q1 citation (which the real "20.43x" also claims), and get flagged
+    # as a mismatch before the correct token was even reached.
+    r"(?<![A-Za-z])[-+]?\$?\d[\d,]*\.?\d*\s*(?:%|x|bn|billion|tn|trillion|mn|million)?",
     re.IGNORECASE,
 )
 

@@ -3,7 +3,7 @@ from datetime import date
 import pytest
 
 from app.ai.client import ClaudeApiError
-from app.ai.prompts.memo_sections import JSON_SCHEMA, SECTION_KEYS
+from app.ai.prompts.memo_sections import JSON_SCHEMA, PROMPT_VERSION, SECTION_KEYS
 from app.models.financial_period import FinancialPeriod
 from app.models.lbo_case import LboCase
 from app.models.peer import Peer
@@ -116,7 +116,7 @@ def test_memo_generates_ten_sections_with_fake_client(client, db_session, fake_c
     assert len(body["sections"]) == 10
     assert {s["section_key"] for s in body["sections"]} == set(SECTION_KEYS)
     assert body["version"] == 1
-    assert body["prompt_version"] == "memo_prompt_v0.1"
+    assert body["prompt_version"] == PROMPT_VERSION
     assert body["model"] == "fake-claude-test"
 
 
