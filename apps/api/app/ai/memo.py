@@ -9,7 +9,7 @@ import json
 from typing import Any, Dict
 
 from app.ai.citation_validation import validate_citations
-from app.ai.client import ClaudeClient
+from app.ai.client import ClaudeApiError, ClaudeClient
 from app.ai.prompts import memo_sections
 
 
@@ -21,6 +21,27 @@ def _build_user_prompt(bundle: Dict[str, Any]) -> str:
     )
 
 
+def _validate_sections(sections: Any) -> None:
+    """The JSON schema can no longer enforce "exactly 10, one per key" itself
+    (Anthropic's structured-output schema only supports minItems/maxItems of
+    0 or 1 on arrays -- see the NOTE in memo_sections.JSON_SCHEMA), so this
+    is now the only place that contract is checked. Raises ClaudeApiError,
+    the same exception the router already catches and turns into a 503,
+    since this is still "the model's response did not satisfy our contract",
+    not an application bug.
+    """
+    if not isinstance(sections, list):
+        raise ClaudeApiError(f"Claude API: expected 'sections' to be a list, got {type(sections).__name__}")
+
+    keys = [s.get("section_key") for s in sections]
+    expected = memo_sections.SECTION_KEYS
+    if len(sections) != len(expected) or set(keys) != set(expected) or len(set(keys)) != len(keys):
+        raise ClaudeApiError(
+            f"Claude API: response did not contain exactly the expected 10 unique memo "
+            f"sections (expected {expected}, got {keys})"
+        )
+
+
 def generate_memo(bundle: Dict[str, Any], client: ClaudeClient) -> Dict[str, Any]:
     result = client.complete_structured(
         system=memo_sections.SYSTEM_PROMPT,
@@ -28,6 +49,7 @@ def generate_memo(bundle: Dict[str, Any], client: ClaudeClient) -> Dict[str, Any
         json_schema=memo_sections.JSON_SCHEMA,
     )
     sections = result["sections"]
+    _validate_sections(sections)
 
     per_section_reports = []
     for section in sections:

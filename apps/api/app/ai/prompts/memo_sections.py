@@ -43,8 +43,13 @@ JSON_SCHEMA = {
                 "required": ["section_key", "title", "content"],
                 "additionalProperties": False,
             },
-            "minItems": 10,
-            "maxItems": 10,
+            # NOTE: Anthropic's structured-output schema only supports minItems/
+            # maxItems values of 0 or 1 on array types -- an arbitrary count like
+            # 10 is rejected with a 400 at call time (discovered against the real
+            # API; the fake test client never enforces this, so it silently
+            # passed until a live run). The "exactly 10 sections, one per
+            # SECTION_KEYS entry" contract is enforced in Python instead, in
+            # generate_memo() -- see memo.py.
         }
     },
     "required": ["sections"],

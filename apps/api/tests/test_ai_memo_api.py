@@ -3,7 +3,7 @@ from datetime import date
 import pytest
 
 from app.ai.client import ClaudeApiError
-from app.ai.prompts.memo_sections import SECTION_KEYS
+from app.ai.prompts.memo_sections import JSON_SCHEMA, SECTION_KEYS
 from app.models.financial_period import FinancialPeriod
 from app.models.lbo_case import LboCase
 from app.models.peer import Peer
@@ -162,6 +162,58 @@ def test_memo_version_not_found_returns_404(client, db_session):
     company = _create_company(client)
     response = client.get(f"/companies/{company['id']}/memo/1")
     assert response.status_code == 404
+
+
+def _find_bad_item_count_constraints(node, path="$"):
+    """Recursively find any minItems/maxItems in a JSON schema whose value is
+    neither 0 nor 1 -- Anthropic's real structured-output API rejects those
+    (discovered the hard way: memo_sections.JSON_SCHEMA used to say
+    minItems/maxItems: 10, which the fake test client happily accepted but
+    the live API returned a 400 for). This walks the whole schema so the
+    constraint can't quietly reappear somewhere else, or on a nested schema,
+    without a live API call ever catching it again.
+    """
+    violations = []
+    if isinstance(node, dict):
+        for key in ("minItems", "maxItems"):
+            if key in node and node[key] not in (0, 1):
+                violations.append(f"{path}.{key} = {node[key]}")
+        for k, v in node.items():
+            violations.extend(_find_bad_item_count_constraints(v, f"{path}.{k}"))
+    elif isinstance(node, list):
+        for i, item in enumerate(node):
+            violations.extend(_find_bad_item_count_constraints(item, f"{path}[{i}]"))
+    return violations
+
+
+def test_memo_schema_never_uses_unsupported_item_count_constraints():
+    violations = _find_bad_item_count_constraints(JSON_SCHEMA)
+    assert violations == [], (
+        "JSON_SCHEMA has minItems/maxItems values other than 0 or 1, which the real "
+        f"Claude structured-output API rejects with a 400: {violations}"
+    )
+
+
+def test_memo_rejects_wrong_section_count_from_model(client, db_session, fake_claude_client):
+    company = _full_prereqs_company(client, db_session)
+    bad_response = _canned_memo_response()
+    bad_response["sections"] = bad_response["sections"][:-1]  # drop one -> only 9 sections
+    fake_claude_client([bad_response])
+
+    response = client.post(f"/companies/{company['id']}/memo")
+    assert response.status_code == 503
+    assert "did not contain exactly the expected 10 unique memo sections" in response.json()["detail"]
+
+
+def test_memo_rejects_duplicate_section_key_from_model(client, db_session, fake_claude_client):
+    company = _full_prereqs_company(client, db_session)
+    bad_response = _canned_memo_response()
+    bad_response["sections"][-1]["section_key"] = bad_response["sections"][0]["section_key"]  # duplicate a key
+    fake_claude_client([bad_response])
+
+    response = client.post(f"/companies/{company['id']}/memo")
+    assert response.status_code == 503
+    assert "did not contain exactly the expected 10 unique memo sections" in response.json()["detail"]
 
 
 def test_memo_claude_api_error_returns_503(client, db_session):
