@@ -1,30 +1,24 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api, ApiError, type Peer, type ValuationResponse } from "@/lib/api";
-
-const cardStyle: React.CSSProperties = {
-  border: "1px solid #1f2430",
-  borderRadius: "8px",
-  padding: "1rem",
-  background: "#11151d",
-};
-
-const buttonStyle: React.CSSProperties = {
-  padding: "0.4rem 0.9rem",
-  borderRadius: "6px",
-  border: "none",
-  background: "#4f7cff",
-  color: "white",
-  cursor: "pointer",
-};
-
-function statusColor(status: string): string {
-  if (status === "SELECTED") return "#3ecf8e";
-  if (status === "REJECTED") return "#ff6b6b";
-  return "#e0a030";
-}
+import {
+  Badge,
+  Button,
+  Card,
+  CompanySubNav,
+  EmptyState,
+  Eyebrow,
+  Skeleton,
+  StatTile,
+  colors,
+  formatMoney,
+  formatMultiple,
+  peerStatusTone,
+  thStyle,
+  tdStyle,
+  trStyle,
+} from "@/lib/ui";
 
 export default function ValuationPage({ params }: { params: { id: string } }) {
   const companyId = params.id;
@@ -86,109 +80,97 @@ export default function ValuationPage({ params }: { params: { id: string } }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
       <div>
-        <Link href={`/companies/${companyId}`} style={{ color: "#7c8494" }}>
-          &larr; back to company
-        </Link>
+        <Eyebrow>Comparable companies</Eyebrow>
+        <h1 style={{ margin: 0, fontSize: "1.4rem" }}>Valuation</h1>
       </div>
 
-      <section style={cardStyle}>
-        <h1 style={{ marginTop: 0 }}>Comparable companies &amp; valuation</h1>
-        <button onClick={handleGeneratePeers} disabled={busy} style={buttonStyle}>
-          {busy ? "Working..." : "Generate / refresh peers"}
-        </button>
-        <p style={{ color: "#7c8494", fontSize: "0.85rem" }}>
-          Peer universe = companies already ingested into DealLens (no external screener in this slice).
-          Every candidate stays visible even when rejected -- peer selection is never silently accepted.
-        </p>
-        {error && <p style={{ color: "#ff6b6b" }}>{error}</p>}
-      </section>
+      <CompanySubNav companyId={companyId} active="valuation" />
 
-      <section style={cardStyle}>
-        <h2 style={{ marginTop: 0 }}>Entry valuation</h2>
+      <Card>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem" }}>
+          <p style={{ color: colors.textFaint, fontSize: "0.85rem", margin: 0, maxWidth: "560px" }}>
+            Peer universe = companies already ingested into DealLens (no external screener in this slice).
+            Every candidate stays visible even when rejected -- peer selection is never silently accepted.
+          </p>
+          <Button onClick={handleGeneratePeers} disabled={busy}>
+            {busy ? "Working..." : "Generate / refresh peers"}
+          </Button>
+        </div>
+        {error && <Badge tone="danger">{error}</Badge>}
+      </Card>
+
+      <Card>
+        <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Entry valuation</h2>
         {valuationError ? (
-          <p style={{ color: "#e0a030" }}>{valuationError}</p>
+          <Badge tone="warning">{valuationError}</Badge>
         ) : valuation ? (
           <>
-            <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
-              <div>
-                <div style={{ color: "#7c8494", fontSize: "0.8rem" }}>Entry EV (from EV/EBITDA median)</div>
-                <div style={{ fontSize: "1.5rem", fontWeight: 700 }}>{formatMoney(valuation.entry_ev)}</div>
-              </div>
-              <div>
-                <div style={{ color: "#7c8494", fontSize: "0.8rem" }}>Entry equity value</div>
-                <div style={{ fontSize: "1.5rem", fontWeight: 700 }}>{formatMoney(valuation.entry_equity_value)}</div>
-              </div>
-              <div>
-                <div style={{ color: "#7c8494", fontSize: "0.8rem" }}>Median EV/EBITDA</div>
-                <div style={{ fontSize: "1.5rem", fontWeight: 700 }}>{valuation.median_ev_ebitda.toFixed(2)}x</div>
-              </div>
-              <div>
-                <div style={{ color: "#7c8494", fontSize: "0.8rem" }}>Median EV/Revenue (cross-check only)</div>
-                <div style={{ fontSize: "1.5rem", fontWeight: 700 }}>{valuation.median_ev_revenue.toFixed(2)}x</div>
-              </div>
+            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+              <StatTile label="Entry EV" value={formatMoney(valuation.entry_ev)} sub="from EV/EBITDA median" />
+              <StatTile label="Entry equity value" value={formatMoney(valuation.entry_equity_value)} />
+              <StatTile label="Median EV/EBITDA" value={formatMultiple(valuation.median_ev_ebitda)} />
+              <StatTile label="Median EV/Revenue" value={formatMultiple(valuation.median_ev_revenue)} sub="cross-check only" />
             </div>
-            <p style={{ color: "#7c8494", fontSize: "0.8rem" }}>
-              Based on {valuation.peer_count} SELECTED peer(s). Q1/Q3 EV/EBITDA: {valuation.q1_ev_ebitda.toFixed(2)}x
-              &ndash; {valuation.q3_ev_ebitda.toFixed(2)}x.
+            <p style={{ color: colors.textFaint, fontSize: "0.8rem", marginBottom: 0, marginTop: "0.9rem" }}>
+              Based on {valuation.peer_count} SELECTED peer(s). Q1/Q3 EV/EBITDA: {formatMultiple(valuation.q1_ev_ebitda)}
+              &ndash;{formatMultiple(valuation.q3_ev_ebitda)}.
             </p>
           </>
         ) : (
-          <p>Loading...</p>
+          <Skeleton height="5rem" />
         )}
-      </section>
+      </Card>
 
-      <section style={cardStyle}>
-        <h2 style={{ marginTop: 0 }}>Peers</h2>
+      <Card>
+        <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Peers</h2>
         {peers.length === 0 ? (
-          <p style={{ color: "#7c8494" }}>No peers yet -- click &quot;Generate / refresh peers&quot; above.</p>
+          <EmptyState>No peers yet -- click &quot;Generate / refresh peers&quot; above.</EmptyState>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
+          <table style={{ width: "100%" }}>
             <thead>
-              <tr style={{ textAlign: "left", color: "#7c8494" }}>
-                <th>Peer</th>
-                <th>Status</th>
-                <th>Score</th>
-                <th>EV/Rev</th>
-                <th>EV/EBITDA</th>
-                <th>Reason</th>
-                <th></th>
+              <tr>
+                <th style={thStyle}>Peer</th>
+                <th style={thStyle}>Status</th>
+                <th style={thStyle}>Score</th>
+                <th style={thStyle}>EV/Rev</th>
+                <th style={thStyle}>EV/EBITDA</th>
+                <th style={thStyle}>Reason</th>
+                <th style={thStyle}></th>
               </tr>
             </thead>
             <tbody>
               {peers.map((p) => (
-                <tr key={p.id} style={{ borderTop: "1px solid #1f2430" }}>
-                  <td style={{ padding: "0.4rem 0" }}>
-                    {p.peer_ticker} <span style={{ color: "#7c8494" }}>{p.peer_name}</span>
+                <tr key={p.id} style={trStyle}>
+                  <td style={tdStyle}>
+                    <strong>{p.peer_ticker}</strong> <span style={{ color: colors.textFaint }}>{p.peer_name}</span>
                   </td>
-                  <td>
-                    <span style={{ color: statusColor(p.status) }}>{p.status}</span>
+                  <td style={tdStyle}>
+                    <Badge tone={peerStatusTone(p.status)}>{p.status}</Badge>
                   </td>
-                  <td>{p.similarity_score ?? "-"}</td>
-                  <td>{p.ev_revenue_multiple?.toFixed(2) ?? "-"}</td>
-                  <td>{p.ev_ebitda_multiple?.toFixed(2) ?? "-"}</td>
-                  <td style={{ color: "#7c8494" }}>{p.reason_code || p.reason_notes || "-"}</td>
-                  <td>
-                    {p.status !== "SELECTED" && (
-                      <button onClick={() => handleOverride(p, "SELECTED")} disabled={busy} style={{ ...buttonStyle, fontSize: "0.75rem", padding: "0.2rem 0.5rem" }}>
-                        Select
-                      </button>
-                    )}
-                    {p.status !== "REJECTED" && (
-                      <button onClick={() => handleOverride(p, "REJECTED")} disabled={busy} style={{ ...buttonStyle, fontSize: "0.75rem", padding: "0.2rem 0.5rem", background: "#ff6b6b" }}>
-                        Reject
-                      </button>
-                    )}
+                  <td style={tdStyle}>{p.similarity_score ?? "–"}</td>
+                  <td style={tdStyle}>{p.ev_revenue_multiple !== null ? formatMultiple(p.ev_revenue_multiple) : "–"}</td>
+                  <td style={tdStyle}>{p.ev_ebitda_multiple !== null ? formatMultiple(p.ev_ebitda_multiple) : "–"}</td>
+                  <td style={{ ...tdStyle, color: colors.textFaint, fontSize: "0.78rem" }}>{p.reason_code || p.reason_notes || "–"}</td>
+                  <td style={tdStyle}>
+                    <div style={{ display: "flex", gap: "0.35rem" }}>
+                      {p.status !== "SELECTED" && (
+                        <Button size="sm" variant="secondary" onClick={() => handleOverride(p, "SELECTED")} disabled={busy}>
+                          Select
+                        </Button>
+                      )}
+                      {p.status !== "REJECTED" && (
+                        <Button size="sm" variant="danger" onClick={() => handleOverride(p, "REJECTED")} disabled={busy}>
+                          Reject
+                        </Button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
-      </section>
+      </Card>
     </div>
   );
-}
-
-function formatMoney(value: number): string {
-  return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }

@@ -3,13 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api, ApiError, type Company } from "@/lib/api";
-
-const cardStyle: React.CSSProperties = {
-  border: "1px solid #1f2430",
-  borderRadius: "8px",
-  padding: "1rem",
-  background: "#11151d",
-};
+import { Badge, Button, Card, EmptyState, Eyebrow, Skeleton, colors, inputStyle } from "@/lib/ui";
 
 export default function CompanyListPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -19,6 +13,8 @@ export default function CompanyListPage() {
   const [ticker, setTicker] = useState("");
   const [name, setName] = useState("");
   const [cik, setCik] = useState("");
+  const [sector, setSector] = useState("");
+  const [industry, setIndustry] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   async function refresh() {
@@ -42,10 +38,18 @@ export default function CompanyListPage() {
     setSubmitting(true);
     setError(null);
     try {
-      await api.createCompany({ ticker, name, cik: cik || undefined });
+      await api.createCompany({
+        ticker,
+        name,
+        cik: cik || undefined,
+        sector: sector || undefined,
+        industry: industry || undefined,
+      });
       setTicker("");
       setName("");
       setCik("");
+      setSector("");
+      setIndustry("");
       await refresh();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "failed to create company");
@@ -56,79 +60,97 @@ export default function CompanyListPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-      <section style={cardStyle}>
-        <h2 style={{ marginTop: 0 }}>Add a company</h2>
-        <form onSubmit={handleCreate} style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+      <div>
+        <Eyebrow>Deal screening</Eyebrow>
+        <h1 style={{ margin: 0, fontSize: "1.5rem" }}>Companies</h1>
+      </div>
+
+      <Card>
+        <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Add a company</h2>
+        <form onSubmit={handleCreate} style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
           <input
             placeholder="Ticker (e.g. AAPL)"
             value={ticker}
             onChange={(e) => setTicker(e.target.value)}
             required
-            style={inputStyle}
+            style={{ ...inputStyle, flex: "1 1 160px" }}
           />
           <input
             placeholder="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            style={inputStyle}
+            style={{ ...inputStyle, flex: "1 1 200px" }}
           />
           <input
             placeholder="CIK (optional, e.g. 0000320193)"
             value={cik}
             onChange={(e) => setCik(e.target.value)}
-            style={inputStyle}
+            style={{ ...inputStyle, flex: "1 1 200px" }}
           />
-          <button type="submit" disabled={submitting} style={buttonStyle}>
+          <input
+            placeholder="Sector (optional, e.g. Technology)"
+            value={sector}
+            onChange={(e) => setSector(e.target.value)}
+            style={{ ...inputStyle, flex: "1 1 200px" }}
+          />
+          <input
+            placeholder="Industry (optional, e.g. Consumer Electronics)"
+            value={industry}
+            onChange={(e) => setIndustry(e.target.value)}
+            style={{ ...inputStyle, flex: "1 1 220px" }}
+          />
+          <Button type="submit" disabled={submitting}>
             {submitting ? "Adding..." : "Add company"}
-          </button>
+          </Button>
         </form>
-        <p style={{ color: "#7c8494", fontSize: "0.85rem" }}>
-          A CIK is required before <code>/ingest</code> can pull SEC EDGAR data for this company.
+        <p style={{ color: colors.textFaint, fontSize: "0.8rem", marginBottom: 0 }}>
+          A CIK is required before ingest can pull SEC EDGAR data for this company. Sector is required before
+          peer generation (Valuation tab) can run.
         </p>
-      </section>
+      </Card>
 
-      {error && <p style={{ color: "#ff6b6b" }}>{error}</p>}
+      {error && <Badge tone="danger">{error}</Badge>}
 
-      <section>
-        <h2>Companies</h2>
+      <div>
+        <h2 style={{ fontSize: "0.95rem", color: colors.textMuted, marginBottom: "0.75rem" }}>
+          {loading ? "Loading..." : `${companies.length} ${companies.length === 1 ? "company" : "companies"}`}
+        </h2>
         {loading ? (
-          <p>Loading...</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <Skeleton height="3.2rem" />
+            <Skeleton height="3.2rem" />
+          </div>
         ) : companies.length === 0 ? (
-          <p style={{ color: "#7c8494" }}>No companies yet -- add one above.</p>
+          <EmptyState>No companies yet -- add one above to start a screening case.</EmptyState>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
             {companies.map((c) => (
-              <Link
-                key={c.id}
-                href={`/companies/${c.id}`}
-                style={{ ...cardStyle, display: "block", color: "#e6e6e6", textDecoration: "none" }}
-              >
-                <strong>{c.ticker}</strong> -- {c.name}
-                {c.sector && <span style={{ color: "#7c8494" }}> &middot; {c.sector}</span>}
+              <Link key={c.id} href={`/companies/${c.id}`} style={{ textDecoration: "none" }}>
+                <div
+                  style={{
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: "8px",
+                    padding: "0.85rem 1.1rem",
+                    background: colors.surface,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "1rem",
+                  }}
+                >
+                  <div>
+                    <strong style={{ color: colors.text }}>{c.ticker}</strong>{" "}
+                    <span style={{ color: colors.textMuted }}>{c.name}</span>
+                    {c.sector && <span style={{ color: colors.textFaint }}> &middot; {c.sector}</span>}
+                  </div>
+                  <Badge tone={c.cik ? "success" : "neutral"}>{c.cik ? "ready to ingest" : "no CIK yet"}</Badge>
+                </div>
               </Link>
             ))}
           </div>
         )}
-      </section>
+      </div>
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  padding: "0.5rem",
-  borderRadius: "6px",
-  border: "1px solid #2a3040",
-  background: "#0b0e14",
-  color: "#e6e6e6",
-  flex: "1 1 160px",
-};
-
-const buttonStyle: React.CSSProperties = {
-  padding: "0.5rem 1rem",
-  borderRadius: "6px",
-  border: "none",
-  background: "#4f7cff",
-  color: "white",
-  cursor: "pointer",
-};

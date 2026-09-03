@@ -3,24 +3,35 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api, ApiError, type CaseType, type LboCaseResponse, type SensitivityResponse } from "@/lib/api";
-
-const cardStyle: React.CSSProperties = {
-  border: "1px solid #1f2430",
-  borderRadius: "8px",
-  padding: "1rem",
-  background: "#11151d",
-};
-
-const buttonStyle: React.CSSProperties = {
-  padding: "0.4rem 0.9rem",
-  borderRadius: "6px",
-  border: "none",
-  background: "#4f7cff",
-  color: "white",
-  cursor: "pointer",
-};
+import {
+  Badge,
+  Banner,
+  Button,
+  Card,
+  CompanySubNav,
+  EmptyState,
+  Eyebrow,
+  Skeleton,
+  StatTile,
+  colors,
+  formatMoney,
+  formatMultiple,
+  formatPercent,
+  thStyle,
+  tdStyle,
+  trStyle,
+  type Tone,
+} from "@/lib/ui";
 
 const CASE_TYPES: CaseType[] = ["base", "bull", "bear"];
+
+const CASE_TONE: Record<CaseType, Tone> = { base: "info", bull: "success", bear: "danger" };
+
+function irrTone(irr: number): Tone {
+  if (irr >= 0.18) return "success";
+  if (irr >= 0.1) return "warning";
+  return "danger";
+}
 
 export default function LboPage({ params }: { params: { id: string } }) {
   const companyId = params.id;
@@ -30,9 +41,11 @@ export default function LboPage({ params }: { params: { id: string } }) {
   const [sensitivity, setSensitivity] = useState<SensitivityResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   async function refresh(selectedCase: CaseType) {
     setError(null);
+    setLoaded(false);
     try {
       setLboCase(await api.getLbo(companyId, selectedCase));
     } catch {
@@ -43,6 +56,7 @@ export default function LboPage({ params }: { params: { id: string } }) {
     } catch {
       setSensitivity(null);
     }
+    setLoaded(true);
   }
 
   useEffect(() => {
@@ -78,97 +92,122 @@ export default function LboPage({ params }: { params: { id: string } }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
       <div>
-        <Link href={`/companies/${companyId}`} style={{ color: "#7c8494" }}>
-          &larr; back to company
-        </Link>
+        <Eyebrow>Underwriting</Eyebrow>
+        <h1 style={{ margin: 0, fontSize: "1.4rem" }}>LBO</h1>
       </div>
 
-      <section style={cardStyle}>
-        <h1 style={{ marginTop: 0 }}>LBO underwriting</h1>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
-          {CASE_TYPES.map((ct) => (
-            <button
-              key={ct}
-              onClick={() => setCaseType(ct)}
-              style={{
-                ...buttonStyle,
-                background: ct === caseType ? "#4f7cff" : "#1f2430",
-                textTransform: "uppercase",
-              }}
-            >
-              {ct}
-            </button>
-          ))}
-          <button onClick={handleGenerateScenarios} disabled={busy} style={buttonStyle}>
-            Generate scenarios
-          </button>
-          <button onClick={handleRun} disabled={busy} style={buttonStyle}>
-            {busy ? "Running..." : `Run ${caseType.toUpperCase()} case`}
-          </button>
-        </div>
-        {error && <p style={{ color: "#ff6b6b" }}>{error}</p>}
-      </section>
+      <CompanySubNav companyId={companyId} active="lbo" />
 
-      {lboCase ? (
+      <Card>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", gap: "0.4rem" }}>
+            {CASE_TYPES.map((ct) => (
+              <button
+                key={ct}
+                onClick={() => setCaseType(ct)}
+                style={{
+                  padding: "0.4rem 0.9rem",
+                  borderRadius: "7px",
+                  fontWeight: 700,
+                  fontSize: "0.78rem",
+                  letterSpacing: "0.03em",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  border: `1px solid ${ct === caseType ? colors.accent : colors.border}`,
+                  background: ct === caseType ? colors.accentSoft : "transparent",
+                  color: ct === caseType ? colors.text : colors.textMuted,
+                }}
+              >
+                {ct}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <Button variant="secondary" onClick={handleGenerateScenarios} disabled={busy}>
+              Generate scenarios
+            </Button>
+            <Button onClick={handleRun} disabled={busy}>
+              {busy ? "Running..." : `Run ${caseType.toUpperCase()} case`}
+            </Button>
+          </div>
+        </div>
+        {error && (
+          <div style={{ marginTop: "0.75rem" }}>
+            <Badge tone="danger">{error}</Badge>
+          </div>
+        )}
+      </Card>
+
+      {!loaded ? (
+        <Skeleton height="10rem" />
+      ) : lboCase ? (
         <>
-          <section style={cardStyle}>
-            <h2 style={{ marginTop: 0 }}>Key outputs</h2>
-            <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
-              <Stat label="MOIC" value={`${lboCase.moic.toFixed(2)}x`} />
-              <Stat label="IRR" value={`${(lboCase.irr * 100).toFixed(1)}%`} />
-              <Stat label="Entry multiple" value={`${lboCase.entry_multiple.toFixed(1)}x`} />
-              <Stat label="Exit multiple" value={`${lboCase.exit_multiple.toFixed(1)}x`} />
-              <Stat label="Entry leverage" value={`${lboCase.entry_leverage.toFixed(1)}x`} />
-              <Stat label="Exit leverage" value={`${lboCase.exit_leverage.toFixed(1)}x`} />
+          <Card tone={CASE_TONE[caseType]}>
+            <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Key outputs</h2>
+            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+              <StatTile label="MOIC" value={formatMultiple(lboCase.moic)} tone={CASE_TONE[caseType]} />
+              <StatTile label="IRR" value={formatPercent(lboCase.irr)} tone={irrTone(lboCase.irr)} />
+              <StatTile label="Entry multiple" value={formatMultiple(lboCase.entry_multiple, 1)} />
+              <StatTile label="Exit multiple" value={formatMultiple(lboCase.exit_multiple, 1)} />
+              <StatTile label="Entry leverage" value={formatMultiple(lboCase.entry_leverage, 1)} />
+              <StatTile label="Exit leverage" value={formatMultiple(lboCase.exit_leverage, 1)} />
             </div>
             {lboCase.warnings.length > 0 && (
-              <ul style={{ color: "#e0a030", fontSize: "0.85rem" }}>
+              <ul style={{ color: colors.warning, fontSize: "0.85rem" }}>
                 {lboCase.warnings.map((w, i) => (
                   <li key={i}>{w}</li>
                 ))}
               </ul>
             )}
-          </section>
+          </Card>
 
-          <section style={cardStyle}>
-            <h2 style={{ marginTop: 0 }}>Sources &amp; Uses</h2>
-            <table style={{ fontSize: "0.85rem" }}>
+          <Card>
+            <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Sources &amp; Uses</h2>
+            <table>
               <tbody>
                 <tr>
-                  <td style={{ paddingRight: "1rem", color: "#7c8494" }}>New debt</td>
-                  <td>{formatMoney(lboCase.sources_uses.new_debt)}</td>
+                  <td style={{ ...tdStyle, color: colors.textMuted }}>New debt</td>
+                  <td style={tdStyle}>{formatMoney(lboCase.sources_uses.new_debt)}</td>
                 </tr>
                 <tr>
-                  <td style={{ paddingRight: "1rem", color: "#7c8494" }}>Sponsor equity</td>
-                  <td>{formatMoney(lboCase.sources_uses.sponsor_equity)}</td>
+                  <td style={{ ...tdStyle, color: colors.textMuted }}>Sponsor equity</td>
+                  <td style={tdStyle}>{formatMoney(lboCase.sources_uses.sponsor_equity)}</td>
                 </tr>
                 <tr>
-                  <td style={{ paddingRight: "1rem", color: "#7c8494" }}>Purchase EV</td>
-                  <td>{formatMoney(lboCase.sources_uses.purchase_ev)}</td>
+                  <td style={{ ...tdStyle, color: colors.textMuted }}>Purchase EV</td>
+                  <td style={tdStyle}>{formatMoney(lboCase.sources_uses.purchase_ev)}</td>
                 </tr>
                 <tr>
-                  <td style={{ paddingRight: "1rem", color: "#7c8494" }}>Fees</td>
-                  <td>{formatMoney(lboCase.sources_uses.fees)}</td>
+                  <td style={{ ...tdStyle, color: colors.textMuted }}>Fees</td>
+                  <td style={tdStyle}>{formatMoney(lboCase.sources_uses.fees)}</td>
                 </tr>
                 <tr>
-                  <td style={{ paddingRight: "1rem", color: "#7c8494" }}>Reconciles</td>
-                  <td style={{ color: lboCase.sources_uses.reconciles ? "#3ecf8e" : "#ff6b6b" }}>
-                    {String(lboCase.sources_uses.reconciles)}
+                  <td style={{ ...tdStyle, color: colors.textMuted }}>Reconciles</td>
+                  <td style={tdStyle}>
+                    <Badge tone={lboCase.sources_uses.reconciles ? "success" : "danger"}>
+                      {String(lboCase.sources_uses.reconciles)}
+                    </Badge>
                   </td>
                 </tr>
               </tbody>
             </table>
-          </section>
+          </Card>
 
-          <section style={cardStyle}>
-            <h2 style={{ marginTop: 0 }}>Value creation bridge</h2>
+          <Card>
+            <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Value creation bridge</h2>
             {lboCase.value_creation_bridge.value_destructive && (
-              <p style={{ color: "#ff6b6b" }}>Value-destructive case: this deal loses money on these assumptions.</p>
+              <div style={{ marginBottom: "0.75rem" }}>
+                <Banner tone="danger" title="Value-destructive case">
+                  This deal loses money on these assumptions.
+                </Banner>
+              </div>
             )}
             {lboCase.value_creation_bridge.exit_multiple_dependent && (
-              <p style={{ color: "#e0a030" }}>
-                Exit-multiple dependent: &gt;50% of value creation relies on multiple expansion.
-              </p>
+              <div style={{ marginBottom: "0.75rem" }}>
+                <Banner tone="warning" title="Exit-multiple dependent">
+                  &gt;50% of value creation relies on multiple expansion.
+                </Banner>
+              </div>
             )}
             <BridgeBar label="Entry equity" value={lboCase.value_creation_bridge.entry_equity} />
             <BridgeBar label="EBITDA growth" value={lboCase.value_creation_bridge.ebitda_growth} />
@@ -176,97 +215,107 @@ export default function LboPage({ params }: { params: { id: string } }) {
             <BridgeBar label="Debt paydown" value={lboCase.value_creation_bridge.debt_paydown} />
             <BridgeBar label="Multiple expansion" value={lboCase.value_creation_bridge.multiple_expansion} />
             <BridgeBar label="Transaction fees" value={lboCase.value_creation_bridge.transaction_fees} />
-            <p style={{ color: "#7c8494", fontSize: "0.8rem" }}>
-              Total: {lboCase.value_creation_bridge.total.toFixed(3)}x (reconciles exactly to MOIC{" "}
-              {lboCase.moic.toFixed(3)}x)
+            <p style={{ color: colors.textFaint, fontSize: "0.8rem", marginBottom: 0 }}>
+              Total: {formatMultiple(lboCase.value_creation_bridge.total, 3)} (reconciles exactly to MOIC{" "}
+              {formatMultiple(lboCase.moic, 3)})
             </p>
-          </section>
+          </Card>
 
-          <section style={cardStyle}>
-            <h2 style={{ marginTop: 0 }}>Debt schedule</h2>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem" }}>
+          <Card>
+            <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Debt schedule</h2>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%" }}>
+                <thead>
+                  <tr>
+                    <th style={thStyle}>Yr</th>
+                    <th style={thStyle}>Revenue</th>
+                    <th style={thStyle}>EBITDA</th>
+                    <th style={thStyle}>Interest</th>
+                    <th style={thStyle}>CFADS</th>
+                    <th style={thStyle}>Sweep</th>
+                    <th style={thStyle}>Ending debt</th>
+                    <th style={thStyle}>Ending cash</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lboCase.schedule.map((y) => (
+                    <tr key={y.year} style={trStyle}>
+                      <td style={tdStyle}>{y.year}</td>
+                      <td style={tdStyle}>{formatMoney(y.revenue)}</td>
+                      <td style={tdStyle}>{formatMoney(y.ebitda)}</td>
+                      <td style={tdStyle}>{y.interest !== null ? formatMoney(y.interest) : "–"}</td>
+                      <td style={tdStyle}>{y.cfads !== null ? formatMoney(y.cfads) : "–"}</td>
+                      <td style={tdStyle}>{y.sweep !== null ? formatMoney(y.sweep) : "–"}</td>
+                      <td style={tdStyle}>{formatMoney(y.ending_debt)}</td>
+                      <td style={{ ...tdStyle, color: y.ending_cash < 0 ? colors.danger : undefined }}>
+                        {formatMoney(y.ending_cash)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </>
+      ) : (
+        <Card>
+          <EmptyState>
+            No {caseType.toUpperCase()} case computed yet -- generate scenarios, then click &quot;Run{" "}
+            {caseType.toUpperCase()} case&quot; above. Requires the target to have &ge;2 SELECTED peers (see the{" "}
+            <Link href={`/companies/${companyId}/valuation`} style={{ color: colors.accent }}>
+              valuation page
+            </Link>
+            ) or an explicit entry_ev override.
+          </EmptyState>
+        </Card>
+      )}
+
+      {sensitivity && (
+        <Card>
+          <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Entry &times; exit multiple sensitivity (IRR)</h2>
+          <div style={{ overflowX: "auto" }}>
+            <table>
               <thead>
-                <tr style={{ textAlign: "left", color: "#7c8494" }}>
-                  <th>Yr</th>
-                  <th>Revenue</th>
-                  <th>EBITDA</th>
-                  <th>Interest</th>
-                  <th>CFADS</th>
-                  <th>Sweep</th>
-                  <th>Ending debt</th>
-                  <th>Ending cash</th>
+                <tr>
+                  <th style={thStyle}></th>
+                  {sensitivity.exit_multiples.map((m, i) => (
+                    <th key={i} style={{ ...thStyle, textAlign: "center" }}>
+                      exit {m.toFixed(1)}x
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {lboCase.schedule.map((y) => (
-                  <tr key={y.year} style={{ borderTop: "1px solid #1f2430" }}>
-                    <td>{y.year}</td>
-                    <td>{formatMoney(y.revenue)}</td>
-                    <td>{formatMoney(y.ebitda)}</td>
-                    <td>{y.interest !== null ? formatMoney(y.interest) : "-"}</td>
-                    <td>{y.cfads !== null ? formatMoney(y.cfads) : "-"}</td>
-                    <td>{y.sweep !== null ? formatMoney(y.sweep) : "-"}</td>
-                    <td>{formatMoney(y.ending_debt)}</td>
-                    <td style={{ color: y.ending_cash < 0 ? "#ff6b6b" : undefined }}>{formatMoney(y.ending_cash)}</td>
+                {sensitivity.irr_grid.map((row, i) => (
+                  <tr key={i} style={trStyle}>
+                    <td style={{ ...tdStyle, color: colors.textMuted }}>entry {sensitivity.entry_multiples[i].toFixed(1)}x</td>
+                    {row.map((irr, j) => {
+                      const tone = irrTone(irr);
+                      return (
+                        <td key={j} style={{ padding: "0.25rem" }}>
+                          <div
+                            style={{
+                              textAlign: "center",
+                              borderRadius: "6px",
+                              padding: "0.35rem 0.4rem",
+                              fontWeight: 600,
+                              fontSize: "0.82rem",
+                              background: tone === "success" ? colors.successSoft : tone === "warning" ? colors.warningSoft : colors.dangerSoft,
+                              color: tone === "success" ? colors.success : tone === "warning" ? colors.warning : colors.danger,
+                            }}
+                          >
+                            {formatPercent(irr)}
+                          </div>
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>
             </table>
-          </section>
-        </>
-      ) : (
-        <section style={cardStyle}>
-          <p style={{ color: "#7c8494" }}>
-            No {caseType.toUpperCase()} case computed yet -- generate scenarios, then click &quot;Run{" "}
-            {caseType.toUpperCase()} case&quot; above. Requires the target to have &gt;=2 SELECTED peers (see the{" "}
-            <Link href={`/companies/${companyId}/valuation`} style={{ color: "#4f7cff" }}>
-              valuation page
-            </Link>
-            ) or an explicit entry_ev override.
-          </p>
-        </section>
+          </div>
+        </Card>
       )}
-
-      {sensitivity && (
-        <section style={cardStyle}>
-          <h2 style={{ marginTop: 0 }}>Entry x exit multiple sensitivity (IRR)</h2>
-          <table style={{ borderCollapse: "collapse", fontSize: "0.8rem" }}>
-            <thead>
-              <tr>
-                <th style={{ padding: "0.3rem" }}></th>
-                {sensitivity.exit_multiples.map((m, i) => (
-                  <th key={i} style={{ padding: "0.3rem", color: "#7c8494" }}>
-                    exit {m.toFixed(1)}x
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {sensitivity.irr_grid.map((row, i) => (
-                <tr key={i} style={{ borderTop: "1px solid #1f2430" }}>
-                  <td style={{ padding: "0.3rem", color: "#7c8494" }}>
-                    entry {sensitivity.entry_multiples[i].toFixed(1)}x
-                  </td>
-                  {row.map((irr, j) => (
-                    <td key={j} style={{ padding: "0.3rem", textAlign: "center" }}>
-                      {(irr * 100).toFixed(1)}%
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      )}
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <div style={{ color: "#7c8494", fontSize: "0.8rem" }}>{label}</div>
-      <div style={{ fontSize: "1.5rem", fontWeight: 700 }}>{value}</div>
     </div>
   );
 }
@@ -274,23 +323,21 @@ function Stat({ label, value }: { label: string; value: string }) {
 function BridgeBar({ label, value }: { label: string; value: number }) {
   const width = Math.min(Math.abs(value) * 40, 100);
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", margin: "0.25rem 0" }}>
-      <div style={{ width: "160px", fontSize: "0.8rem", color: "#7c8494" }}>{label}</div>
-      <div style={{ flex: 1, background: "#1f2430", borderRadius: "4px", height: "12px", position: "relative" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", margin: "0.3rem 0" }}>
+      <div style={{ width: "150px", fontSize: "0.8rem", color: colors.textMuted }}>{label}</div>
+      <div style={{ flex: 1, background: colors.surfaceRaised, borderRadius: "4px", height: "10px", position: "relative" }}>
         <div
           style={{
             width: `${width}%`,
             height: "100%",
             borderRadius: "4px",
-            background: value >= 0 ? "#3ecf8e" : "#ff6b6b",
+            background: value >= 0 ? colors.success : colors.danger,
           }}
         />
       </div>
-      <div style={{ width: "70px", textAlign: "right", fontSize: "0.8rem" }}>{value.toFixed(3)}x</div>
+      <div style={{ width: "70px", textAlign: "right", fontSize: "0.8rem", fontVariantNumeric: "tabular-nums" }}>
+        {formatMultiple(value, 3)}
+      </div>
     </div>
   );
-}
-
-function formatMoney(value: number): string {
-  return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }

@@ -1,0 +1,30 @@
+@keyframes dl-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: rgba(91, 132, 255, 0.35);
+}
+
+table {
+  border-collapse: collapse;
+}
+
+a {
+  color: inherit;
+}
+
+input:focus,
+button:focus {
+  outline: 2px solid #5b84ff;
+  outline-offset: 1px;
+}

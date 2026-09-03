@@ -9,13 +9,24 @@ import {
   type FinancialPeriod,
   type ScreeningScoreResponse,
 } from "@/lib/api";
-
-const cardStyle: React.CSSProperties = {
-  border: "1px solid #1f2430",
-  borderRadius: "8px",
-  padding: "1rem",
-  background: "#11151d",
-};
+import {
+  Badge,
+  Button,
+  Card,
+  CompanySubNav,
+  EmptyState,
+  Eyebrow,
+  Skeleton,
+  StatTile,
+  colors,
+  formatMoney,
+  inputStyle,
+  scoreTone,
+  sourceTone,
+  thStyle,
+  tdStyle,
+  trStyle,
+} from "@/lib/ui";
 
 const PLACEHOLDER_FACTORS = [
   { key: "business_quality_score", label: "Business quality" },
@@ -54,9 +65,7 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
       setScreeningError(null);
     } catch (err) {
       setScreening(null);
-      setScreeningError(
-        err instanceof ApiError ? err.message : "failed to load screening score"
-      );
+      setScreeningError(err instanceof ApiError ? err.message : "failed to load screening score");
     }
   }
 
@@ -95,105 +104,125 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
   }
 
   if (error) {
-    return <p style={{ color: "#ff6b6b" }}>{error}</p>;
+    return (
+      <div>
+        <Link href="/" style={{ color: colors.textMuted, fontSize: "0.85rem", textDecoration: "none" }}>
+          &larr; all companies
+        </Link>
+        <Badge tone="danger">{error}</Badge>
+      </div>
+    );
   }
   if (!company) {
-    return <p>Loading...</p>;
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <Skeleton height="4rem" />
+        <Skeleton height="10rem" />
+      </div>
+    );
   }
+
+  const latest = company.latest_financial_period;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-      <section style={cardStyle}>
-        <h1 style={{ marginTop: 0 }}>
-          {company.name} <span style={{ color: "#7c8494" }}>({company.ticker})</span>
-        </h1>
-        <p style={{ color: "#7c8494" }}>
-          {company.sector || "n/a"} &middot; {company.industry || "n/a"} &middot;{" "}
-          {company.country || "n/a"} &middot; reports in {company.reporting_currency}
-        </p>
-        <button onClick={handleIngest} disabled={busy} style={buttonStyle}>
-          {busy ? "Working..." : "Ingest financials (SEC EDGAR + FMP)"}
-        </button>
-        {company.market_cap !== null && (
-          <p style={{ color: "#7c8494", fontSize: "0.85rem" }}>
-            Market cap: {company.market_cap.toLocaleString(undefined, { maximumFractionDigits: 0 })}{" "}
-            (as of {company.market_data_as_of}, via {company.market_data_source})
-          </p>
-        )}
-        <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
-          <Link href={`/companies/${companyId}/valuation`} style={{ color: "#4f7cff" }}>
-            Valuation &amp; comps &rarr;
-          </Link>
-          <Link href={`/companies/${companyId}/lbo`} style={{ color: "#4f7cff" }}>
-            LBO underwriting &rarr;
-          </Link>
-          <Link href={`/companies/${companyId}/memo`} style={{ color: "#4f7cff" }}>
-            Investment memo &rarr;
-          </Link>
-          <Link href={`/companies/${companyId}/ic-simulation`} style={{ color: "#4f7cff" }}>
-            IC simulation &rarr;
-          </Link>
-        </div>
-      </section>
+      <Link href="/" style={{ color: colors.textMuted, fontSize: "0.85rem", textDecoration: "none" }}>
+        &larr; all companies
+      </Link>
 
-      <section style={cardStyle}>
-        <h2 style={{ marginTop: 0 }}>Screening score</h2>
+      <div>
+        <Eyebrow>{company.sector || "sector n/a"} &middot; {company.industry || "industry n/a"}</Eyebrow>
+        <div style={{ display: "flex", alignItems: "baseline", gap: "0.6rem", flexWrap: "wrap" }}>
+          <h1 style={{ margin: 0, fontSize: "1.6rem" }}>{company.name}</h1>
+          <span style={{ color: colors.textMuted, fontSize: "1rem" }}>{company.ticker}</span>
+        </div>
+      </div>
+
+      <CompanySubNav companyId={companyId} active="overview" />
+
+      <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+        <StatTile
+          label="PE Screening Score"
+          value={screening ? `${screening.score.toFixed(0)} / 100` : "–"}
+          tone={screening ? scoreTone(screening.score) : undefined}
+        />
+        <StatTile label="Revenue (latest FY)" value={latest ? formatMoney(latest.revenue) : "–"} sub={latest ? `FY${latest.fiscal_year}` : undefined} />
+        <StatTile label="EBITDA (latest FY)" value={latest ? formatMoney(latest.ebitda) : "–"} sub={latest ? `FY${latest.fiscal_year}` : undefined} />
+        <StatTile
+          label="Market cap"
+          value={company.market_cap !== null ? formatMoney(company.market_cap) : "–"}
+          sub={company.market_data_source ? `via ${company.market_data_source}` : undefined}
+        />
+      </div>
+
+      <Card>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem" }}>
+          <div style={{ color: colors.textMuted, fontSize: "0.85rem" }}>
+            {company.country || "n/a"} &middot; reports in {company.reporting_currency}
+          </div>
+          <Button onClick={handleIngest} disabled={busy}>
+            {busy ? "Working..." : "Ingest financials (SEC EDGAR + FMP)"}
+          </Button>
+        </div>
+      </Card>
+
+      <Card>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Screening score breakdown</h2>
+          {screening && <span style={{ color: colors.textFaint, fontSize: "0.78rem" }}>formula {screening.formula_version}</span>}
+        </div>
         {screeningError ? (
-          <p style={{ color: "#e0a030" }}>{screeningError}</p>
+          <Badge tone="warning">{screeningError}</Badge>
         ) : screening ? (
           <>
-            <div style={{ fontSize: "2.5rem", fontWeight: 700 }}>{screening.score} / 100</div>
-            <p style={{ color: "#7c8494", fontSize: "0.85rem" }}>
-              formula {screening.formula_version} &middot; computed {screening.computed_at}
-            </p>
-            <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "0.75rem" }}>
+            <table style={{ width: "100%", marginTop: "0.5rem" }}>
               <thead>
-                <tr style={{ textAlign: "left", color: "#7c8494", fontSize: "0.8rem" }}>
-                  <th>Factor</th>
-                  <th>Weight</th>
-                  <th>Score</th>
-                  <th>Source</th>
-                  <th>Notes</th>
+                <tr>
+                  <th style={thStyle}>Factor</th>
+                  <th style={thStyle}>Weight</th>
+                  <th style={thStyle}>Score</th>
+                  <th style={thStyle}>Source</th>
+                  <th style={thStyle}>Notes</th>
                 </tr>
               </thead>
               <tbody>
                 {screening.factors.map((f) => (
-                  <tr key={f.name} style={{ borderTop: "1px solid #1f2430" }}>
-                    <td style={{ padding: "0.4rem 0" }}>{f.name.replace(/_/g, " ")}</td>
-                    <td>{(f.weight * 100).toFixed(0)}%</td>
-                    <td>{f.normalized_score.toFixed(1)}</td>
-                    <td>
-                      <span style={sourceTagStyle(f.source)}>{f.source}</span>
+                  <tr key={f.name} style={trStyle}>
+                    <td style={tdStyle}>{f.name.replace(/_/g, " ")}</td>
+                    <td style={tdStyle}>{(f.weight * 100).toFixed(0)}%</td>
+                    <td style={{ ...tdStyle, fontWeight: 600 }}>{f.normalized_score.toFixed(1)}</td>
+                    <td style={tdStyle}>
+                      <Badge tone={sourceTone(f.source)}>{f.source}</Badge>
                     </td>
-                    <td style={{ color: "#7c8494", fontSize: "0.8rem" }}>{f.notes}</td>
+                    <td style={{ ...tdStyle, color: colors.textFaint, fontSize: "0.8rem" }}>{f.notes}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             {screening.warnings.length > 0 && (
-              <ul style={{ color: "#e0a030", fontSize: "0.85rem" }}>
+              <ul style={{ color: colors.warning, fontSize: "0.85rem" }}>
                 {screening.warnings.map((w, i) => (
                   <li key={i}>{w}</li>
                 ))}
               </ul>
             )}
-            <p style={{ color: "#7c8494", fontSize: "0.8rem" }}>
-              Honest limitation: 45% of this score&apos;s weight (business quality, market
-              structure, exit optionality, management/execution) is manual/placeholder until an
-              analyst supplies an assumption below.
+            <p style={{ color: colors.textFaint, fontSize: "0.8rem", marginBottom: 0 }}>
+              Honest limitation: 45% of this score&apos;s weight (business quality, market structure, exit
+              optionality, management/execution) is manual/placeholder until an analyst supplies an assumption
+              below.
             </p>
           </>
         ) : (
-          <p>Loading...</p>
+          <Skeleton height="8rem" />
         )}
-      </section>
+      </Card>
 
-      <section style={cardStyle}>
-        <h2 style={{ marginTop: 0 }}>Manual assumptions (placeholder factors)</h2>
+      <Card>
+        <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Manual assumptions (placeholder factors)</h2>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           {PLACEHOLDER_FACTORS.map(({ key, label }) => (
             <div key={key} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-              <label style={{ width: "220px" }}>{label}</label>
+              <label style={{ width: "220px", color: colors.textMuted, fontSize: "0.85rem" }}>{label}</label>
               <input
                 type="number"
                 min={0}
@@ -203,84 +232,47 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
                 onChange={(e) => setAssumptionDrafts((d) => ({ ...d, [key]: e.target.value }))}
                 style={{ ...inputStyle, width: "100px" }}
               />
-              <button onClick={() => handleSetAssumption(key)} disabled={busy} style={buttonStyle}>
+              <Button size="sm" variant="secondary" onClick={() => handleSetAssumption(key)} disabled={busy}>
                 Save
-              </button>
+              </Button>
             </div>
           ))}
         </div>
-      </section>
+      </Card>
 
-      <section style={cardStyle}>
-        <h2 style={{ marginTop: 0 }}>Financial periods</h2>
+      <Card>
+        <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Financial periods</h2>
         {financials.length === 0 ? (
-          <p style={{ color: "#7c8494" }}>No financials ingested yet.</p>
+          <EmptyState>No financials ingested yet -- click &quot;Ingest financials&quot; above.</EmptyState>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
+          <table style={{ width: "100%" }}>
             <thead>
-              <tr style={{ textAlign: "left", color: "#7c8494" }}>
-                <th>FY</th>
-                <th>Type</th>
-                <th>Source</th>
-                <th>Revenue</th>
-                <th>EBITDA</th>
-                <th>OCF</th>
-                <th>Capex</th>
+              <tr>
+                <th style={thStyle}>FY</th>
+                <th style={thStyle}>Type</th>
+                <th style={thStyle}>Source</th>
+                <th style={thStyle}>Revenue</th>
+                <th style={thStyle}>EBITDA</th>
+                <th style={thStyle}>OCF</th>
+                <th style={thStyle}>Capex</th>
               </tr>
             </thead>
             <tbody>
               {financials.map((p) => (
-                <tr key={p.id} style={{ borderTop: "1px solid #1f2430" }}>
-                  <td style={{ padding: "0.3rem 0" }}>{p.fiscal_year}</td>
-                  <td>{p.period_type}</td>
-                  <td>{p.source}</td>
-                  <td>{formatMoney(p.revenue)}</td>
-                  <td>{formatMoney(p.ebitda)}</td>
-                  <td>{formatMoney(p.operating_cash_flow)}</td>
-                  <td>{formatMoney(p.capex)}</td>
+                <tr key={p.id} style={trStyle}>
+                  <td style={tdStyle}>{p.fiscal_year}</td>
+                  <td style={tdStyle}>{p.period_type}</td>
+                  <td style={{ ...tdStyle, color: colors.textFaint }}>{p.source}</td>
+                  <td style={tdStyle}>{formatMoney(p.revenue)}</td>
+                  <td style={tdStyle}>{formatMoney(p.ebitda)}</td>
+                  <td style={tdStyle}>{formatMoney(p.operating_cash_flow)}</td>
+                  <td style={tdStyle}>{formatMoney(p.capex)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
-      </section>
+      </Card>
     </div>
   );
 }
-
-function formatMoney(value: number | null): string {
-  if (value === null) return "-";
-  return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
-}
-
-function sourceTagStyle(source: string): React.CSSProperties {
-  const colors: Record<string, string> = {
-    computed: "#3ecf8e",
-    assumption: "#4f7cff",
-    default: "#e0a030",
-  };
-  return {
-    color: colors[source] || "#7c8494",
-    border: `1px solid ${colors[source] || "#7c8494"}`,
-    borderRadius: "4px",
-    padding: "0.1rem 0.4rem",
-    fontSize: "0.75rem",
-  };
-}
-
-const inputStyle: React.CSSProperties = {
-  padding: "0.4rem",
-  borderRadius: "6px",
-  border: "1px solid #2a3040",
-  background: "#0b0e14",
-  color: "#e6e6e6",
-};
-
-const buttonStyle: React.CSSProperties = {
-  padding: "0.4rem 0.9rem",
-  borderRadius: "6px",
-  border: "none",
-  background: "#4f7cff",
-  color: "white",
-  cursor: "pointer",
-};

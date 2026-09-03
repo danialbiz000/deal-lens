@@ -1,24 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api, ApiError, type MemoResponse, type MemoSummary } from "@/lib/api";
-
-const cardStyle: React.CSSProperties = {
-  border: "1px solid #1f2430",
-  borderRadius: "8px",
-  padding: "1rem",
-  background: "#11151d",
-};
-
-const buttonStyle: React.CSSProperties = {
-  padding: "0.4rem 0.9rem",
-  borderRadius: "6px",
-  border: "none",
-  background: "#4f7cff",
-  color: "white",
-  cursor: "pointer",
-};
+import { Badge, Banner, Button, Card, CompanySubNav, EmptyState, Eyebrow, Skeleton, colors } from "@/lib/ui";
 
 export default function MemoPage({ params }: { params: { id: string } }) {
   const companyId = params.id;
@@ -27,6 +11,7 @@ export default function MemoPage({ params }: { params: { id: string } }) {
   const [memo, setMemo] = useState<MemoResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   async function refresh() {
     setError(null);
@@ -40,6 +25,8 @@ export default function MemoPage({ params }: { params: { id: string } }) {
       }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "failed to load memo");
+    } finally {
+      setLoaded(true);
     }
   }
 
@@ -64,69 +51,120 @@ export default function MemoPage({ params }: { params: { id: string } }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
       <div>
-        <Link href={`/companies/${companyId}`} style={{ color: "#7c8494" }}>
-          &larr; back to company
-        </Link>
+        <Eyebrow>AI layer</Eyebrow>
+        <h1 style={{ margin: 0, fontSize: "1.4rem" }}>Investment memo</h1>
       </div>
 
-      <section style={cardStyle}>
-        <h1 style={{ marginTop: 0 }}>Investment memo</h1>
-        <button onClick={handleGenerate} disabled={busy} style={buttonStyle}>
-          {busy ? "Generating..." : "Generate new memo version"}
-        </button>
-        <p style={{ color: "#7c8494", fontSize: "0.85rem" }}>
-          Requires: a screening score, a valuation with &gt;=2 selected peers, and a BASE LBO case.
-          Requires <code>ANTHROPIC_API_KEY</code> to be set on the server -- this is the only page in
-          the app that makes a real outbound call to a third-party API.
-        </p>
-        {error && <p style={{ color: "#ff6b6b" }}>{error}</p>}
+      <CompanySubNav companyId={companyId} active="memo" />
+
+      <Card>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem" }}>
+          <p style={{ color: colors.textFaint, fontSize: "0.85rem", margin: 0, maxWidth: "560px" }}>
+            Requires a screening score, a valuation with &ge;2 selected peers, and a BASE LBO case. This is
+            the only page that makes a real outbound call to a third-party API (Claude, for narrative
+            synthesis only -- every number is pulled from the deterministic engine, never computed by the model).
+          </p>
+          <Button onClick={handleGenerate} disabled={busy}>
+            {busy ? "Generating..." : "Generate new memo version"}
+          </Button>
+        </div>
+        {error && (
+          <div style={{ marginTop: "0.75rem" }}>
+            <Badge tone="danger">{error}</Badge>
+          </div>
+        )}
         {summaries.length > 1 && (
-          <p style={{ color: "#7c8494", fontSize: "0.85rem" }}>
+          <p style={{ color: colors.textFaint, fontSize: "0.8rem", marginBottom: 0, marginTop: "0.6rem" }}>
             {summaries.length} versions exist. Showing the latest (v{summaries[0].version}).
           </p>
         )}
-      </section>
+      </Card>
 
-      {memo && (
+      {!loaded ? (
+        <Skeleton height="12rem" />
+      ) : memo ? (
         <>
           {memo.validation_report.status === "warnings" && (
-            <section style={{ ...cardStyle, borderColor: "#e0a030" }}>
-              <strong style={{ color: "#e0a030" }}>Citation warnings</strong>
-              {memo.validation_report.invalid_citations.length > 0 && (
-                <p style={{ color: "#ff6b6b", fontSize: "0.85rem" }}>
-                  Invalid citations (path not found in source data): {memo.validation_report.invalid_citations.join(", ")}
-                </p>
-              )}
-              {memo.validation_report.mismatched_citations.length > 0 && (
-                <p style={{ color: "#ff6b6b", fontSize: "0.85rem" }}>
-                  Mismatched citations (stated number doesn&apos;t match the cited value):{" "}
-                  {memo.validation_report.mismatched_citations.join("; ")}
-                </p>
-              )}
-              {memo.validation_report.uncited_numbers.length > 0 && (
-                <p style={{ color: "#e0a030", fontSize: "0.85rem" }}>
-                  Uncited numbers (heuristic, may include false positives): {memo.validation_report.uncited_numbers.join(", ")}
-                </p>
-              )}
-            </section>
+            <Banner tone="warning" title="Citation warnings">
+              <CitationList
+                label="Invalid citations (path not found in source data)"
+                items={memo.validation_report.invalid_citations}
+                tone="danger"
+              />
+              <CitationList
+                label="Mismatched citations (stated number doesn't match the cited value)"
+                items={memo.validation_report.mismatched_citations}
+                tone="danger"
+              />
+              <CitationList
+                label="Uncited numbers (heuristic, may include false positives)"
+                items={memo.validation_report.uncited_numbers}
+                tone="warning"
+                last
+              />
+            </Banner>
           )}
 
-          <section style={cardStyle}>
-            <p style={{ color: "#7c8494", fontSize: "0.8rem" }}>
-              Version {memo.version} &middot; model {memo.model} &middot; prompt {memo.prompt_version} &middot;
-              generated {memo.generated_at}
-            </p>
+          <Card>
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center", marginBottom: "1rem" }}>
+              <Badge tone={memo.validation_report.status === "ok" ? "success" : "warning"}>
+                {memo.validation_report.status === "ok" ? "citations clean" : "citation warnings"}
+              </Badge>
+              <span style={{ color: colors.textFaint, fontSize: "0.78rem" }}>
+                v{memo.version} &middot; {memo.model} &middot; prompt {memo.prompt_version} &middot; {memo.generated_at}
+              </span>
+            </div>
             {memo.sections.map((section) => (
-              <div key={section.section_key} style={{ marginBottom: "1.25rem" }}>
-                <h3 style={{ marginBottom: "0.25rem" }}>{section.title}</h3>
-                <p style={{ whiteSpace: "pre-wrap", color: "#d0d4dc" }}>{section.content}</p>
+              <div key={section.section_key} style={{ marginBottom: "1.4rem" }}>
+                <h3 style={{ marginBottom: "0.35rem", fontSize: "0.95rem" }}>{section.title}</h3>
+                <p style={{ whiteSpace: "pre-wrap", color: colors.text, lineHeight: 1.55, margin: 0, fontSize: "0.9rem" }}>
+                  {section.content}
+                </p>
               </div>
             ))}
-          </section>
+          </Card>
         </>
+      ) : (
+        <Card>
+          <EmptyState>No memo generated yet -- click &quot;Generate new memo version&quot; above.</EmptyState>
+        </Card>
       )}
+    </div>
+  );
+}
 
-      {!memo && !error && <p style={{ color: "#7c8494" }}>No memo generated yet.</p>}
+function CitationList({
+  label,
+  items,
+  tone,
+  last,
+}: {
+  label: string;
+  items: string[];
+  tone: "danger" | "warning";
+  last?: boolean;
+}) {
+  if (items.length === 0) return null;
+  return (
+    <div style={{ marginBottom: last ? 0 : "0.9rem" }}>
+      <div style={{ color: colors[tone], fontSize: "0.8rem", fontWeight: 600, marginBottom: "0.3rem" }}>
+        {label} ({items.length})
+      </div>
+      <ul
+        style={{
+          margin: 0,
+          paddingLeft: "1.1rem",
+          maxHeight: "9rem",
+          overflowY: "auto",
+          fontSize: "0.8rem",
+          color: colors.textMuted,
+          lineHeight: 1.6,
+        }}
+      >
+        {items.map((item, i) => (
+          <li key={i}>{item}</li>
+        ))}
+      </ul>
     </div>
   );
 }
