@@ -252,6 +252,19 @@ def validate_citations(text: str, bundle: Dict[str, Any]) -> ValidationReport:
             continue
 
         span = token_match.span()
+
+        # Skip a token that falls entirely inside a citation tag's own text
+        # (e.g. the "1" in "[[source: valuation.selected_peers.1.ticker]]").
+        # A bundle path can legitimately contain digits as array indices, and
+        # the letter-lookbehind in NUMERIC_TOKEN_PATTERN doesn't catch this
+        # case -- the digit there is preceded by a literal "." (from
+        # "peers.1."), not a letter. Left unhandled, that digit could land
+        # within the adjacency window of a genuinely different, nearby
+        # citation and get flagged as a phantom mismatch against it. Found
+        # via a live memo generation, immediately after the Q1/Q3-label fix.
+        if any(c_start <= span[0] and span[1] <= c_end for c_start, c_end in (m.span() for m in citation_matches)):
+            continue
+
         nearest_citation = _nearest_citation_within(span, citation_matches, CITATION_ADJACENCY_WINDOW)
 
         if nearest_citation is not None:

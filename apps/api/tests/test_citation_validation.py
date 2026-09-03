@@ -195,6 +195,26 @@ def test_fiscal_year_label_digits_not_mistaken_for_a_claimed_number():
     assert report.mismatched_citations == []
 
 
+def test_array_index_digit_inside_a_citation_tag_is_not_a_phantom_claim():
+    # Regression test: found via a live memo generation, immediately after
+    # the Q1/Q3 label-digit fix -- a *different* source of a stray digit.
+    # "[[source: valuation.selected_peers.1.ticker]]) at 24.1x [[source:
+    # valuation.selected_peers.1.ev_ebitda_multiple]]" is fully correct, but
+    # the "1" inside "peers.1.ticker" (preceded by ".", not a letter, so the
+    # earlier lookbehind fix didn't exclude it) fell within the adjacency
+    # window of the *next* citation and got flagged as if it claimed "1"
+    # against ev_ebitda_multiple=24.1.
+    bundle = {"valuation": {"selected_peers": [{"ticker": "AAPL"}, {"ticker": "MSFT", "ev_ebitda_multiple": 24.1}]}}
+    text = (
+        "Microsoft (MSFT [[source: valuation.selected_peers.1.ticker]]) at 24.1x "
+        "[[source: valuation.selected_peers.1.ev_ebitda_multiple]]."
+    )
+    report = validate_citations(text, bundle)
+    assert report.mismatched_citations == []
+    assert report.invalid_citations == []
+    assert report.status == "ok"
+
+
 def test_citation_to_non_numeric_value_is_never_treated_as_a_mismatch():
     # A number happening to sit near a citation to a *string* field (e.g.
     # sector) has nothing numeric to compare against -- must not crash or
