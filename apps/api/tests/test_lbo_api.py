@@ -176,3 +176,78 @@ def test_lbo_invalid_case_type_returns_422(client, db_session):
     _add_fy_period(db_session, company["id"])
     response = client.post(f"/companies/{company['id']}/lbo/nonsense/run", json={"entry_ev": 1000.0})
     assert response.status_code == 422
+
+
+# --- debt sculpting: multiple tranches (v1.0), via the API ---
+
+
+def _two_tranche_payload(entry_ev=1000.0):
+    return {
+        "entry_ev": entry_ev,
+        "debt_tranches": [
+            {"name": "Senior", "leverage_multiple": 3.5, "interest_rate": 0.06, "mandatory_amort_pct": 0.05, "priority": 1},
+            {"name": "Mezzanine", "leverage_multiple": 1.5, "interest_rate": 0.11, "mandatory_amort_pct": 0.0, "priority": 2},
+        ],
+    }
+
+
+def test_run_lbo_with_custom_tranches_persists_and_reconciles(client, db_session):
+    company = _create_company(client, "TRANCHE1")
+    _add_fy_period(db_session, company["id"])
+    client.post(f"/companies/{company['id']}/scenarios/generate")
+
+    response = client.post(f"/companies/{company['id']}/lbo/base/run", json=_two_tranche_payload())
+    assert response.status_code == 200
+    body = response.json()
+
+    assert body["entry_leverage"] == pytest.approx(5.0)  # 3.5 + 1.5
+    assert body["sources_uses"]["new_debt"] == pytest.approx(100.0 * 5.0)  # entry_ebitda * total leverage
+    assert body["value_creation_bridge"]["total"] == pytest.approx(body["moic"], abs=1e-6)
+
+    year1 = body["schedule"][1]
+    assert len(year1["tranches"]) == 2
+    names = {tr["name"] for tr in year1["tranches"]}
+    assert names == {"Senior", "Mezzanine"}
+    assert sum(tr["ending_balance"] for tr in year1["tranches"]) == pytest.approx(year1["ending_debt"], abs=1e-6)
+    assert body["inputs"]["debt_tranches"][0]["name"] == "Senior"
+
+
+def test_get_lbo_case_round_trips_tranche_detail_through_storage(client, db_session):
+    company = _create_company(client, "TRANCHE2")
+    _add_fy_period(db_session, company["id"])
+    client.post(f"/companies/{company['id']}/scenarios/generate")
+    client.post(f"/companies/{company['id']}/lbo/base/run", json=_two_tranche_payload())
+
+    fetched = client.get(f"/companies/{company['id']}/lbo/base").json()
+    year1 = fetched["schedule"][1]
+    assert {tr["name"] for tr in year1["tranches"]} == {"Senior", "Mezzanine"}
+    senior = next(tr for tr in year1["tranches"] if tr["name"] == "Senior")
+    assert senior["interest"] == pytest.approx(350.0 * 0.06)  # entry_ebitda(100) * 3.5x * 6%
+
+
+def test_lbo_sensitivity_grid_works_when_stored_case_used_custom_tranches(client, db_session):
+    # Regression test: the sensitivity endpoint rehydrates LboInputs from the
+    # persisted case's inputs_json, where debt_tranches is stored as plain
+    # dicts (JSON has no dataclass concept) -- it must convert them back into
+    # DebtTranche instances, not hand raw dicts to the engine.
+    company = _create_company(client, "TRANCHESENS")
+    _add_fy_period(db_session, company["id"])
+    client.post(f"/companies/{company['id']}/scenarios/generate")
+    client.post(f"/companies/{company['id']}/lbo/base/run", json=_two_tranche_payload())
+
+    response = client.get(f"/companies/{company['id']}/lbo/base/sensitivity", params={"step": 1.0, "size": 3})
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body["irr_grid"]) == 3
+    assert all(len(row) == 3 for row in body["irr_grid"])
+
+
+def test_lbo_tranche_with_invalid_leverage_multiple_returns_422(client, db_session):
+    company = _create_company(client, "TRANCHEBAD")
+    _add_fy_period(db_session, company["id"])
+    client.post(f"/companies/{company['id']}/scenarios/generate")
+
+    payload = _two_tranche_payload()
+    payload["debt_tranches"][0]["leverage_multiple"] = -1.0  # must be > 0
+    response = client.post(f"/companies/{company['id']}/lbo/base/run", json=payload)
+    assert response.status_code == 422

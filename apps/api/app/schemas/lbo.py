@@ -1,10 +1,24 @@
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+
+class DebtTrancheIn(BaseModel):
+    """One tranche of the debt stack (v1.0 debt sculpting). Omitting
+    `debt_tranches` entirely on LboRunRequest preserves the MVP's single
+    blended-tranche behavior -- this is purely opt-in.
+    """
+
+    name: str
+    leverage_multiple: float = Field(gt=0, description="this tranche's own share of entry EBITDA")
+    interest_rate: float = Field(ge=0)
+    mandatory_amort_pct: float = Field(default=0.0, ge=0, le=1)
+    priority: int = Field(default=1, description="lower = swept first with excess cash; does not affect interest/mandatory amort")
 
 
 class LboRunRequest(BaseModel):
     entry_ev: Optional[float] = None  # override the comps-derived entry_ev if provided
+    debt_tranches: Optional[List[DebtTrancheIn]] = None  # opt into multi-tranche debt sculpting
 
 
 class SourcesUsesOut(BaseModel):
@@ -13,6 +27,15 @@ class SourcesUsesOut(BaseModel):
     purchase_ev: float
     fees: float
     reconciles: bool
+
+
+class TrancheYearOut(BaseModel):
+    name: str
+    beginning_balance: float
+    ending_balance: float
+    interest: Optional[float] = None
+    mandatory_amort: Optional[float] = None
+    sweep: Optional[float] = None
 
 
 class ScheduleYearOut(BaseModel):
@@ -31,6 +54,7 @@ class ScheduleYearOut(BaseModel):
     cfads: Optional[float] = None
     mandatory_amort: Optional[float] = None
     sweep: Optional[float] = None
+    tranches: Optional[List[TrancheYearOut]] = None
 
 
 class ValueCreationBridgeOut(BaseModel):

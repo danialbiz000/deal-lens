@@ -156,6 +156,15 @@ export interface ScenarioGenerateResponse {
   warnings: string[];
 }
 
+export interface TrancheYear {
+  name: string;
+  beginning_balance: number;
+  ending_balance: number;
+  interest: number | null;
+  mandatory_amort: number | null;
+  sweep: number | null;
+}
+
 export interface ScheduleYear {
   year: number;
   revenue: number;
@@ -172,6 +181,15 @@ export interface ScheduleYear {
   cfads: number | null;
   mandatory_amort: number | null;
   sweep: number | null;
+  tranches: TrancheYear[] | null;
+}
+
+export interface DebtTrancheInput {
+  name: string;
+  leverage_multiple: number;
+  interest_rate: number;
+  mandatory_amort_pct?: number;
+  priority?: number;
 }
 
 export interface ValueCreationBridge {
@@ -375,10 +393,13 @@ export const api = {
   ) =>
     request<Scenario>(`/companies/${id}/scenarios/${caseType}`, { method: "PATCH", body: JSON.stringify(payload) }),
 
-  runLbo: (id: string, caseType: CaseType, entryEv?: number) =>
+  runLbo: (id: string, caseType: CaseType, entryEv?: number, debtTranches?: DebtTrancheInput[]) =>
     request<LboCaseResponse>(`/companies/${id}/lbo/${caseType}/run`, {
       method: "POST",
-      body: JSON.stringify(entryEv !== undefined ? { entry_ev: entryEv } : {}),
+      body: JSON.stringify({
+        ...(entryEv !== undefined ? { entry_ev: entryEv } : {}),
+        ...(debtTranches !== undefined ? { debt_tranches: debtTranches } : {}),
+      }),
     }),
 
   getLbo: (id: string, caseType: CaseType) => request<LboCaseResponse>(`/companies/${id}/lbo/${caseType}`),

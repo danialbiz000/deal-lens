@@ -9,7 +9,17 @@ randomness in the scoring math itself).
 from .comps import PeerEvaluation, ValuationResult, compute_valuation, evaluate_peer, select_top_peers
 from .constants import FORMULA_VERSION, LBO_FORMULA_VERSION, WEIGHTS
 from .ic_gate import BearCaseInput, BearCaseYear, GateResult, evaluate_bear_case_thresholds
-from .lbo import LboInputs, LboResult, ScheduleYear, SourcesUses, ValueCreationBridge, run_lbo, run_sensitivity_grid
+from .lbo import (
+    DebtTranche,
+    LboInputs,
+    LboResult,
+    ScheduleYear,
+    SourcesUses,
+    TrancheYear,
+    ValueCreationBridge,
+    run_lbo,
+    run_sensitivity_grid,
+)
 from .screening import ScoredFactor, ScreeningResult, score_company
 from .types import AssumptionInput, CompanySnapshotInput, FactorResult, FinancialPeriodInput
 
@@ -21,6 +31,7 @@ __all__ = [
     "BearCaseInput",
     "BearCaseYear",
     "CompanySnapshotInput",
+    "DebtTranche",
     "FactorResult",
     "FinancialPeriodInput",
     "GateResult",
@@ -31,6 +42,7 @@ __all__ = [
     "ScoredFactor",
     "ScreeningResult",
     "SourcesUses",
+    "TrancheYear",
     "ValuationResult",
     "ValueCreationBridge",
     "compute_valuation",

@@ -256,6 +256,49 @@ export default function LboPage({ params }: { params: { id: string } }) {
               </table>
             </div>
           </Card>
+
+          {(lboCase.schedule[1]?.tranches?.length ?? 0) > 1 && (
+            <Card>
+              <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Debt tranches</h2>
+              <p style={{ color: colors.textFaint, fontSize: "0.8rem", marginTop: 0 }}>
+                Each tranche accrues interest and amortizes independently; the cash sweep pays tranches down in
+                priority order (a lower-priority tranche receives nothing until every higher-priority tranche is
+                fully repaid).
+              </p>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%" }}>
+                  <thead>
+                    <tr>
+                      <th style={thStyle}>Yr</th>
+                      <th style={thStyle}>Tranche</th>
+                      <th style={thStyle}>Beginning</th>
+                      <th style={thStyle}>Interest</th>
+                      <th style={thStyle}>Mand. amort</th>
+                      <th style={thStyle}>Sweep</th>
+                      <th style={thStyle}>Ending</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lboCase.schedule
+                      .filter((y) => y.year > 0 && y.tranches)
+                      .flatMap((y) =>
+                        (y.tranches ?? []).map((tr, i) => (
+                          <tr key={`${y.year}-${tr.name}`} style={i === 0 ? trStyle : undefined}>
+                            <td style={tdStyle}>{i === 0 ? y.year : ""}</td>
+                            <td style={tdStyle}>{tr.name}</td>
+                            <td style={tdStyle}>{formatMoney(tr.beginning_balance)}</td>
+                            <td style={tdStyle}>{tr.interest !== null ? formatMoney(tr.interest) : "–"}</td>
+                            <td style={tdStyle}>{tr.mandatory_amort !== null ? formatMoney(tr.mandatory_amort) : "–"}</td>
+                            <td style={tdStyle}>{tr.sweep !== null ? formatMoney(tr.sweep) : "–"}</td>
+                            <td style={tdStyle}>{formatMoney(tr.ending_balance)}</td>
+                          </tr>
+                        ))
+                      )}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          )}
         </>
       ) : (
         <Card>

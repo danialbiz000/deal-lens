@@ -1,6 +1,6 @@
 import pytest
 
-from finance_engine.lbo import LboInputs, run_lbo, run_sensitivity_grid
+from finance_engine.lbo import DebtTranche, LboInputs, run_lbo, run_sensitivity_grid
 
 
 def base_inputs(**overrides):
@@ -231,3 +231,141 @@ def test_sensitivity_grid_monotonicity():
         column_values = [irr_grid[row][col] for row in range(len(irr_grid))]
         for a, b in zip(column_values, column_values[1:]):
             assert b < a
+
+
+# --- debt sculpting: multiple tranches (v1.0) ---
+
+
+def test_no_tranches_given_is_byte_identical_to_the_old_single_blended_behavior():
+    # The whole point of making debt_tranches optional: every existing
+    # caller (no tranches specified) must get exactly the same numbers as
+    # before this feature existed.
+    without_tranches = run_lbo(base_inputs())
+    with_equivalent_single_tranche = run_lbo(
+        base_inputs(
+            debt_tranches=(
+                DebtTranche(name="Blended Term Loan", leverage_multiple=5.0, interest_rate=0.08,
+                            mandatory_amort_pct=0.01, priority=1),
+            )
+        )
+    )
+    assert with_equivalent_single_tranche.moic == pytest.approx(without_tranches.moic, abs=1e-9)
+    assert with_equivalent_single_tranche.irr == pytest.approx(without_tranches.irr, abs=1e-9)
+    for a, b in zip(without_tranches.schedule, with_equivalent_single_tranche.schedule):
+        assert a.ending_debt == pytest.approx(b.ending_debt, abs=1e-6)
+        assert a.ending_cash == pytest.approx(b.ending_cash, abs=1e-6)
+
+
+def test_tranche_principals_sum_to_total_new_debt():
+    inputs = base_inputs(
+        debt_tranches=(
+            DebtTranche(name="Senior", leverage_multiple=3.5, interest_rate=0.06, mandatory_amort_pct=0.05, priority=1),
+            DebtTranche(name="Mezzanine", leverage_multiple=1.5, interest_rate=0.11, mandatory_amort_pct=0.0, priority=2),
+        )
+    )
+    result = run_lbo(inputs)
+    assert result.sources_uses.new_debt == pytest.approx(100.0 * (3.5 + 1.5))  # entry_ebitda * total leverage
+    assert result.entry_leverage == pytest.approx(5.0)
+
+    year1 = result.schedule[1]
+    assert len(year1.tranches) == 2
+    assert sum(tr.beginning_balance for tr in year1.tranches) == pytest.approx(year1.beginning_debt)
+    assert sum(tr.ending_balance for tr in year1.tranches) == pytest.approx(year1.ending_debt, abs=1e-6)
+    assert sum(tr.interest for tr in year1.tranches) == pytest.approx(year1.interest, abs=1e-6)
+    assert sum(tr.mandatory_amort for tr in year1.tranches) == pytest.approx(year1.mandatory_amort, abs=1e-6)
+    assert sum(tr.sweep for tr in year1.tranches) == pytest.approx(year1.sweep, abs=1e-6)
+
+
+def test_each_tranche_accrues_interest_at_its_own_rate():
+    inputs = base_inputs(
+        lbo_cash_sweep_pct=0.0,  # isolate interest from sweep effects
+        debt_tranches=(
+            DebtTranche(name="Senior", leverage_multiple=3.5, interest_rate=0.06, priority=1),
+            DebtTranche(name="Mezzanine", leverage_multiple=1.5, interest_rate=0.11, priority=2),
+        ),
+    )
+    result = run_lbo(inputs)
+    year1 = result.schedule[1]
+    senior = next(tr for tr in year1.tranches if tr.name == "Senior")
+    mezz = next(tr for tr in year1.tranches if tr.name == "Mezzanine")
+    assert senior.interest == pytest.approx(350.0 * 0.06)  # entry_ebitda(100) * 3.5x * 6%
+    assert mezz.interest == pytest.approx(150.0 * 0.11)  # entry_ebitda(100) * 1.5x * 11%
+
+
+def test_mandatory_amort_caps_at_each_tranches_own_original_principal():
+    # Senior amortizes 20%/yr of its OWN principal; mezzanine never amortizes.
+    # After year 1, mezzanine's balance must be completely untouched by
+    # senior's amort schedule.
+    inputs = base_inputs(
+        lbo_cash_sweep_pct=0.0,
+        revenue_growth_rate=0.0,
+        ebitda_margin_delta=0.0,
+        debt_tranches=(
+            DebtTranche(name="Senior", leverage_multiple=3.5, interest_rate=0.06, mandatory_amort_pct=0.20, priority=1),
+            DebtTranche(name="Mezzanine", leverage_multiple=1.5, interest_rate=0.11, mandatory_amort_pct=0.0, priority=2),
+        ),
+    )
+    result = run_lbo(inputs)
+    year1 = result.schedule[1]
+    senior = next(tr for tr in year1.tranches if tr.name == "Senior")
+    mezz = next(tr for tr in year1.tranches if tr.name == "Mezzanine")
+    assert senior.mandatory_amort == pytest.approx(350.0 * 0.20)  # 20% of senior's own original principal
+    assert mezz.mandatory_amort == pytest.approx(0.0)
+    assert mezz.beginning_balance == pytest.approx(150.0)
+    assert mezz.ending_balance == pytest.approx(150.0)  # untouched: no mandatory amort, no sweep
+
+
+def test_cash_sweep_pays_down_higher_priority_tranche_first():
+    # Senior (priority 1) must be swept down to zero before Mezzanine
+    # (priority 2) receives any sweep cash at all.
+    inputs = base_inputs(
+        entry_ev=250.0,  # small EV -> aggressive equity return -> lots of excess cash to sweep
+        lbo_leverage_multiple=1.0,
+        lbo_mandatory_amort_pct=0.0,
+        lbo_cash_sweep_pct=1.0,
+        debt_tranches=(
+            DebtTranche(name="Senior", leverage_multiple=0.5, interest_rate=0.06, priority=1),
+            DebtTranche(name="Mezzanine", leverage_multiple=0.5, interest_rate=0.11, priority=2),
+        ),
+    )
+    result = run_lbo(inputs)
+
+    senior_paid_off_year = None
+    for year in result.schedule[1:]:
+        senior = next(tr for tr in year.tranches if tr.name == "Senior")
+        mezz = next(tr for tr in year.tranches if tr.name == "Mezzanine")
+        if senior_paid_off_year is None:
+            # While Senior still has a balance, Mezzanine must receive zero sweep.
+            if senior.ending_balance > 1e-6:
+                assert mezz.sweep == pytest.approx(0.0, abs=1e-6)
+            else:
+                senior_paid_off_year = year.year
+        else:
+            # Once Senior is fully repaid, Mezzanine is now free to receive sweep cash.
+            pass
+
+    assert senior_paid_off_year is not None, "test is only meaningful if Senior actually gets fully repaid"
+    final_mezz = next(tr for tr in result.schedule[-1].tranches if tr.name == "Mezzanine")
+    assert final_mezz.ending_balance < 0.5 * 100.0 * 0.5  # meaningfully paid down vs its own starting principal
+
+
+def test_value_creation_bridge_still_reconciles_with_multiple_tranches():
+    inputs = base_inputs(
+        debt_tranches=(
+            DebtTranche(name="Senior", leverage_multiple=3.5, interest_rate=0.06, mandatory_amort_pct=0.05, priority=1),
+            DebtTranche(name="Mezzanine", leverage_multiple=1.5, interest_rate=0.11, mandatory_amort_pct=0.0, priority=2),
+        )
+    )
+    result = run_lbo(inputs)
+    assert result.value_creation_bridge.total == pytest.approx(result.moic, abs=1e-6)
+
+
+def test_inputs_snapshot_always_records_the_fully_resolved_tranche_list():
+    # Even when debt_tranches is left unset, the stored snapshot should show
+    # the implicit single tranche actually used -- the audit trail must
+    # reflect what was modeled, not just what the caller passed in.
+    result = run_lbo(base_inputs())
+    assert result.inputs["debt_tranches"] == [
+        {"name": "Blended Term Loan", "leverage_multiple": 5.0, "interest_rate": 0.08,
+         "mandatory_amort_pct": 0.01, "priority": 1}
+    ]

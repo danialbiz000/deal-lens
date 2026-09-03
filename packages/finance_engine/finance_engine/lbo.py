@@ -5,8 +5,21 @@ that reconciles exactly to MOIC.
 Pure Python, zero I/O/DB dependency -- same discipline as screening.py.
 Every formula here matches docs/phase2-comps-lbo-design.md section 4-5
 verbatim; see that doc for the economic rationale behind each documented
-MVP simplification (capex-as-D&A-tax-shield-proxy, flat-% NWC, single
-blended debt tranche, no revolver, clean single entry/exit for IRR).
+MVP simplification (capex-as-D&A-tax-shield-proxy, flat-% NWC, no
+revolver, clean single entry/exit for IRR).
+
+v1.0 addition (section 10): debt sculpting with multiple tranches. The
+MVP's "single blended tranche" is still the default -- `LboInputs.debt_tranches`
+is optional, and omitting it reconstructs exactly one tranche from the
+existing scalar lbo_leverage_multiple/lbo_interest_rate/
+lbo_mandatory_amort_pct fields, so every pre-existing call site and stored
+LBOCase is byte-identical to before this feature existed. Passing an
+explicit list of `DebtTranche` opts into a real multi-tranche waterfall:
+each tranche accrues interest and amortizes independently at its own
+rate/schedule, and the cash sweep pays tranches down strictly in
+`priority` order (lower first) -- a tranche only starts receiving sweep
+cash once every higher-priority tranche is fully repaid, matching how a
+real credit agreement's mandatory prepayment waterfall works.
 """
 
 from dataclasses import asdict, dataclass, replace
@@ -29,6 +42,43 @@ from .constants import (
     SENSITIVITY_DEFAULT_STEP,
 )
 from .factors import clamp
+
+
+@dataclass(frozen=True)
+class DebtTranche:
+    """One tranche of the debt stack. `leverage_multiple` is this tranche's
+    own share of entry EBITDA (the sum across all tranches is the deal's
+    total entry leverage). `mandatory_amort_pct` is a percentage of THIS
+    tranche's own original principal, paid every year, independent of the
+    other tranches' schedules -- matching how a real senior term loan
+    amortizes against its own face value regardless of what a subordinated
+    tranche does. `priority` controls cash-sweep order only (lower value =
+    swept first, once its own mandatory amort is applied); it does not
+    affect interest or mandatory amortization, which always apply to every
+    tranche independently and simultaneously.
+    """
+
+    name: str
+    leverage_multiple: float
+    interest_rate: float
+    mandatory_amort_pct: float = 0.0
+    priority: int = 1
+
+
+@dataclass(frozen=True)
+class TrancheYear:
+    """One tranche's slice of a single year's debt schedule -- see
+    `ScheduleYear.tranches`. Year 0 has interest/mandatory_amort/sweep set
+    to None (nothing has happened yet), matching the parent ScheduleYear's
+    own year-0 convention.
+    """
+
+    name: str
+    beginning_balance: float
+    ending_balance: float
+    interest: Optional[float] = None
+    mandatory_amort: Optional[float] = None
+    sweep: Optional[float] = None
 
 
 @dataclass(frozen=True)
@@ -57,6 +107,11 @@ class LboInputs:
     lbo_transaction_fees_pct: float = LBO_DEFAULT_TRANSACTION_FEES_PCT
     hold_period_years: int = LBO_DEFAULT_HOLD_PERIOD_YEARS
 
+    # Optional debt sculpting (v1.0). None/empty -> a single implicit tranche
+    # is reconstructed from lbo_leverage_multiple/lbo_interest_rate/
+    # lbo_mandatory_amort_pct above, so every existing caller is unaffected.
+    debt_tranches: Optional[Tuple[DebtTranche, ...]] = None
+
 
 @dataclass(frozen=True)
 class SourcesUses:
@@ -84,6 +139,7 @@ class ScheduleYear:
     cfads: Optional[float] = None
     mandatory_amort: Optional[float] = None
     sweep: Optional[float] = None
+    tranches: Optional[List[TrancheYear]] = None
 
 
 @dataclass(frozen=True)
@@ -122,6 +178,24 @@ class LboResult:
         return asdict(self)
 
 
+def _resolve_tranches(inputs: LboInputs) -> List[DebtTranche]:
+    """Explicit tranches win; otherwise reconstruct the single implicit
+    tranche the MVP always used, so behavior is identical when this v1.0
+    field is left unset.
+    """
+    if inputs.debt_tranches:
+        return list(inputs.debt_tranches)
+    return [
+        DebtTranche(
+            name="Blended Term Loan",
+            leverage_multiple=inputs.lbo_leverage_multiple,
+            interest_rate=inputs.lbo_interest_rate,
+            mandatory_amort_pct=inputs.lbo_mandatory_amort_pct,
+            priority=1,
+        )
+    ]
+
+
 def run_lbo(inputs: LboInputs) -> LboResult:
     if inputs.entry_ebitda is None or inputs.entry_ebitda <= 0:
         raise ValueError("entry_ebitda must be > 0 to run an LBO")
@@ -132,9 +206,15 @@ def run_lbo(inputs: LboInputs) -> LboResult:
 
     entry_multiple = inputs.entry_ev / inputs.entry_ebitda
 
+    tranches = _resolve_tranches(inputs)
+    tranche_principals = [tr.leverage_multiple * inputs.entry_ebitda for tr in tranches]
+    # Sweep order only -- interest and mandatory amort always apply to every
+    # tranche independently, regardless of priority.
+    sweep_order = sorted(range(len(tranches)), key=lambda i: tranches[i].priority)
+
     # --- 1. Sources & Uses (Year 0) ---
     fees_amount = inputs.entry_ev * inputs.lbo_transaction_fees_pct
-    new_debt = inputs.entry_ebitda * inputs.lbo_leverage_multiple
+    new_debt = sum(tranche_principals)
     uses_total = inputs.entry_ev + fees_amount
     sponsor_equity = uses_total - new_debt
     sources_total = new_debt + sponsor_equity
@@ -157,11 +237,15 @@ def run_lbo(inputs: LboInputs) -> LboResult:
             ending_debt=new_debt,
             beginning_cash=0.0,
             ending_cash=0.0,
+            tranches=[
+                TrancheYear(name=tr.name, beginning_balance=principal, ending_balance=principal)
+                for tr, principal in zip(tranches, tranche_principals)
+            ],
         )
     ]
 
     revenue_prev = inputs.entry_revenue
-    debt_prev = new_debt
+    tranche_balances = list(tranche_principals)
     cash_prev = 0.0
 
     for t in range(1, inputs.hold_period_years + 1):
@@ -172,22 +256,45 @@ def run_lbo(inputs: LboInputs) -> LboResult:
         delta_rev_t = revenue_t - revenue_prev
         nwc_invest_t = delta_rev_t * inputs.lbo_nwc_pct_revenue_change
 
-        interest_t = debt_prev * inputs.lbo_interest_rate
+        balances_begin = list(tranche_balances)
+        tranche_interests = [bal * tr.interest_rate for bal, tr in zip(balances_begin, tranches)]
+        interest_t = sum(tranche_interests)
+
         pretax_income_t = ebitda_t - capex_t - interest_t
         taxes_t = max(0.0, pretax_income_t) * inputs.lbo_tax_rate
         cfads_t = ebitda_t - capex_t - taxes_t - nwc_invest_t
 
-        mandatory_amort_t = min(debt_prev, new_debt * inputs.lbo_mandatory_amort_pct)
+        # Mandatory amort: each tranche pays down against its OWN original
+        # principal, capped at its own current balance -- independent of
+        # every other tranche.
+        tranche_mandatory_amorts = [
+            min(balances_begin[i], tranche_principals[i] * tranches[i].mandatory_amort_pct)
+            for i in range(len(tranches))
+        ]
+        mandatory_amort_t = sum(tranche_mandatory_amorts)
+        balances_after_mandatory = [balances_begin[i] - tranche_mandatory_amorts[i] for i in range(len(tranches))]
+
         cash_before_sweep_t = cfads_t - interest_t - mandatory_amort_t
 
+        tranche_sweeps = [0.0] * len(tranches)
         if cash_before_sweep_t > 0:
-            sweep_t = clamp(cash_before_sweep_t, 0, debt_prev - mandatory_amort_t) * inputs.lbo_cash_sweep_pct
+            total_after_mandatory = sum(balances_after_mandatory)
+            sweep_pool = clamp(cash_before_sweep_t, 0, total_after_mandatory) * inputs.lbo_cash_sweep_pct
+            remaining_pool = sweep_pool
+            for i in sweep_order:
+                if remaining_pool <= 0:
+                    break
+                pay = min(remaining_pool, balances_after_mandatory[i])
+                tranche_sweeps[i] = pay
+                remaining_pool -= pay
+            sweep_t = sweep_pool - remaining_pool
             unswept_cash_t = cash_before_sweep_t - sweep_t
         else:
             sweep_t = 0.0
             unswept_cash_t = cash_before_sweep_t  # allowed to be negative -- no revolver modeled
 
-        ending_debt_t = debt_prev - mandatory_amort_t - sweep_t
+        balances_end = [balances_after_mandatory[i] - tranche_sweeps[i] for i in range(len(tranches))]
+        ending_debt_t = sum(balances_end)
         ending_cash_t = cash_prev + unswept_cash_t
 
         if ending_cash_t < 0:
@@ -209,15 +316,26 @@ def run_lbo(inputs: LboInputs) -> LboResult:
                 cfads=cfads_t,
                 mandatory_amort=mandatory_amort_t,
                 sweep=sweep_t,
-                beginning_debt=debt_prev,
+                beginning_debt=sum(balances_begin),
                 ending_debt=ending_debt_t,
                 beginning_cash=cash_prev,
                 ending_cash=ending_cash_t,
+                tranches=[
+                    TrancheYear(
+                        name=tranches[i].name,
+                        beginning_balance=balances_begin[i],
+                        interest=tranche_interests[i],
+                        mandatory_amort=tranche_mandatory_amorts[i],
+                        sweep=tranche_sweeps[i],
+                        ending_balance=balances_end[i],
+                    )
+                    for i in range(len(tranches))
+                ],
             )
         )
 
         revenue_prev = revenue_t
-        debt_prev = ending_debt_t
+        tranche_balances = balances_end
         cash_prev = ending_cash_t
 
     # --- 5. Exit & returns ---
@@ -286,6 +404,10 @@ def run_lbo(inputs: LboInputs) -> LboResult:
         "revenue_growth_rate": inputs.revenue_growth_rate,
         "ebitda_margin_delta": inputs.ebitda_margin_delta,
         "exit_multiple_delta": inputs.exit_multiple_delta,
+        # Always the fully-resolved tranche list, even when debt_tranches was
+        # left unset -- so the audit trail shows exactly what was modeled,
+        # not just what the caller happened to specify.
+        "debt_tranches": [asdict(tr) for tr in tranches],
     }
 
     return LboResult(

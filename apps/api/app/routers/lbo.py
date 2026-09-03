@@ -18,6 +18,7 @@ from app.models.lbo_case import LboCase
 from app.models.peer import Peer
 from app.models.scenario import Scenario
 from app.schemas.lbo import (
+    DebtTrancheIn,
     LboCaseResponse,
     LboRunRequest,
     ScheduleYearOut,
@@ -25,7 +26,7 @@ from app.schemas.lbo import (
     SourcesUsesOut,
     ValueCreationBridgeOut,
 )
-from finance_engine import LboInputs, compute_valuation, run_lbo, run_sensitivity_grid
+from finance_engine import DebtTranche, LboInputs, compute_valuation, run_lbo, run_sensitivity_grid
 from finance_engine.constants import (
     COMPS_MIN_PEERS_FOR_VALUATION,
     LBO_DEFAULT_CAPEX_PCT_REVENUE,
@@ -74,8 +75,31 @@ def _assumption_value(rows: List[Assumption], name: str, default: float) -> floa
     return float(match.value_numeric) if match is not None else default
 
 
+def _to_engine_tranches(tranches_in: Optional[List[DebtTrancheIn]]) -> Optional[tuple]:
+    """Convert the request schema's DebtTrancheIn list into the tuple of
+    finance_engine.DebtTranche the engine expects -- None/empty stays None
+    so the engine falls back to its single-blended-tranche default.
+    """
+    if not tranches_in:
+        return None
+    return tuple(
+        DebtTranche(
+            name=t.name,
+            leverage_multiple=t.leverage_multiple,
+            interest_rate=t.interest_rate,
+            mandatory_amort_pct=t.mandatory_amort_pct,
+            priority=t.priority,
+        )
+        for t in tranches_in
+    )
+
+
 def _resolve_lbo_inputs(
-    db: Session, company: Company, scenario: Scenario, entry_ev_override: Optional[float]
+    db: Session,
+    company: Company,
+    scenario: Scenario,
+    entry_ev_override: Optional[float],
+    debt_tranches: Optional[List[DebtTrancheIn]] = None,
 ) -> LboInputs:
     latest = _latest_fy_period(db, company.id)
     if latest is None or latest.revenue is None or latest.ebitda is None:
@@ -146,6 +170,7 @@ def _resolve_lbo_inputs(
         hold_period_years=int(
             _assumption_value(assumption_rows, "lbo_hold_period_years", LBO_DEFAULT_HOLD_PERIOD_YEARS)
         ),
+        debt_tranches=_to_engine_tranches(debt_tranches),
     )
 
 
@@ -238,7 +263,7 @@ def run_lbo_case(
     company_id: str, case_type: str, payload: LboRunRequest, db: Session = Depends(get_db)
 ) -> LboCaseResponse:
     company, scenario = _get_company_and_scenario(db, company_id, case_type)
-    inputs = _resolve_lbo_inputs(db, company, scenario, payload.entry_ev)
+    inputs = _resolve_lbo_inputs(db, company, scenario, payload.entry_ev, payload.debt_tranches)
     result = run_lbo(inputs)
 
     existing = (
@@ -307,6 +332,13 @@ def get_lbo_sensitivity(
     if existing_case is not None:
         stored_inputs = dict(existing_case.inputs_json)
         stored_inputs.pop("entry_multiple", None)  # derived field, not an LboInputs constructor arg
+        # inputs_json always stores debt_tranches as plain dicts (JSON has no
+        # dataclass concept) -- rehydrate into DebtTranche instances before
+        # handing back to LboInputs, which expects the real dataclass so
+        # attribute access (tr.leverage_multiple, etc.) works inside run_lbo.
+        stored_tranches = stored_inputs.pop("debt_tranches", None)
+        if stored_tranches:
+            stored_inputs["debt_tranches"] = tuple(DebtTranche(**t) for t in stored_tranches)
         inputs = LboInputs(**stored_inputs)
     else:
         inputs = _resolve_lbo_inputs(db, company, scenario, entry_ev_override=None)
