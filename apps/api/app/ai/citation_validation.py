@@ -42,11 +42,26 @@ CITATION_PATTERN = re.compile(r"\[\[source:\s*([a-zA-Z0-9_.]+)\s*\]\]")
 # design (see module docstring): this is a heuristic aid, not a parser for
 # arbitrary natural-language quantities.
 NUMERIC_TOKEN_PATTERN = re.compile(
-    r"[-+]?\$?\d[\d,]*\.?\d*\s*(?:%|x|bn|billion|mn|million)?",
+    r"[-+]?\$?\d[\d,]*\.?\d*\s*(?:%|x|bn|billion|tn|trillion|mn|million)?",
     re.IGNORECASE,
 )
 
-_SCALE_SUFFIXES = (("billion", 1e9), ("bn", 1e9), ("million", 1e6), ("mn", 1e6))
+# Order matters: checked via `endswith` in a loop that breaks on first hit,
+# so a longer suffix that is itself a superstring of a shorter one (there
+# are none currently, but keep this in mind when adding more) must come
+# first. "trillion"/"tn" were missing entirely until a live memo generation
+# on a mega-cap target (Alphabet, >$1tn enterprise value) surfaced it: the
+# model correctly wrote "$3.25 trillion [[source: valuation.entry_ev]]" and
+# the validator flagged it as mismatched because "trillion" parsed as scale
+# 1.0 instead of 1e12 -- a false positive on a genuinely correct citation.
+_SCALE_SUFFIXES = (
+    ("trillion", 1e12),
+    ("tn", 1e12),
+    ("billion", 1e9),
+    ("bn", 1e9),
+    ("million", 1e6),
+    ("mn", 1e6),
+)
 
 # How close (in characters) a numeric token must be to a citation tag to be
 # considered "covered" by it for the loose uncited-number fallback check,

@@ -146,6 +146,33 @@ def test_genuinely_wrong_number_with_currency_suffix_is_flagged():
     assert len(report.mismatched_citations) == 1
 
 
+def test_trillion_scale_suffix_formatting_variance_not_flagged():
+    # Regression test: found via a live memo generation on a mega-cap target
+    # (Alphabet, >$1tn enterprise value) where the model correctly wrote
+    # "$3.25 trillion" and the validator flagged it as mismatched because
+    # "trillion" wasn't a recognized scale suffix (only bn/billion/mn/million
+    # were) -- so "3.25" was compared literally against 3_251_288_750_000.0.
+    bundle_with_trillion_value = {"valuation": {"entry_ev": 3_251_288_750_000.0}}
+    text = "Enterprise value of $3.25 trillion [[source: valuation.entry_ev]]."
+    report = validate_citations(text, bundle_with_trillion_value)
+    assert report.mismatched_citations == []
+    assert report.status == "ok"
+
+
+def test_genuinely_wrong_number_with_trillion_suffix_is_flagged():
+    bundle_with_trillion_value = {"valuation": {"entry_ev": 3_251_288_750_000.0}}
+    text = "Enterprise value of $9.0 trillion [[source: valuation.entry_ev]]."
+    report = validate_citations(text, bundle_with_trillion_value)
+    assert len(report.mismatched_citations) == 1
+
+
+def test_tn_abbreviation_scale_suffix_not_flagged():
+    bundle_with_trillion_value = {"valuation": {"entry_ev": 3_251_288_750_000.0}}
+    text = "Enterprise value of $3.25tn [[source: valuation.entry_ev]]."
+    report = validate_citations(text, bundle_with_trillion_value)
+    assert report.mismatched_citations == []
+
+
 def test_citation_to_non_numeric_value_is_never_treated_as_a_mismatch():
     # A number happening to sit near a citation to a *string* field (e.g.
     # sector) has nothing numeric to compare against -- must not crash or
