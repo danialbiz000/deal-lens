@@ -345,4 +345,16 @@ Errors:   404 if company not found, 422 if no FinancialPeriod rows exist yet ("r
 
 ## 7. Explicitly deferred (not this slice)
 
-Comps/`Peer`, `Transaction`, `Scenario`, `LBOCase`, `Memo` entities and all associated engines/endpoints; any document parsing, synthesis, IC-agent, or memo-writing AI functionality; multi-currency FX conversion; private-company upload workflow; auth; cloud deployment. All per spec slide 20's MVP/v1.0 scope split and slide 17's phased roadmap — this document only covers Phase 0/1 (repo + schema + data layer) and the screening half of Phase 2.
+Comps/`Peer`, `Transaction`, `Scenario`, `LBOCase`, `Memo` entities and all associated engines/endpoints; any document parsing, synthesis, IC-agent, or memo-writing AI functionality; multi-currency FX conversion; ~~private-company upload workflow~~ **built, see §8**; auth; cloud deployment. All per spec slide 20's MVP/v1.0 scope split and slide 17's phased roadmap — this document only covers Phase 0/1 (repo + schema + data layer) and the screening half of Phase 2.
+
+## 8. Manual financial entry for private companies (v1.0)
+
+A private company has no CIK and no SEC/EDGAR filing, so `/ingest` (§4/§5, EDGAR + FMP only) can never produce a single row for it — until this addition, there was no way at all, not even a manual one, to get a private target's financials into DealLens.
+
+`POST /companies/{id}/financials` (`apps/api/app/routers/financials.py`) accepts the same numeric fields `/ingest` normalizes to (revenue, EBITDA, cash flow, debt, etc.) typed in directly by an analyst, reusing the exact same `_upsert_period` upsert helper and the same `to_positive_magnitude` sign-convention normalizer as the EDGAR/FMP path — no parallel, drifting implementation. Every row is stored with `source="MANUAL"` and `is_estimate=True` unconditionally, so it can never be mistaken for an audited public filing anywhere it's read back (the financial-periods table renders it as a distinct badge, not blended into the plain-text source column EDGAR/FMP rows get). An optional `source_ref` free-text field preserves the same "every number traces to something" principle EDGAR's accession numbers and FMP's document links already provide (e.g. `"management-provided FY2025 draft P&L"`).
+
+The unique constraint `(company_id, period_end_date, period_type, source)` means a manual entry and an EDGAR entry for the same period coexist as separate rows rather than colliding — relevant if a company later goes public, or if an analyst wants to override/supplement one field without touching the machine-ingested figures.
+
+Critically, this closes a data-entry gap only — the screening/comps/LBO engines were already source-agnostic (they only ever read `FinancialPeriod` rows, never care how they got there), so a manually-entered private company runs through the identical deterministic pipeline as a real SEC filer the moment a row exists, with zero engine-side changes. Verified directly: `test_manual_entry_unblocks_screening_score_for_a_private_company` creates a company with no CIK, posts one manual period, and asserts a real, non-trivial screening score comes back.
+
+Comps against public peers work in the economically correct direction even for a private target: a private company has no market multiple of its own (not being quoted), so the standard PE approach is exactly what §2's comps engine already does — derive an implied entry EV from public peers' trading multiples applied to the private target's own EBITDA/revenue. Nothing in the comps engine needed to change for this.

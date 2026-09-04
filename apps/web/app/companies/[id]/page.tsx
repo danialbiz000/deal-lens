@@ -7,6 +7,7 @@ import {
   ApiError,
   type CompanyDetail,
   type FinancialPeriod,
+  type ManualFinancialPeriodInput,
   type ScreeningScoreResponse,
 } from "@/lib/api";
 import {
@@ -28,6 +29,16 @@ import {
   trStyle,
 } from "@/lib/ui";
 
+const MANUAL_ENTRY_FIELDS: Array<{ key: keyof ManualFinancialPeriodInput; label: string }> = [
+  { key: "revenue", label: "Revenue" },
+  { key: "ebitda", label: "EBITDA" },
+  { key: "operating_cash_flow", label: "Operating cash flow" },
+  { key: "capex", label: "Capex" },
+  { key: "total_debt", label: "Total debt" },
+  { key: "cash_and_equivalents", label: "Cash & equivalents" },
+  { key: "interest_expense", label: "Interest expense" },
+];
+
 const PLACEHOLDER_FACTORS = [
   { key: "business_quality_score", label: "Business quality" },
   { key: "market_structure_score", label: "Market structure" },
@@ -45,6 +56,12 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [assumptionDrafts, setAssumptionDrafts] = useState<Record<string, string>>({});
+  const [showManualForm, setShowManualForm] = useState(false);
+  const [manualDraft, setManualDraft] = useState<Record<string, string>>({
+    fiscal_year: String(new Date().getFullYear() - 1),
+    period_end_date: `${new Date().getFullYear() - 1}-12-31`,
+  });
+  const [manualError, setManualError] = useState<string | null>(null);
 
   async function refresh() {
     try {
@@ -82,6 +99,37 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
       await refresh();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "ingest failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleAddManualPeriod(e: React.FormEvent) {
+    e.preventDefault();
+    setManualError(null);
+    setBusy(true);
+    try {
+      const numericFields: Record<string, number> = {};
+      for (const { key } of MANUAL_ENTRY_FIELDS) {
+        const raw = manualDraft[key];
+        if (raw !== undefined && raw !== "") {
+          numericFields[key] = Number(raw);
+        }
+      }
+      const payload: ManualFinancialPeriodInput = {
+        fiscal_year: Number(manualDraft.fiscal_year),
+        period_end_date: manualDraft.period_end_date,
+        source_ref: manualDraft.source_ref || undefined,
+        ...numericFields,
+      };
+      await api.addManualFinancialPeriod(companyId, payload);
+      setManualDraft({
+        fiscal_year: String(new Date().getFullYear() - 1),
+        period_end_date: `${new Date().getFullYear() - 1}-12-31`,
+      });
+      await refresh();
+    } catch (err) {
+      setManualError(err instanceof ApiError ? err.message : "failed to save manual financial period");
     } finally {
       setBusy(false);
     }
@@ -159,12 +207,87 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem" }}>
           <div style={{ color: colors.textMuted, fontSize: "0.85rem" }}>
             {company.country || "n/a"} &middot; reports in {company.reporting_currency}
+            {!company.cik && (
+              <span style={{ display: "block", color: colors.textFaint, marginTop: "0.2rem" }}>
+                No CIK on file -- this looks like a private company. SEC EDGAR has no data for it; use
+                &quot;Add financials manually&quot; below instead.
+              </span>
+            )}
           </div>
-          <Button onClick={handleIngest} disabled={busy}>
-            {busy ? "Working..." : "Ingest financials (SEC EDGAR + FMP)"}
-          </Button>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <Button variant="secondary" onClick={() => setShowManualForm((s) => !s)}>
+              {showManualForm ? "Hide manual entry" : "Add financials manually"}
+            </Button>
+            <Button onClick={handleIngest} disabled={busy}>
+              {busy ? "Working..." : "Ingest financials (SEC EDGAR + FMP)"}
+            </Button>
+          </div>
         </div>
       </Card>
+
+      {showManualForm && (
+        <Card>
+          <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Add financials manually</h2>
+          <p style={{ color: colors.textFaint, fontSize: "0.8rem", marginTop: 0 }}>
+            For a private company with no SEC filing -- these numbers are unaudited and will always be labeled{" "}
+            <Badge tone="warning">MANUAL</Badge> everywhere they&apos;re shown, never blended in silently with
+            verified filings. Enter whatever you actually have; leave the rest blank.
+          </p>
+          <form onSubmit={handleAddManualPeriod} style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+            <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+              <label style={{ display: "flex", flexDirection: "column", gap: "0.2rem", fontSize: "0.8rem", color: colors.textMuted }}>
+                Fiscal year
+                <input
+                  type="number"
+                  required
+                  value={manualDraft.fiscal_year ?? ""}
+                  onChange={(e) => setManualDraft((d) => ({ ...d, fiscal_year: e.target.value }))}
+                  style={{ ...inputStyle, width: "110px" }}
+                />
+              </label>
+              <label style={{ display: "flex", flexDirection: "column", gap: "0.2rem", fontSize: "0.8rem", color: colors.textMuted }}>
+                Period end date
+                <input
+                  type="date"
+                  required
+                  value={manualDraft.period_end_date ?? ""}
+                  onChange={(e) => setManualDraft((d) => ({ ...d, period_end_date: e.target.value }))}
+                  style={{ ...inputStyle, width: "150px" }}
+                />
+              </label>
+              <label style={{ display: "flex", flexDirection: "column", gap: "0.2rem", fontSize: "0.8rem", color: colors.textMuted, flex: "1 1 220px" }}>
+                Source note (optional)
+                <input
+                  placeholder="e.g. management-provided FY2025 draft P&amp;L"
+                  value={manualDraft.source_ref ?? ""}
+                  onChange={(e) => setManualDraft((d) => ({ ...d, source_ref: e.target.value }))}
+                  style={inputStyle}
+                />
+              </label>
+            </div>
+            <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+              {MANUAL_ENTRY_FIELDS.map(({ key, label }) => (
+                <label key={key} style={{ display: "flex", flexDirection: "column", gap: "0.2rem", fontSize: "0.8rem", color: colors.textMuted }}>
+                  {label}
+                  <input
+                    type="number"
+                    placeholder="optional"
+                    value={manualDraft[key] ?? ""}
+                    onChange={(e) => setManualDraft((d) => ({ ...d, [key]: e.target.value }))}
+                    style={{ ...inputStyle, width: "150px" }}
+                  />
+                </label>
+              ))}
+            </div>
+            {manualError && <Badge tone="danger">{manualError}</Badge>}
+            <div>
+              <Button type="submit" disabled={busy}>
+                {busy ? "Saving..." : "Save manual financial period"}
+              </Button>
+            </div>
+          </form>
+        </Card>
+      )}
 
       <Card>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
@@ -262,7 +385,13 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
                 <tr key={p.id} style={trStyle}>
                   <td style={tdStyle}>{p.fiscal_year}</td>
                   <td style={tdStyle}>{p.period_type}</td>
-                  <td style={{ ...tdStyle, color: colors.textFaint }}>{p.source}</td>
+                  <td style={tdStyle}>
+                    {p.source === "MANUAL" ? (
+                      <Badge tone="warning">MANUAL</Badge>
+                    ) : (
+                      <span style={{ color: colors.textFaint }}>{p.source}</span>
+                    )}
+                  </td>
                   <td style={tdStyle}>{formatMoney(p.revenue)}</td>
                   <td style={tdStyle}>{formatMoney(p.ebitda)}</td>
                   <td style={tdStyle}>{formatMoney(p.operating_cash_flow)}</td>

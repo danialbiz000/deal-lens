@@ -7,10 +7,16 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.db import get_db
 from app.ingestion import edgar_client, market_data_client, normalize
+from app.ingestion.normalize import to_positive_magnitude
 from app.models.company import Company
 from app.models.financial_period import FinancialPeriod
 from app.rate_limit import SCOPE_INGEST_PER_COMPANY, SCOPE_INGEST_PER_IP, company_id_key, limiter
-from app.schemas.financial_period import FinancialPeriodRead, IngestRequest, IngestResponse
+from app.schemas.financial_period import (
+    FinancialPeriodRead,
+    IngestRequest,
+    IngestResponse,
+    ManualFinancialPeriodCreate,
+)
 
 router = APIRouter(prefix="/companies", tags=["financials"])
 
@@ -129,6 +135,59 @@ def ingest_financials(
         periods=[FinancialPeriodRead.model_validate(p) for p in saved_periods],
         warnings=warnings,
     )
+
+
+@router.post("/{company_id}/financials", response_model=FinancialPeriodRead, status_code=201)
+def create_manual_financial_period(
+    company_id: str, payload: ManualFinancialPeriodCreate, db: Session = Depends(get_db)
+) -> FinancialPeriod:
+    """For private companies -- no CIK, no SEC/EDGAR filing, usually no FMP
+    market data either -- this is the only way their financials can enter
+    DealLens at all. Everything downstream (screening, comps, LBO) already
+    works on `FinancialPeriod` rows regardless of where they came from; the
+    gap this closes is purely getting the numbers in, not analyzing them.
+    """
+    company = db.get(Company, company_id)
+    if company is None:
+        raise HTTPException(status_code=404, detail="company not found")
+
+    if payload.period_type not in VALID_PERIOD_TYPES:
+        raise HTTPException(status_code=422, detail=f"invalid period_type: {payload.period_type}")
+
+    if payload.revenue is None and payload.ebitda is None and payload.operating_cash_flow is None:
+        raise HTTPException(
+            status_code=422,
+            detail="at least one of revenue, ebitda, or operating_cash_flow must be provided",
+        )
+
+    normalized = {
+        "fiscal_year": payload.fiscal_year,
+        "period_end_date": payload.period_end_date,
+        "period_type": payload.period_type,
+        "currency": payload.currency,
+        "source": "MANUAL",
+        "source_ref": payload.source_ref,
+        "revenue": payload.revenue,
+        "gross_profit": payload.gross_profit,
+        "ebitda": payload.ebitda,
+        "ebit": payload.ebit,
+        "net_income": payload.net_income,
+        "operating_cash_flow": payload.operating_cash_flow,
+        "capex": to_positive_magnitude(payload.capex),
+        "total_debt": to_positive_magnitude(payload.total_debt),
+        "cash_and_equivalents": payload.cash_and_equivalents,
+        "interest_expense": payload.interest_expense,
+        "shares_outstanding": payload.shares_outstanding,
+        # Never audited/machine-verified like an EDGAR filing -- always
+        # flagged, so it can never be silently mistaken for one downstream.
+        "is_estimate": True,
+        "raw_payload": None,
+    }
+
+    row = _upsert_period(db, company_id, normalized)
+    db.commit()
+    db.refresh(row)
+    return row
 
 
 @router.get("/{company_id}/financials", response_model=List[FinancialPeriodRead])

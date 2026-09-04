@@ -52,6 +52,25 @@ export interface CompanyDetail extends Company {
   latest_financial_period: FinancialPeriod | null;
 }
 
+export interface ManualFinancialPeriodInput {
+  fiscal_year: number;
+  period_end_date: string; // YYYY-MM-DD
+  period_type?: string;
+  currency?: string;
+  source_ref?: string;
+  revenue?: number;
+  gross_profit?: number;
+  ebitda?: number;
+  ebit?: number;
+  net_income?: number;
+  operating_cash_flow?: number;
+  capex?: number;
+  total_debt?: number;
+  cash_and_equivalents?: number;
+  interest_expense?: number;
+  shares_outstanding?: number;
+}
+
 export interface ScreeningFactor {
   name: string;
   weight: number;
@@ -375,6 +394,12 @@ export const api = {
     request<IngestResponse>(`/companies/${id}/ingest`, {
       method: "POST",
       body: JSON.stringify({ years_back }),
+    }),
+
+  addManualFinancialPeriod: (id: string, payload: ManualFinancialPeriodInput) =>
+    request<FinancialPeriod>(`/companies/${id}/financials`, {
+      method: "POST",
+      body: JSON.stringify(payload),
     }),
 
   getScreeningScore: (id: string) => request<ScreeningScoreResponse>(`/companies/${id}/screening-score`),
