@@ -4,7 +4,10 @@
  * proving the contract end-to-end, not building an abstraction layer.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+import { ApiError, request } from "./api-client";
+import { aiApi } from "./api-ai";
+
+export * from "./api-ai";
 
 export interface Company {
   id: string;
@@ -275,99 +278,7 @@ export interface TornadoResponse {
   variables: TornadoVariable[];
 }
 
-// --- Phase 4: AI layer (memo writer + IC simulator) ---
-
-export interface MemoSection {
-  section_key: string;
-  title: string;
-  content: string;
-}
-
-export interface MemoValidationReport {
-  total_citations: number;
-  invalid_citations: string[];
-  mismatched_citations: string[];
-  uncited_numbers: string[];
-  status: "ok" | "warnings";
-  per_section: Array<Record<string, unknown>>;
-}
-
-export interface MemoResponse {
-  id: string;
-  company_id: string;
-  version: number;
-  prompt_version: string;
-  model: string;
-  sections: MemoSection[];
-  validation_report: MemoValidationReport;
-  generated_at: string;
-}
-
-export interface MemoSummary {
-  id: string;
-  version: number;
-  generated_at: string;
-  validation_status: string;
-}
-
-export interface IcRoleOutput {
-  role: string;
-  output: Record<string, unknown>;
-  validation_report: { total_citations: number; invalid_citations: string[]; uncited_numbers: string[]; status: string };
-}
-
-export interface IcSimulationResponse {
-  id: string;
-  company_id: string;
-  version: number;
-  model: string;
-  transcript: IcRoleOutput[];
-  llm_recommendation: string;
-  recommendation: string;
-  override_fired: boolean;
-  override_reason: string | null;
-  key_strengths: string[];
-  key_risks: string[];
-  unanswered_dd: string[];
-  generated_at: string;
-}
-
-export interface IcSimulationSummary {
-  id: string;
-  version: number;
-  generated_at: string;
-  recommendation: string;
-  override_fired: boolean;
-}
-
-class ApiError extends Error {
-  status: number;
-  constructor(status: number, message: string) {
-    super(message);
-    this.status = status;
-  }
-}
-
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers: { "Content-Type": "application/json", ...(init?.headers || {}) },
-    cache: "no-store",
-  });
-  if (!response.ok) {
-    let detail = response.statusText;
-    try {
-      const body = await response.json();
-      detail = body.detail ? JSON.stringify(body.detail) : detail;
-    } catch {
-      // ignore -- fall back to statusText
-    }
-    throw new ApiError(response.status, detail);
-  }
-  return response.json() as Promise<T>;
-}
-
-export const api = {
+const coreApi = {
   listCompanies: () => request<Company[]>("/companies"),
 
   getCompany: (id: string) => request<CompanyDetail>(`/companies/${id}`),
@@ -455,22 +366,8 @@ export const api = {
 
   getLboTornado: (id: string, caseType: CaseType) =>
     request<TornadoResponse>(`/companies/${id}/lbo/${caseType}/tornado`),
-
-  // --- Phase 4 ---
-
-  generateMemo: (id: string) => request<MemoResponse>(`/companies/${id}/memo`, { method: "POST" }),
-
-  listMemos: (id: string) => request<MemoSummary[]>(`/companies/${id}/memo`),
-
-  getMemo: (id: string, version: number) => request<MemoResponse>(`/companies/${id}/memo/${version}`),
-
-  generateIcSimulation: (id: string) =>
-    request<IcSimulationResponse>(`/companies/${id}/ic-simulation`, { method: "POST" }),
-
-  listIcSimulations: (id: string) => request<IcSimulationSummary[]>(`/companies/${id}/ic-simulation`),
-
-  getIcSimulation: (id: string, version: number) =>
-    request<IcSimulationResponse>(`/companies/${id}/ic-simulation/${version}`),
 };
+
+export const api = { ...coreApi, ...aiApi };
 
 export { ApiError };

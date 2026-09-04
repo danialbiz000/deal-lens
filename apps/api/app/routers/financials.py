@@ -1,22 +1,39 @@
+import base64
 from datetime import date
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
 from sqlalchemy.orm import Session
 
+from app.ai.client import ClaudeApiError, ClaudeClient, get_claude_client
+from app.ai.extraction import extract_financials
 from app.config import settings
 from app.db import get_db
 from app.ingestion import edgar_client, market_data_client, normalize
 from app.ingestion.normalize import to_positive_magnitude
 from app.models.company import Company
 from app.models.financial_period import FinancialPeriod
-from app.rate_limit import SCOPE_INGEST_PER_COMPANY, SCOPE_INGEST_PER_IP, company_id_key, limiter
+from app.rate_limit import (
+    SCOPE_AI_PER_IP,
+    SCOPE_EXTRACTION_PER_COMPANY,
+    SCOPE_INGEST_PER_COMPANY,
+    SCOPE_INGEST_PER_IP,
+    company_id_key,
+    limiter,
+)
 from app.schemas.financial_period import (
+    DocumentExtractionResponse,
     FinancialPeriodRead,
     IngestRequest,
     IngestResponse,
     ManualFinancialPeriodCreate,
 )
+
+# Anthropic document understanding is capped well above this in practice, but
+# a hard local ceiling keeps one oversized upload from tying up a request/
+# inflating token cost unexpectedly (design doc's own "validate at system
+# boundaries" principle).
+MAX_EXTRACTION_UPLOAD_BYTES = 20 * 1024 * 1024
 
 router = APIRouter(prefix="/companies", tags=["financials"])
 
@@ -188,6 +205,48 @@ def create_manual_financial_period(
     db.commit()
     db.refresh(row)
     return row
+
+
+@router.post("/{company_id}/documents/extract", response_model=DocumentExtractionResponse)
+@limiter.shared_limit(lambda: settings.rate_limit_ai_per_ip, scope=SCOPE_AI_PER_IP, error_message=SCOPE_AI_PER_IP)
+@limiter.limit(
+    lambda: settings.rate_limit_extraction_per_company, key_func=company_id_key, error_message=SCOPE_EXTRACTION_PER_COMPANY
+)
+def extract_financials_from_document(
+    request: Request,
+    company_id: str,
+    file: UploadFile,
+    db: Session = Depends(get_db),
+    client: ClaudeClient = Depends(get_claude_client),
+) -> DocumentExtractionResponse:
+    """Upload a financial statement / investor-relations PDF and get back AI-
+    proposed candidate periods for human review -- never written to the
+    database directly (design doc section 8). A reviewer confirms/edits each
+    candidate and saves it the same way a manually-typed period is saved,
+    via POST /companies/{id}/financials.
+    """
+    company = db.get(Company, company_id)
+    if company is None:
+        raise HTTPException(status_code=404, detail="company not found")
+
+    if file.content_type not in ("application/pdf", "application/octet-stream"):
+        raise HTTPException(status_code=422, detail=f"unsupported file type: {file.content_type}, expected a PDF")
+
+    raw = file.file.read()
+    if len(raw) == 0:
+        raise HTTPException(status_code=422, detail="uploaded file is empty")
+    if len(raw) > MAX_EXTRACTION_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"file too large: {len(raw)} bytes, max {MAX_EXTRACTION_UPLOAD_BYTES} bytes",
+        )
+
+    try:
+        result = extract_financials(base64.b64encode(raw).decode("ascii"), client)
+    except ClaudeApiError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    return DocumentExtractionResponse(periods=result["periods"], notes=result["notes"])
 
 
 @router.get("/{company_id}/financials", response_model=List[FinancialPeriodRead])

@@ -81,6 +81,22 @@ class FakeClaudeClient:
             raise AssertionError("FakeClaudeClient ran out of canned responses")
         return self._responses.pop(0)
 
+    def complete_structured_from_document(
+        self, system: str, user: str, json_schema: dict, document_base64: str, media_type: str = "application/pdf"
+    ) -> dict:
+        self.calls.append(
+            {
+                "system": system,
+                "user": user,
+                "json_schema": json_schema,
+                "document_base64": document_base64,
+                "media_type": media_type,
+            }
+        )
+        if not self._responses:
+            raise AssertionError("FakeClaudeClient ran out of canned responses")
+        return self._responses.pop(0)
+
 
 @pytest.fixture
 def fake_claude_client():

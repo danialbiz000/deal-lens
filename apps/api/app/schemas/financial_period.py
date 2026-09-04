@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -75,3 +75,38 @@ class ManualFinancialPeriodCreate(BaseModel):
     cash_and_equivalents: Optional[float] = None
     interest_expense: Optional[float] = None
     shares_outstanding: Optional[float] = None
+
+
+class ExtractedPeriodCandidate(BaseModel):
+    """One AI-proposed period from POST /companies/{id}/documents/extract --
+    shaped identically to ManualFinancialPeriodCreate (minus source_ref, which
+    the review UI fills in itself, e.g. "extracted from <filename>") so it can
+    be handed straight to that endpoint once a human confirms/edits it. Never
+    written to the database by the extraction endpoint itself (design doc
+    section 8: no unvalidated write path for extracted values).
+
+    `citations` carries a short verbatim quote per non-null numeric field so
+    a reviewer can verify each number without re-reading the source document.
+    """
+
+    fiscal_year: int
+    period_end_date: date
+    period_type: str
+    currency: str
+    revenue: Optional[float] = None
+    gross_profit: Optional[float] = None
+    ebitda: Optional[float] = None
+    ebit: Optional[float] = None
+    net_income: Optional[float] = None
+    operating_cash_flow: Optional[float] = None
+    capex: Optional[float] = None
+    total_debt: Optional[float] = None
+    cash_and_equivalents: Optional[float] = None
+    interest_expense: Optional[float] = None
+    shares_outstanding: Optional[float] = None
+    citations: Dict[str, Optional[str]] = Field(default_factory=dict)
+
+
+class DocumentExtractionResponse(BaseModel):
+    periods: List[ExtractedPeriodCandidate]
+    notes: str

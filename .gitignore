@@ -17,3 +17,4 @@ apps/api/deal_lens.db
 node_modules/
 apps/web/.next/
 apps/web/next-env.d.ts
+*.tsbuildinfo

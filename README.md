@@ -162,11 +162,13 @@ for your target company from step 7:
    in code, and the model's original answer stays visible, struck through,
    right next to it -- never silently substituted.
 
-This is the only part of the whole project that talks to a third-party AI
-API, and it is the only part that needs `ANTHROPIC_API_KEY` set. Without
-it, `POST .../memo` and `POST .../ic-simulation` return `503` with a clear
-message rather than a raw stack trace; every other endpoint in the app is
-completely unaffected.
+This, along with `POST .../documents/extract` (upload a financial statement
+or investor-relations PDF for a private company and get back AI-proposed
+candidate periods with citations -- see "Rate limiting" below), is the only
+part of the whole project that talks to a third-party AI API, and the only
+part that needs `ANTHROPIC_API_KEY` set. Without it, all three endpoints
+return `503` with a clear message rather than a raw stack trace; every
+other endpoint in the app is completely unaffected.
 
 ## Running the tests
 
@@ -299,16 +301,19 @@ explain. Python owns the financial math."* Concretely, in this codebase:
 ## Rate limiting
 
 Added once a real `ANTHROPIC_API_KEY` was configured and the repo went
-public on GitHub (`docs/phase4-ai-layer-design.md` section 12). `POST
-.../memo` and `POST .../ic-simulation` (1 and 5 paid Claude calls per
-invocation respectively) each carry two independent, stacked limits:
+public on GitHub (`docs/phase4-ai-layer-design.md` section 12, extended in
+section 13 for document extraction). `POST .../memo`, `POST
+.../ic-simulation` (1 and 5 paid Claude calls per invocation respectively),
+and `POST .../documents/extract` (1 call, but a whole PDF's worth of
+tokens) each carry two independent, stacked limits:
 
 - **Per-company** (the real cost control): keyed on the `{company_id}` path
   parameter, not caller identity -- default `5/hour;20/day` per company per
-  endpoint, capping worst-case spend for a single company at roughly
-  $1/hour.
+  endpoint for memo/IC-simulation (`5/hour;15/day` for document extraction,
+  slightly stricter given the larger token cost per call), capping
+  worst-case spend for a single company at roughly $1/hour.
 - **Per-IP** (abuse/blast-radius backstop): keyed on remote address,
-  combined across both AI endpoints -- default `10/minute`.
+  combined across all three AI endpoints -- default `10/minute`.
 
 `POST .../ingest` gets the same two dimensions at a lighter touch (`20/
 minute` per IP, `10/hour` per company) purely as good-citizenship
@@ -317,12 +322,14 @@ screening score, comps/LBO computation) is pure local computation and
 carries no limit at all.
 
 Exceeding a limit returns `429` with `{ "error": "rate_limit_exceeded",
-"scope": "ai_per_company" | "ai_per_ip" | "ingest_per_ip" |
-"ingest_per_company", "message": "...", "retry_after_seconds": N }` and,
-where obtainable, a `Retry-After` header. All 5 limit values are env vars
-(`RATE_LIMIT_ENABLED`, `RATE_LIMIT_AI_PER_IP`, `RATE_LIMIT_AI_PER_COMPANY`,
-`RATE_LIMIT_INGEST_PER_IP`, `RATE_LIMIT_INGEST_PER_COMPANY`), never
-hardcoded; set `RATE_LIMIT_ENABLED=false` for local dev convenience. The
+"scope": "ai_per_company" | "ai_per_ip" | "extraction_per_company" |
+"ingest_per_ip" | "ingest_per_company", "message": "...",
+"retry_after_seconds": N }` and, where obtainable, a `Retry-After` header.
+All 6 limit values are env vars (`RATE_LIMIT_ENABLED`,
+`RATE_LIMIT_AI_PER_IP`, `RATE_LIMIT_AI_PER_COMPANY`,
+`RATE_LIMIT_EXTRACTION_PER_COMPANY`, `RATE_LIMIT_INGEST_PER_IP`,
+`RATE_LIMIT_INGEST_PER_COMPANY`), never hardcoded; set
+`RATE_LIMIT_ENABLED=false` for local dev convenience. The
 test suite always runs with it disabled by default (`tests/conftest.py`)
 regardless of what's in `.env` -- otherwise its many repeated calls to
 these same endpoints would start failing with `429`s partway through a
@@ -381,9 +388,10 @@ header end-to-end in both cases.
   `FMP_API_KEY` is unset.
 - **AI layer (Phase 4 only):** the Claude API (`ANTHROPIC_API_KEY`,
   model configurable via `ANTHROPIC_MODEL`, default `claude-sonnet-4-5`).
-  Confined entirely to `apps/api/app/ai/` -- `POST .../memo` and
-  `POST .../ic-simulation` are the only two endpoints in the whole codebase
-  that make an outbound call to a third-party API.
+  Confined entirely to `apps/api/app/ai/` -- `POST .../memo`,
+  `POST .../ic-simulation`, and `POST .../documents/extract` are the only
+  three endpoints in the whole codebase that make an outbound call to a
+  third-party API.
 
 See `docs/phase0-vertical-slice-design.md` section 5 for the full rationale
 and normalization rules.

@@ -41,6 +41,11 @@ class Settings(BaseSettings):
     rate_limit_ai_per_company: str = "5/hour;20/day"
     rate_limit_ingest_per_ip: str = "20/minute"
     rate_limit_ingest_per_company: str = "10/hour"
+    # Document extraction (POST /companies/{id}/documents/extract) sends a
+    # whole PDF to Claude -- far more tokens per call than memo/ic-simulation
+    # -- so it gets its own, stricter per-company budget while still sharing
+    # the combined ai_per_ip abuse backstop with those two endpoints.
+    rate_limit_extraction_per_company: str = "5/hour;15/day"
 
     request_timeout_seconds: float = 30.0
 

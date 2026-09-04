@@ -6,10 +6,12 @@ import {
   api,
   ApiError,
   type CompanyDetail,
+  type ExtractedPeriodCandidate,
   type FinancialPeriod,
   type ManualFinancialPeriodInput,
   type ScreeningScoreResponse,
 } from "@/lib/api";
+import { DocumentExtractionPanel } from "./DocumentExtractionPanel";
 import {
   Badge,
   Button,
@@ -60,8 +62,11 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
   const [manualDraft, setManualDraft] = useState<Record<string, string>>({
     fiscal_year: String(new Date().getFullYear() - 1),
     period_end_date: `${new Date().getFullYear() - 1}-12-31`,
+    period_type: "FY",
+    currency: "USD",
   });
   const [manualError, setManualError] = useState<string | null>(null);
+  const [activeCitations, setActiveCitations] = useState<Record<string, string | null>>({});
 
   async function refresh() {
     try {
@@ -119,6 +124,8 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
       const payload: ManualFinancialPeriodInput = {
         fiscal_year: Number(manualDraft.fiscal_year),
         period_end_date: manualDraft.period_end_date,
+        period_type: manualDraft.period_type || "FY",
+        currency: manualDraft.currency || "USD",
         source_ref: manualDraft.source_ref || undefined,
         ...numericFields,
       };
@@ -126,13 +133,34 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
       setManualDraft({
         fiscal_year: String(new Date().getFullYear() - 1),
         period_end_date: `${new Date().getFullYear() - 1}-12-31`,
+        period_type: "FY",
+        currency: "USD",
       });
+      setActiveCitations({});
       await refresh();
     } catch (err) {
       setManualError(err instanceof ApiError ? err.message : "failed to save manual financial period");
     } finally {
       setBusy(false);
     }
+  }
+
+  function handleUseExtractedCandidate(candidate: ExtractedPeriodCandidate) {
+    const draft: Record<string, string> = {
+      fiscal_year: String(candidate.fiscal_year),
+      period_end_date: candidate.period_end_date,
+      period_type: candidate.period_type,
+      currency: candidate.currency,
+      source_ref: "extracted from uploaded document -- review before saving",
+    };
+    for (const { key } of MANUAL_ENTRY_FIELDS) {
+      const value = candidate[key as keyof ExtractedPeriodCandidate];
+      if (typeof value === "number") draft[key] = String(value);
+    }
+    setManualDraft(draft);
+    setActiveCitations(candidate.citations);
+    setManualError(null);
+    setShowManualForm(true);
   }
 
   async function handleSetAssumption(name: string) {
@@ -214,7 +242,7 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
               </span>
             )}
           </div>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
             <Button variant="secondary" onClick={() => setShowManualForm((s) => !s)}>
               {showManualForm ? "Hide manual entry" : "Add financials manually"}
             </Button>
@@ -224,6 +252,8 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
           </div>
         </div>
       </Card>
+
+      <DocumentExtractionPanel companyId={companyId} onUseCandidate={handleUseExtractedCandidate} />
 
       {showManualForm && (
         <Card>
@@ -255,6 +285,29 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
                   style={{ ...inputStyle, width: "150px" }}
                 />
               </label>
+              <label style={{ display: "flex", flexDirection: "column", gap: "0.2rem", fontSize: "0.8rem", color: colors.textMuted }}>
+                Period type
+                <select
+                  value={manualDraft.period_type ?? "FY"}
+                  onChange={(e) => setManualDraft((d) => ({ ...d, period_type: e.target.value }))}
+                  style={{ ...inputStyle, width: "90px" }}
+                >
+                  {["FY", "Q1", "Q2", "Q3", "Q4", "TTM"].map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label style={{ display: "flex", flexDirection: "column", gap: "0.2rem", fontSize: "0.8rem", color: colors.textMuted }}>
+                Currency
+                <input
+                  value={manualDraft.currency ?? "USD"}
+                  onChange={(e) => setManualDraft((d) => ({ ...d, currency: e.target.value.toUpperCase() }))}
+                  maxLength={3}
+                  style={{ ...inputStyle, width: "70px" }}
+                />
+              </label>
               <label style={{ display: "flex", flexDirection: "column", gap: "0.2rem", fontSize: "0.8rem", color: colors.textMuted, flex: "1 1 220px" }}>
                 Source note (optional)
                 <input
@@ -276,6 +329,11 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
                     onChange={(e) => setManualDraft((d) => ({ ...d, [key]: e.target.value }))}
                     style={{ ...inputStyle, width: "150px" }}
                   />
+                  {activeCitations[key] && (
+                    <span style={{ color: colors.textFaint, fontSize: "0.7rem", maxWidth: "150px" }}>
+                      &ldquo;{activeCitations[key]}&rdquo;
+                    </span>
+                  )}
                 </label>
               ))}
             </div>

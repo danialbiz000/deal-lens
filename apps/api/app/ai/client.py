@@ -27,6 +27,15 @@ class ClaudeClient(Protocol):
 
     def complete_structured(self, system: str, user: str, json_schema: Dict[str, Any]) -> Dict[str, Any]: ...
 
+    def complete_structured_from_document(
+        self,
+        system: str,
+        user: str,
+        json_schema: Dict[str, Any],
+        document_base64: str,
+        media_type: str = "application/pdf",
+    ) -> Dict[str, Any]: ...
+
 
 class ClaudeApiError(RuntimeError):
     """Raised when the Claude API errors or times out.
@@ -57,12 +66,38 @@ class AnthropicClaudeClient:
         self._max_tokens = max_tokens
 
     def complete_structured(self, system: str, user: str, json_schema: Dict[str, Any]) -> Dict[str, Any]:
+        return self._create_and_parse(system, [{"type": "text", "text": user}], json_schema)
+
+    def complete_structured_from_document(
+        self,
+        system: str,
+        user: str,
+        json_schema: Dict[str, Any],
+        document_base64: str,
+        media_type: str = "application/pdf",
+    ) -> Dict[str, Any]:
+        """Same contract as complete_structured, plus the uploaded document
+        as a content block ahead of the text instruction (Claude's Messages
+        API document-understanding format) -- used only by the financial
+        statement / investor-relations extraction flow (design doc section
+        8's deferred "document parser", now built).
+        """
+        content = [
+            {
+                "type": "document",
+                "source": {"type": "base64", "media_type": media_type, "data": document_base64},
+            },
+            {"type": "text", "text": user},
+        ]
+        return self._create_and_parse(system, content, json_schema)
+
+    def _create_and_parse(self, system: str, content, json_schema: Dict[str, Any]) -> Dict[str, Any]:
         try:
             response = self._client.messages.create(
                 model=self.model_name,
                 max_tokens=self._max_tokens,
                 system=system,
-                messages=[{"role": "user", "content": user}],
+                messages=[{"role": "user", "content": content}],
                 output_config={"format": {"type": "json_schema", "schema": json_schema}},
             )
         except self._anthropic.APIConnectionError as exc:

@@ -62,12 +62,14 @@ from app.config import settings
 
 SCOPE_AI_PER_IP = "ai_per_ip"
 SCOPE_AI_PER_COMPANY = "ai_per_company"
+SCOPE_EXTRACTION_PER_COMPANY = "extraction_per_company"
 SCOPE_INGEST_PER_IP = "ingest_per_ip"
 SCOPE_INGEST_PER_COMPANY = "ingest_per_company"
 
 _SCOPE_DESCRIPTIONS = {
     SCOPE_AI_PER_IP: "across all companies from this address",
     SCOPE_AI_PER_COMPANY: "for this company",
+    SCOPE_EXTRACTION_PER_COMPANY: "for this company",
     SCOPE_INGEST_PER_IP: "from this address",
     SCOPE_INGEST_PER_COMPANY: "for this company",
 }
