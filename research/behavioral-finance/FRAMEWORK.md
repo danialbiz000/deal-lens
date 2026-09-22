@@ -18,24 +18,34 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
 - **Not as a standalone strategy.** Every fund in the case studies pairs
   behavioral signals with fundamental discipline (value screens, quality
   filters, sector/beta neutralization) rather than trading the raw signal.
-  In a DealLens-style workflow, the natural use is a **tilt or flag layered on
-  top of the existing 8-factor screening score**
-  (`docs/phase0-vertical-slice-design.md`), not a replacement for it: a stock
-  that screens well fundamentally *and* sits in the top behavioral decile is a
-  stronger candidate than either signal alone; a stock flagged as a behavioral
-  "loser" (bottom decile, near-anchored, recently overreacted-to) is worth a
-  second look before initiating or sizing a position, even if fundamentals
-  look fine.
+  The natural use is a **tilt or flag layered on top of an existing
+  fundamentals-driven screen**, not a replacement for it: a stock that
+  screens well fundamentally *and* sits in the top behavioral decile is a
+  stronger candidate than either signal alone; a stock flagged as a
+  behavioral "loser" is worth a second look before initiating or sizing a
+  position, even if fundamentals look fine.
 - **Decile, not point-estimate.** Treat the score as a rank, not a precise
   number — the whole point of `backtest/engine.py`'s decile-sort methodology
   is that the edge shows up in the spread between the extreme deciles, not in
   any single stock's score being "correct."
-- **Re-validate before trusting it.** Per `README.md`'s stated limitation,
-  the backtest has only been run on synthetic data in this environment. The
-  very first step of using this framework for real capital is running it on
-  a real, survivorship-bias-free universe and checking the long-short Sharpe
-  and cost-adjusted return hold up out-of-sample — exactly the discipline
-  the case studies show quant shops living and dying by.
+- **Never trust the blend without checking its parts — this is now a proven
+  failure mode, not a hypothetical one.** The NSE empirical run
+  (`README.md`, "Empirical results") shows exactly why: the *composite*
+  score looked like a mediocre, roughly break-even signal (Sharpe ≈ 0), and
+  stopping there would have been a reasonable-looking but wrong conclusion.
+  Decomposing it showed the composite was averaging together one signal that
+  actively lost money and had a −97% max drawdown (52-week-high) with one
+  that had a real, positive edge net of costs (short-term reversal,
+  Sharpe 0.22 net) — the blend was hiding both the danger and the edge.
+  **Rule: always report and validate each component signal separately before
+  trusting a blended score, and re-weight or drop components that don't
+  independently earn their place.**
+- **Re-validate on each new universe before trusting it there.** The NSE
+  result is real, but it's one market (India), one large-cap-only universe,
+  and one 21-year window. Don't assume it transfers to a different market,
+  cap segment, or period without re-running the same decomposition — see
+  "How to run" in `README.md` for the US-universe path that still needs
+  this treatment.
 
 ## 2. Risk-management lessons
 
@@ -75,44 +85,55 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
    project's whole thesis applied to your own tooling, not just to the
    market you're modeling.
 
-## 3. Business / product idea: a Behavioral Risk & Signal Overlay module
+## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
-**The pitch.** A module — usable standalone or, concretely, as a plausible
-future phase of this repo's own `packages/finance_engine` /
-`apps/api` architecture — that layers behavioral-finance signals onto an
-existing fundamentals-driven deal/portfolio screening pipeline, in two parts:
+**The gap this targets.** Off-the-shelf factor data (momentum, value,
+quality) is sold by large vendors (MSCI, AQR's own public factor data,
+Bloomberg) as pre-blended, black-box composites, priced for institutions
+with seven-figure budgets. Smaller systematic funds, family offices, RIAs,
+and independent research desks either can't afford that tier or can't see
+*inside* the composite to know which component is actually carrying the
+edge on their specific universe — exactly the failure mode this project hit
+firsthand on the NSE data (section 1, above). The product is built directly
+around fixing that: **decomposed, auditable behavioral signals plus honest,
+per-universe validation, not another black-box score.**
 
-- **Alpha side**: the composite Behavioral Mispricing Score from part 1,
-  exposed as an additional factor in the screening score, comps selection,
-  or LBO entry-timing decision (e.g., flag targets trading near a 52-week
-  low with strong recent-quarter fundamentals as *possible* anchoring-driven
-  mispricing worth a closer look, not an automatic buy).
-- **Risk side**: a stress-VaR overlay based on the regime-switching
-  methodology in `risk_simulation/fat_tails_vs_normal.py`, run against a
-  portfolio's or LBO's actual leverage and position correlations, reporting
-  both the calm-regime and stress-regime tail loss side by side — the single
-  number a rational-markets-only risk model would never show.
+**What it is.** A subscription analytics service with two parts:
 
-**Why this fits as a DealLens extension specifically**: the existing
-`apps/api/app/ai` design principle in this repo — "architecturally incapable
-of inventing a number, every claim must cite a snapshot of already-computed
-outputs" — maps directly onto this module's honesty requirement: a behavioral
-score or stress-VaR number is only useful if it's computed from real,
-inspectable inputs (the same signals/backtest code in this folder), never
-asserted by an LLM. That's a deliberate design constraint carried over from
-this repo's Phase 4 AI layer, not a coincidence.
+- **Signal side**: the momentum / 52-week-high / reversal library in
+  `signals/`, run per-client against *their* universe (not a generic global
+  one), reported as separate, individually-backtested components — never
+  pre-blended — with the decile backtest and cost-adjusted Sharpe shown for
+  each, on their actual investable names, not a vendor's benchmark universe.
+- **Risk side**: the regime-switching stress-VaR methodology from
+  `risk_simulation/fat_tails_vs_normal.py`, run against a client's actual
+  position correlations and leverage, reporting calm-regime vs. stress-regime
+  tail loss side by side — the comparison a standard historical-VaR vendor
+  tool doesn't show.
 
-**Minimum viable version**: a report generator that takes a portfolio (or a
-DealLens screening shortlist) and outputs, per name: fundamental screening
-score (existing), Behavioral Mispricing Score (new), and — for
-leveraged/derivative positions — calm-regime vs. stress-regime VaR (new).
-That is buildable directly on top of the code already in this folder, once
-run against real market data outside this sandbox.
+**Minimum viable version**: a report generator that takes a client's
+portfolio or watchlist and CSV price history, and outputs, per name: each
+individual behavioral signal's current value and its own historical
+Sharpe/drawdown on that universe (not a pre-blended score), plus a portfolio-
+level calm-vs-stress VaR comparison. Buildable directly on the code already
+in this repo folder.
 
-**Revenue framing, if pursued as a standalone product**: sell to
-mid-size long/short equity funds and PE shops as a due-diligence and
-risk-overlay add-on — priced as a per-seat analytics subscription, the same
-go-to-market as the behavioral/quant factor licensing products AQR and
-similar quant shops already sell institutionally, but positioned narrower
-(a specific, auditable signal + risk overlay) rather than a full asset
-management offering.
+**Target customer**: small-to-mid systematic equity funds, family offices,
+and independent RIAs — priced out of institutional factor-data tiers but
+sophisticated enough to want decomposed, re-validated signals rather than a
+black box. A secondary market: finance graduate programs and CFA/PE prep
+courses, as a teaching tool for exactly the "don't trust the blend" lesson
+this project surfaced.
+
+**Revenue model**: per-seat analytics subscription, tiered by number of
+tracked universes/portfolios — the same go-to-market as quant factor-data
+vendors, but priced and scoped for the segment those vendors don't serve
+well, and differentiated specifically on transparency (every number traces
+to runnable code and a stated backtest window, not a vendor's proprietary
+methodology).
+
+**Moat, such as it is**: not the signals themselves (all public, published
+research) — the moat is the discipline of per-client, per-universe
+decomposed validation instead of a generic pre-blended score, which is
+exactly what a larger vendor selling a standardized product across all
+clients structurally can't do cheaply.

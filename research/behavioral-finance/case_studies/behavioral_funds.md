@@ -11,19 +11,26 @@ social preferences, and lack of self-control affect economic decisions — toget
 Russell Fuller. The firm's stated investment philosophy is built directly on Kahneman &
 Tversky-style behavioral finance: markets are inefficient specifically *because* investors
 are human, and those inefficiencies are systematic enough to be identified and exploited
-rather than being pure noise. A signature strategy looks for stocks where investors and
-analysts have systematically under- or over-reacted to company-specific news (e.g.
-earnings surprises, insider buying), on the premise that the same well-documented biases
-that make individuals bad forecasters — anchoring, overconfidence, availability bias —
-also shape the slow, biased way information gets incorporated into prices at the
-aggregate market level. The firm sub-advises several US mutual funds run on this
-philosophy (e.g., an "Undiscovered Managers Behavioral Value" strategy).
+rather than being pure noise.
+
+**The specific mechanism they've built a business on** is closely related to this
+project's `signals/reversal.py` and `signals/momentum.py`: systematic **under-reaction to
+earnings surprises**. The academic finding (post-earnings-announcement drift, or "PEAD",
+first documented by Ball & Brown in 1968 and refined by many since) is that stock prices
+keep drifting in the direction of an earnings surprise for weeks to months after the
+announcement, rather than jumping immediately to the new fair value — consistent with
+analysts and investors anchoring on their pre-announcement estimates and updating too
+slowly. Fuller & Thaler's flagship retail vehicle, the fund long known as "Undiscovered
+Managers Behavioral Value" (ticker UBVLX; the strategy has also traded under other fund
+wrappers over the years as sub-advisory relationships changed), is built around
+systematically buying into that underreaction.
 
 ## LSV Asset Management
 
 Founded in 1994 by three academic economists — Josef Lakonishok, Andrei Shleifer, and
-Robert Vishny — whose own published research (notably Lakonishok, Shleifer & Vishny,
-"Contrarian Investment, Extrapolation, and Risk", *Journal of Finance*, 1994) argued that
+Robert Vishny — whose own published research (Lakonishok, Shleifer & Vishny,
+"Contrarian Investment, Extrapolation, and Risk", *Journal of Finance* 49(5), 1994,
+pp. 1541-1578) argued that
 much of the historical outperformance of value stocks over "glamour" (growth) stocks is
 best explained by investors systematically **extrapolating recent growth too far into the
 future** — chasing exciting recent growth stories and shunning boring, currently
@@ -35,8 +42,12 @@ explanation for the value premium rather than a pure risk-compensation story.
 
 ## AQR Capital Management
 
-Founded in 1998 by Cliff Asness (a University of Chicago PhD whose dissertation was on
-momentum) and colleagues. AQR is not a "pure" behavioral shop the way Fuller & Thaler is —
+Founded in 1998 by Cliff Asness together with several colleagues from Goldman Sachs
+Asset Management's quantitative research group. Asness's University of Chicago PhD
+dissertation, completed under advisors including Eugene Fama, was on momentum in stock
+returns — a notable detail given Fama is himself closely associated with the efficient
+markets hypothesis that momentum's persistence is often read as challenging. AQR is not a
+"pure" behavioral shop the way Fuller & Thaler is —
 it explicitly frames some of its factor premia (value, quality) as at least partly
 risk-based — but its research and public writing repeatedly draw on behavioral
 explanations for specific factors, most clearly **momentum**, where the standard academic

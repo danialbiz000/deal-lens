@@ -16,8 +16,18 @@ forced selling pushed prices in ways that looked, to every *other* quant model, 
 signal to sell the same names — because their factor exposures were so similar. That
 triggered further selling by funds hitting risk limits, which pushed prices further,
 in a short, sharp, self-reinforcing spiral, largely decoupled from any change in the
-underlying companies' fundamentals. (See Khandani & Lo, "What Happened To The Quants In
-August 2007?", 2007/2011, for the standard academic account.)
+underlying companies' fundamentals.
+
+**Scale, per Khandani & Lo's reconstruction:** several well-known quant equity
+market-neutral strategies lost on the order of 5-10%+ in the single week of August 6-10,
+2007 alone — an extreme move for supposedly market-neutral, low-volatility books that
+typically target single-digit *annual* volatility — with the worst of the damage
+concentrated on Tuesday-Wednesday, August 7-8, and a partial, equally sharp rebound
+beginning August 10 once the forced selling exhausted itself, consistent with a
+liquidity-driven overshoot and partial reversal rather than a genuine repricing of
+fundamentals. (See Khandani & Lo, "What Happened To The Quants In August 2007?", working
+paper 2007, published *Journal of Investment Management* 2011, for the full reconstruction
+and the standard academic account.)
 
 **Why this matters for the "rational markets" thesis specifically**: this was not retail
 panic. It was leverage- and crowding-driven herding *among the most sophisticated,
@@ -34,12 +44,21 @@ Amaranth Advisors was a large multi-strategy hedge fund that lost approximately
 $6.5 billion in September 2006 — one of the largest single hedge-fund collapses at the
 time — almost entirely from concentrated, highly leveraged natural-gas futures and
 options spread positions run by a single energy trader, Brian Hunter. Hunter had
-generated large profits with similar positions in prior periods, which is itself a
-textbook setup for **overconfidence and illusion of control**: a string of profitable bets
-under a specific market regime is easy to (mis)read as validation of skill rather than
-of a regime that happened to be favorable, and the fund's risk limits did not constrain
-the position sizing enough to prevent a small number of adverse natural-gas price moves
-from wiping out a large fraction of the firm's capital in days.
+generated large profits with similar positions in prior periods (including large gains in
+2005, a year of unusually high natural-gas volatility around Hurricane Katrina), which is
+itself a textbook setup for **overconfidence and illusion of control**: a string of
+profitable bets under a specific market regime is easy to (mis)read as validation of skill
+rather than of a regime that happened to be favorable.
+
+**The trade and the timeline**: Hunter's core position was a calendar spread bet — long
+winter-month natural-gas futures (e.g. March) against short summer/shoulder-month
+contracts, wagering on the spread between them widening. The position was reportedly
+sized large enough, relative to the actual open interest in some of these contracts, that
+Amaranth's own trading could move the market it was betting on. Warmer-than-expected
+weather forecasts and a mild start to the 2006 hurricane season pushed the spread the
+wrong way; over roughly a single week in mid-September 2006 the fund lost more than half
+its capital, and the position was ultimately unwound (partly sold to JPMorgan Chase and
+Citadel) at a scale of loss the fund's risk limits had not been sized to survive.
 
 **Behavioral mechanism**: unlike LTCM (where the fund's own reasoning was defensible and
 the failure came from other actors' herding) and Quant Quake (where many independently
