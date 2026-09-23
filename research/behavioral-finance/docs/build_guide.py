@@ -1324,8 +1324,60 @@ box(
     "documented in the literature to have weakened somewhat "
     "post-publication. Whether this specific alpha holds up in a "
     "pre-1994 vs. post-1994 sub-sample split has <b>not yet been "
-    "tested</b> &mdash; the natural next milestone, not yet done here.",
-    title="HOW HARD TO LEAN ON THIS"
+    "tested</b> &mdash; checked next.",
+    title="HOW HARD TO LEAN ON THIS, AS UNDERSTOOD AT THE TIME"
+)
+
+h1("5.10  Milestone 9 &mdash; Has US momentum's alpha decayed since publication?")
+p("Jegadeesh &amp; Titman published the 12-1 momentum anomaly in the "
+  "<i>Journal of Finance</i> in March 1993. A large literature (notably "
+  "McLean &amp; Pontiff, &quot;Does Academic Research Destroy Stock "
+  "Return Predictability?&quot;, <i>Journal of Finance</i>, 2016) "
+  "documents that anomaly returns tend to shrink &mdash; by roughly 26% "
+  "after working-paper circulation and ~58% on average after formal "
+  "publication &mdash; once traders can crowd into a known effect. This "
+  "milestone (<i>investigations/momentum_publication_decay.py</i>) "
+  "splits Section 5.9's long leg and combined-book regressions at "
+  "<b>1994-01-01</b> (~1 year after publication) and re-runs each half "
+  "separately: 251 pre-1994 rebalances vs. 286 post-1994, out of 537 "
+  "total.")
+data_table(
+    ["", "Long leg, pre-1994", "Long leg, post-1994", "Combined, pre-1994", "Combined, post-1994"],
+    [
+        ["Daily alpha (ann.)", "+9.8%/yr, p=.003", "+6.5%/yr, p=.032", "+16.1%/yr, p=.011", "+8.6%/yr, p=.116 (n.s.)"],
+        ["Monthly alpha (ann.)", "+11.4%/yr, p=.0004", "+7.1%/yr, p=.041", "+18.6%/yr, p=.0008", "+13.1%/yr, p=.035"],
+    ],
+    col_widths=[1.5*inch, 1.4*inch, 1.4*inch, 1.4*inch, 1.4*inch],
+    small=True,
+)
+p("<b>Real, partial decay &mdash; exactly the textbook pattern, not full "
+  "disappearance.</b> Every cut shows the alpha shrinking after 1994: "
+  "the long leg's daily alpha falls by roughly a third (9.8% to 6.5%/yr) "
+  "and its monthly alpha by roughly two-fifths (11.4% to 7.1%/yr); the "
+  "combined book decays by 30-47% depending on frequency. That magnitude "
+  "lines up closely with McLean &amp; Pontiff's average post-publication "
+  "effect across anomalies generally &mdash; this isn't an unusually "
+  "large or suspicious decay, it's the expected one. <b>The alpha "
+  "survives in three of four cuts</b> (long leg, both frequencies; "
+  "combined book, monthly) but <b>loses statistical significance in "
+  "one</b> (combined book, daily, p=0.116). The combined book's beta "
+  "also drifts from indistinguishable-from-zero pre-1994 (genuinely "
+  "market-neutral) to weakly negative post-1994 &mdash; a secondary sign "
+  "that the strategy's risk profile itself shifted once the anomaly "
+  "became public knowledge.")
+box(
+    "This project's one durable finding is now stated more precisely: "
+    "momentum's long leg (and, less robustly, the market-neutral "
+    "combined book) continued to carry statistically significant, "
+    "economically smaller alpha through 2017 &mdash; not an un-decayed "
+    "anomaly. That is a real, still-standing finding &mdash; three of "
+    "four regression cuts remain significant in the post-1994 half "
+    "alone, more than 20 years after publication &mdash; but a "
+    "meaningfully weaker one than Section 5.9's full-sample numbers "
+    "suggested on their own. <b>Size any position on the post-decay "
+    "number, not the full-sample one</b> &mdash; the pre-publication half "
+    "of the sample describes a market that no longer exists.",
+    title="THE HONEST, FINAL-SIZED NUMBER"
 )
 
 # MARKER_END_PART5
@@ -1390,11 +1442,20 @@ box(
     "(annualized roughly +8-15%/yr, p&lt;0.01 in every cut), with the "
     "combined book's beta close to zero. This is currently the project's "
     "single most credible candidate for a genuine, demonstrated edge "
-    "&mdash; not yet checked for post-1993-publication decay, and not "
-    "replicated on NSE, but a coherent, high-significance cluster rather "
-    "than the isolated marginal hits this project has learned to "
-    "distrust.",
+    "&mdash; not replicated on NSE, but a coherent, high-significance "
+    "cluster rather than the isolated marginal hits this project has "
+    "learned to distrust.",
     kind="fact", title="UPDATE FROM PART V.9"
+)
+box(
+    "Part V.10 checked the one thing Part V.9 left open: publication "
+    "decay. Real, textbook-consistent decay was found &mdash; alpha down "
+    "30-47% post-1994, one cut (combined book, daily) losing "
+    "significance entirely &mdash; but not disappearance: three of four "
+    "cuts remain significant through 2017 alone. <b>Size any claim about "
+    "this finding on the decayed, post-1994 number, not the full-sample "
+    "one.</b>",
+    kind="fact", title="UPDATE FROM PART V.10"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -1475,6 +1536,14 @@ bullets([
     "time it was confirmed &mdash; a standard that improves over a "
     "book's life should apply retroactively, especially to positions "
     "still being sized on the old conclusion.",
+    "<b>Size a position on the decayed number, not the full-sample "
+    "number.</b> Part V.10 split the one surviving edge (US momentum) at "
+    "its 1993 publication date and found real decay: alpha down 30-47% "
+    "post-1994, one cut losing significance outright. The full-sample "
+    "average was never the honest number to size against once a signal "
+    "is old enough to have a publication date &mdash; the post-publication "
+    "sub-sample is, because that's the regime any new capital actually "
+    "trades into.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -1506,7 +1575,10 @@ p("<b>The product:</b> a subscription analytics service with two parts &mdash; "
   "beta-regression alpha/beta breakdown so a client can see whether "
   "performance is genuine stock-selection skill or just uncontrolled market "
   "exposure &mdash; Part V.7's finding made this check a required feature, "
-  "not an optional one) and a <b>risk side</b> (the regime-switching "
+  "not an optional one &mdash; and, for any signal drawn from published "
+  "academic research, a pre/post-publication decay split, Part V.10's "
+  "check, a second differentiator most factor-data vendors don't surface "
+  "at all) and a <b>risk side</b> (the regime-switching "
   "stress-VaR methodology from Part III, run against a client's actual "
   "position correlations and leverage, reporting calm-regime vs. "
   "stress-regime tail loss side by side).")
@@ -1557,12 +1629,15 @@ bullets([
     "of its 12 alpha tests are significant. This project's one previously-"
     "reported positive finding did not survive the same scrutiny applied to "
     "the negative one.",
-    "<b>US 12-1 momentum's alpha (Part V.9) has not been checked for "
-    "publication-decay.</b> It is this project's strongest surviving "
-    "finding (p&lt;0.01 or better, multiple cuts, beta near zero for the "
-    "combined book) but momentum was published in 1993 and is documented "
-    "to weaken post-publication; a pre/post-1994 split has not been run. "
-    "Promising, not confirmed.",
+    "<b>US 12-1 momentum's alpha decays after its 1993 publication date, "
+    "but does not disappear (Part V.10).</b> A pre/post-1994 split found "
+    "real, textbook-consistent decay &mdash; alpha down 30-47% "
+    "post-1994, with one cut (combined book, daily) losing significance "
+    "entirely &mdash; but three of the four cuts tested remain "
+    "significant through 2017 alone. This is still the project's "
+    "strongest surviving finding, but any claim built on it should be "
+    "sized against the decayed, post-1994 number, not the full-sample "
+    "average.",
     "<b>The 52-week-high result's cause: resolved, and it's the boring "
     "answer.</b> Two behavioral/statistical explanations were ruled out by "
     "direct test: crash-window concentration (Part V.4) and a value/growth "
@@ -1629,13 +1704,18 @@ p("The project's real empirical result (Part V.3) delivered a finding more "
   "means checking the specific mechanism, not trusting the "
   "reassuring-looking aggregate. It took until Part V.9 for the project to "
   "apply that same rigor to its own positive-looking half of the story, "
-  "and when it did, the &quot;edge&quot; didn't survive either.")
+  "and when it did, the &quot;edge&quot; didn't survive either &mdash; but "
+  "a different signal, US 12-1 momentum, did, and Part V.10 went one step "
+  "further than any earlier milestone: instead of asking whether the "
+  "finding was real, it asked how much of it a trader could still expect "
+  "to capture today, and found a genuinely mixed, honest answer &mdash; "
+  "real decay, not disappearance.")
 p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "investment framework that explicitly forbids trusting a blend without "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 8 then ran the India findings through "
+  "needed. Milestones 3 through 9 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -1651,7 +1731,9 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "treating as a validated success, the success turned out not to be one "
   "&mdash; while a signal nobody had flagged as special (US momentum) "
   "turned out to hold real, statistically robust alpha once someone "
-  "finally looked properly.")
+  "finally looked properly &mdash; alpha that a further check (Part V.10) "
+  "then showed had partially decayed since its 1993 publication, without "
+  "disappearing.")
 p("The fix that survived all of that scrutiny is more modest, and the "
   "project's one real positive finding is different, than any earlier "
   "draft of this conclusion claimed: there is no demonstrated, "
@@ -1667,9 +1749,12 @@ p("The fix that survived all of that scrutiny is more modest, and the "
   "&mdash; is a hypothesis until it survives testing at every level of "
   "rigor available, and the single most important thread running through "
   "this entire guide is a project that kept correcting its own most "
-  "recent, best-supported-looking result, five times in a row, and found "
-  "its one durable finding only after it stopped exempting its own "
-  "successes from the same scrutiny.")
+  "recent, best-supported-looking result, six times in a row &mdash; five "
+  "outright retractions and, finally, a sixth check that neither confirmed "
+  "nor retracted but simply demanded a more precise, smaller claim &mdash; "
+  "and found its one durable finding only after it stopped exempting its "
+  "own successes from the same scrutiny, then kept refining that finding "
+  "instead of declaring victory and stopping.")
 
 # ============================================================ GLOSSARY
 story.append(PageBreak())

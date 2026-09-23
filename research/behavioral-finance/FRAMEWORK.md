@@ -133,9 +133,19 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   multiple-testing correction; don't apply the same "probably noise" discount to a coherent
   finding that's appropriate for a scattered one.** This is currently this project's single
   most credible candidate for a genuine, demonstrated edge — with the caveat that it is one
-  market, unreplicated on NSE, and not yet checked for the publication-decay risk this
-  project's own README has flagged since its first commit (momentum was published in 1993;
-  a pre/post-1994 sub-sample split has not been run). Promising, not confirmed.
+  market, unreplicated on NSE.
+- **The publication-decay check (Milestone 9) found exactly the textbook pattern: real
+  decay, not disappearance.** Split at 1994 (~1yr after Jegadeesh & Titman's 1993
+  publication), the long leg's alpha shrinks ~33% (daily) to ~38% (monthly) post-1994 but
+  stays significant in both; the combined book's alpha shrinks 30-47% and loses
+  significance at daily frequency (p=0.116) while remaining significant monthly (p=0.035).
+  The magnitude matches McLean & Pontiff's (2016) documented average post-publication decay
+  across anomalies generally — this is the expected pattern playing out exactly as the
+  literature predicts, not a surprise finding. **Rule: "promising, not confirmed" was the
+  right interim label — the confirmed version is narrower (long leg, primarily) and smaller
+  than the full-sample number, which is what a decay check is supposed to do: replace an
+  unqualified headline number with the honestly-sized one that survives scrutiny.** Report
+  the post-decay number when sizing anything against this finding, not the full-sample one.
 
 ## 2. Risk-management lessons
 
@@ -215,6 +225,15 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
    standard at the time it was confirmed — a standard that improves over the life of a
    book (as this project's did) should apply retroactively, especially to the positions
    still being sized on the old conclusion.**
+10. **Size a position on the decayed number, not the full-sample number.** Milestone 9
+    split this project's one surviving edge (US momentum) at its 1993 publication date and
+    found real decay: alpha down ~30-47% post-1994, with one cut (the combined book, daily
+    frequency) losing significance entirely. A position sized on the full-sample alpha
+    would be sized on a number roughly 1.5-2x too generous for what the strategy has
+    actually delivered since the effect became public knowledge. **Rule: for any published
+    anomaly, run the pre/post-publication split before sizing anything against it, and use
+    the post-publication number — the pre-publication half of the sample describes a market
+    that no longer exists.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
@@ -243,8 +262,10 @@ of its retracted one (reversal).
   each, on their actual investable names, not a vendor's benchmark universe.
   Every reported number ships with its own beta-regression alpha/beta
   breakdown (Milestone 6) so a client can see whether a signal's performance
-  is genuine stock-selection skill or just uncontrolled market exposure — a
-  check most factor-data vendors don't surface at all.
+  is genuine stock-selection skill or just uncontrolled market exposure, and
+  a pre/post-publication decay split (Milestone 9) for any signal drawn from
+  published academic research — two checks most factor-data vendors don't
+  surface at all.
 - **Risk side**: the regime-switching stress-VaR methodology from
   `risk_simulation/fat_tails_vs_normal.py`, run against a client's actual
   position correlations and leverage, reporting calm-regime vs. stress-regime

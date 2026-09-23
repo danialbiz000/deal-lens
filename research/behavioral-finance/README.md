@@ -490,10 +490,52 @@ not replicate on NSE, and it has not been checked for the specific decay risk fl
 this README's own "Explicit limitations" since the project's first commit: momentum was
 published by Jegadeesh & Titman in 1993, and momentum's premium is well documented in the
 literature to have weakened somewhat post-publication. Whether this specific alpha holds up
-in a pre-1994 vs. post-1994 sub-sample split has **not yet been tested** — the natural next
-milestone, not yet done here.
+in a pre-1994 vs. post-1994 sub-sample split has **not yet been tested** — checked next.
 
 **Reproduce this**: `python investigations/momentum_reversal_beta.py`.
+
+## Has US momentum's alpha decayed since publication? (Milestone 9)
+
+Jegadeesh & Titman published the 12-1 momentum anomaly in the *Journal of Finance* in
+March 1993. A large literature (notably McLean & Pontiff, "Does Academic Research Destroy
+Stock Return Predictability?", *Journal of Finance*, 2016) documents that anomaly returns
+tend to shrink — by roughly 26% after working-paper circulation and ~58% on average after
+formal publication — once traders can crowd into a known effect. Milestone 8 found large,
+highly significant momentum alpha in the US mirror but never checked whether it was
+concentrated in the pre-publication era. This milestone
+(`investigations/momentum_publication_decay.py`) splits the same long leg and combined-book
+regressions at **1994-01-01** (~1 year after publication) and re-runs them on each half
+separately — 251 pre-1994 rebalances vs. 286 post-1994 rebalances, out of 537 total.
+
+| | Long leg, pre-1994 | Long leg, post-1994 | Combined, pre-1994 | Combined, post-1994 |
+|---|---|---|---|---|
+| Daily alpha (annualized) | +9.8%/yr, **p=0.003** | +6.5%/yr, **p=0.032** | +16.1%/yr, **p=0.011** | +8.6%/yr, p=0.116 (n.s.) |
+| Monthly alpha (annualized) | +11.4%/yr, **p=0.0004** | +7.1%/yr, **p=0.041** | +18.6%/yr, **p=0.0008** | +13.1%/yr, **p=0.035** |
+
+**Real, partial decay — exactly the textbook pattern, not full disappearance.** Every cut
+shows the alpha shrinking after 1994: the long leg's daily alpha falls by roughly a third
+(9.8%→6.5%/yr) and its monthly alpha by roughly two-fifths (11.4%→7.1%/yr); the combined
+book's decays by 30-47% depending on frequency. That magnitude of decline lines up closely
+with McLean & Pontiff's average post-publication effect across US anomalies generally —
+this isn't an unusually large or suspicious decay, it's the expected one. **The alpha
+survives in three of four cuts** (long leg, both frequencies; combined book, monthly) but
+**loses statistical significance in one** (combined book, daily, p=0.116) — and the
+combined book's beta also drifts from indistinguishable-from-zero pre-1994 (p=0.86 daily,
+p=0.27 monthly — genuinely market-neutral) to weakly negative post-1994 (p=0.052 daily),
+a secondary sign that the strategy's risk profile itself has shifted since the anomaly
+became public knowledge.
+
+**Updated conclusion**: this project's one durable finding is now more precisely stated as
+*momentum's long leg (and, less robustly, the market-neutral combined book) continued to
+carry statistically significant, economically smaller alpha through 2017*, not an
+un-decayed anomaly. That is a real, still-standing finding — three of four regression cuts
+remain significant at conventional levels in the post-1994 half alone, more than 20 years
+after publication — but a meaningfully weaker one than Milestone 8's full-sample numbers
+suggested on their own, and the specific "is it dead or does it just work less well"
+question this README has flagged since its first commit now has a real, textbook-consistent
+answer instead of an open one.
+
+**Reproduce this**: `python investigations/momentum_publication_decay.py`.
 
 ## Data provenance: the NSE GitHub mirror
 
@@ -671,6 +713,10 @@ python investigations/beta_hedged_backtest.py
 # "Does the reversal edge survive a beta check too?" above)
 python investigations/momentum_reversal_beta.py
 
+# Investigation — has US momentum's alpha decayed since 1993 publication? (yes, partially —
+# see "Has US momentum's alpha decayed since publication?" above)
+python investigations/momentum_publication_decay.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -681,15 +727,17 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
 
 1. **An investment framework** — a composite behavioral mispricing score usable as a
    screening/tilt signal alongside fundamental analysis, now with real empirical caveats
-   attached (see "Empirical results" through "Does the reversal edge survive a beta check
-   too?" above): don't trust it blind on a large-cap-only universe, check which sub-signal
-   is actually carrying any edge before combining them, and beta-neutralize long-short legs
-   before crediting any performance difference to a behavioral effect rather than to
-   uncontrolled market exposure. As of Milestone 8, exactly one cell in this entire project
-   — US 12-1 momentum's long leg and combined book — has survived every check applied:
-   decomposition, cross-market replication, and a beta-adjusted significance test. That is
-   this repo's one credible candidate for a genuine, demonstrated edge; everything else
-   (including the project's own earlier "positive" reversal finding) did not hold up.
+   attached (see "Empirical results" through "Has US momentum's alpha decayed since
+   publication?" above): don't trust it blind on a large-cap-only universe, check which
+   sub-signal is actually carrying any edge before combining them, and beta-neutralize
+   long-short legs before crediting any performance difference to a behavioral effect
+   rather than to uncontrolled market exposure. Exactly one cell in this entire project —
+   US 12-1 momentum's long leg — has survived every check applied: decomposition,
+   cross-market replication, a beta-adjusted significance test, and a publication-decay
+   split, remaining significant in its own right through the post-1994 era alone. That is
+   this repo's one credible candidate for a genuine, demonstrated (if now smaller) edge;
+   everything else, including the project's own earlier "positive" reversal finding, and
+   the momentum combined book's daily-frequency alpha specifically, did not fully hold up.
 2. **Risk-management lessons** — a stress-testing playbook (derived from the Q1 simulation)
    for any leveraged or "market-neutral" strategy: never calibrate tail risk on a calm-regime
    correlation matrix alone.
@@ -741,10 +789,12 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   52-week-high signal against reversal too: none of its 12 alpha tests (2 markets × 3 legs
   × 2 frequencies) are significant. This project's one previously-reported positive finding
   did not survive the same scrutiny applied to the negative one.
-- **US 12-1 momentum's alpha (long leg and combined book, Milestone 8) has not been checked
-  for publication-decay.** It is this project's strongest surviving finding — significant
-  at p<0.01 or better across both frequencies, in a signal whose beta is close to zero for
-  the combined book — but momentum was published by Jegadeesh & Titman in 1993, and
-  momentum premia are well documented to weaken post-publication. A pre-1994 vs.
-  post-1994 sub-sample split has not been run. Treat this finding as promising, not
-  confirmed, until that check is done.
+- **US 12-1 momentum's alpha decays after publication, as expected, but doesn't
+  disappear (Milestone 9).** Split at 1994-01-01: the long leg's alpha shrinks ~33% (daily)
+  to ~38% (monthly) post-1994 but stays significant in both; the combined book's alpha
+  shrinks 30-47% and loses significance at daily frequency (p=0.116) while remaining
+  significant monthly (p=0.035). The decay magnitude matches McLean & Pontiff's (2016)
+  documented average post-publication effect across anomalies generally — this is the
+  expected pattern, not an anomaly within the anomaly. Treat this as this project's one
+  real, still-standing finding, sized smaller and stated more precisely than Milestone 8's
+  full-sample numbers alone would suggest.
