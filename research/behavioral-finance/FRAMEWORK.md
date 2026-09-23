@@ -146,6 +146,24 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   than the full-sample number, which is what a decay check is supposed to do: replace an
   unqualified headline number with the honestly-sized one that survives scrutiny.** Report
   the post-decay number when sizing anything against this finding, not the full-sample one.
+- **Milestone 10 tested Milestone 9's own decayed number the same way Milestone 7 tested
+  Milestone 6's — with an actual rolling, out-of-sample hedge, not an in-sample regression
+  coefficient — and found it does not survive.** Milestone 9 fit one beta per sub-sample
+  using that sub-sample's own data; Milestone 10 instead re-estimated beta every rebalance
+  from only the preceding year of trailing data (exactly the methodology Milestone 7
+  already established as this project's required standard) and applied the identical
+  1994 split to the resulting hedged return series. Pre-1994, the hedge strongly confirms
+  alpha in both legs (p≤0.025). Post-1994, alpha is not statistically distinguishable from
+  zero in either leg at either frequency (p=0.15-0.59), and the hedged combined book's
+  average post-1994 return is outright negative. **Rule: an in-sample per-era regression
+  and a genuinely out-of-sample rolling hedge can disagree even when both are run
+  correctly, and the out-of-sample version is the one that matters — it's the only one a
+  real fund could actually have traded. Never let an earlier milestone's more convenient
+  methodology stand once a stricter one, already used elsewhere in the same project, is
+  available to re-check it.** This project's headline finding is therefore real and robust
+  pre-1994, and not currently demonstrated to be forward-sizeable in the post-publication
+  era — a materially more conservative conclusion than Milestone 9's, reached by applying
+  the project's own best existing method to its own best surviving result.
 
 ## 2. Risk-management lessons
 
@@ -225,15 +243,20 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
    standard at the time it was confirmed — a standard that improves over the life of a
    book (as this project's did) should apply retroactively, especially to the positions
    still being sized on the old conclusion.**
-10. **Size a position on the decayed number, not the full-sample number.** Milestone 9
-    split this project's one surviving edge (US momentum) at its 1993 publication date and
-    found real decay: alpha down ~30-47% post-1994, with one cut (the combined book, daily
-    frequency) losing significance entirely. A position sized on the full-sample alpha
-    would be sized on a number roughly 1.5-2x too generous for what the strategy has
-    actually delivered since the effect became public knowledge. **Rule: for any published
-    anomaly, run the pre/post-publication split before sizing anything against it, and use
-    the post-publication number — the pre-publication half of the sample describes a market
-    that no longer exists.**
+10. **Size a position on the decayed number, not the full-sample number — and check that
+    decayed number was itself estimated out-of-sample.** Milestone 9 split this project's
+    one surviving edge (US momentum) at its 1993 publication date and found real decay:
+    alpha down ~30-47% post-1994, with one cut losing significance entirely. That was
+    already a large correction to the full-sample number — but it was still an in-sample
+    estimate. Milestone 10 re-tested the same post-1994 period with an actual rolling,
+    out-of-sample hedge (the standard Milestone 7 already required for this project's own
+    negative findings) and found the post-1994 alpha does not survive at all, in either
+    leg. **Rule: for any published anomaly, run the pre/post-publication split before
+    sizing anything against it — and don't stop at an in-sample per-era regression;
+    re-confirm with a hedge that could actually have been traded forward, because the two
+    can and do disagree.** The pre-publication half of the sample describes a market that
+    no longer exists; as of this project's most rigorous test, the post-publication market
+    has not been shown to pay this edge at all.
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
@@ -263,9 +286,11 @@ of its retracted one (reversal).
   Every reported number ships with its own beta-regression alpha/beta
   breakdown (Milestone 6) so a client can see whether a signal's performance
   is genuine stock-selection skill or just uncontrolled market exposure, and
-  a pre/post-publication decay split (Milestone 9) for any signal drawn from
-  published academic research — two checks most factor-data vendors don't
-  surface at all.
+  a pre/post-publication decay split re-confirmed with an actual rolling,
+  out-of-sample hedge (Milestones 9-10) for any signal drawn from published
+  academic research — checks most factor-data vendors don't surface at all,
+  and which this project's own experience shows can materially change the
+  answer versus an in-sample split alone.
 - **Risk side**: the regime-switching stress-VaR methodology from
   `risk_simulation/fat_tails_vs_normal.py`, run against a client's actual
   position correlations and leverage, reporting calm-regime vs. stress-regime

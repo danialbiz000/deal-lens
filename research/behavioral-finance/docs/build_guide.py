@@ -1379,6 +1379,71 @@ box(
     "of the sample describes a market that no longer exists.",
     title="THE HONEST, FINAL-SIZED NUMBER"
 )
+box(
+    "Section 5.11 re-tested this exact post-1994 number with an actual "
+    "out-of-sample hedge instead of an in-sample regression, and found it "
+    "does not survive. Read the box below as the current, superseding "
+    "answer to &quot;is this decayed number real&quot;.",
+    kind="fact", title="UPDATE FROM SECTION 5.11"
+)
+
+h1("5.11  Milestone 10 &mdash; Does the post-1994 alpha survive an actual out-of-sample hedge?")
+p("Section 5.10's decay split is a real improvement over a full-sample "
+  "average, but it has the same limitation Section 5.7's beta regression "
+  "had before Section 5.8 closed the loop: it fits one beta "
+  "<b>in-sample</b>, using the whole post-1994 sub-sample's own data, "
+  "then asks whether the average residual differs from zero. A real fund "
+  "cannot do that &mdash; it has to estimate beta from only trailing "
+  "history and hedge forward. This milestone "
+  "(<i>investigations/momentum_hedged_decay_backtest.py</i>) reuses "
+  "Section 5.8's rolling, out-of-sample beta hedge (re-estimated every "
+  "monthly rebalance from only the preceding 252 trading days, applied "
+  "forward, never looking ahead) on the momentum long leg and combined "
+  "book, then applies the identical 1994-01-01 split to the resulting "
+  "<b>hedged</b> daily return series.")
+data_table(
+    ["", "Long leg, pre-1994", "Long leg, post-1994", "Combined, pre-1994", "Combined, post-1994"],
+    [
+        ["Hedged ann. return", "+9.62%/yr", "+3.29%/yr", "+7.93%/yr", "-0.31%/yr"],
+        ["Daily alpha (HAC)", "p=.0010", "p=.1485 (n.s.)", "p=.0244", "p=.5900 (n.s.)"],
+        ["Monthly alpha (HAC)", "p=.0017", "p=.1886 (n.s.)", "p=.0506 (n.s.)", "p=.5049 (n.s.)"],
+    ],
+    col_widths=[1.5*inch, 1.4*inch, 1.4*inch, 1.4*inch, 1.4*inch],
+    small=True,
+)
+p("<b>This is a further, sharper correction, not a confirmation of "
+  "Section 5.10's &quot;survives in three of four cuts&quot; framing.</b> "
+  "Once beta is estimated the way a real fund would have to estimate it "
+  "&mdash; from trailing data only, re-hedged every month, never fit on "
+  "the same period being tested &mdash; the post-1994 alpha is <b>not "
+  "statistically distinguishable from zero in either leg</b>, at either "
+  "frequency. The combined book's hedged post-1994 average return is "
+  "outright negative. Pre-1994, the same methodology strongly confirms "
+  "alpha in both legs (p&le;0.025 in three of four cuts), so the hedge "
+  "itself isn't simply too noisy to detect a real effect when one is "
+  "present &mdash; it detects it clearly pre-1994 and finds nothing "
+  "post-1994. The gap between Section 5.10's &quot;three of four cuts "
+  "survive&quot; and this section's &quot;none survive&quot; is entirely "
+  "explained by the in-sample vs. out-of-sample distinction: an in-sample "
+  "regression can fit the specific quirks of the post-1994 data it's "
+  "being tested against, while a rolling hedge estimated only from prior "
+  "data cannot.")
+box(
+    "US 12-1 momentum's alpha was real and strong before 1994 and has "
+    "<b>not</b> been demonstrated to survive, in a form an actual fund "
+    "could have traded, in the more-than-two-decades since. This "
+    "project's single most credible candidate for a genuine, durable "
+    "edge does not clear the bar once tested with the same standard of "
+    "rigor &mdash; an actual rolling out-of-sample hedge, not a static "
+    "or per-era regression coefficient &mdash; that Section 5.8 already "
+    "established as this project's own required standard. This doesn't "
+    "mean Sections 5.9 and 5.10's findings were wrong for their samples: "
+    "the full-sample and pre-1994 alpha are both real and robust. It "
+    "means the finding "
+    "cannot currently be sized as a forward-looking edge without further "
+    "work.",
+    title="THE FINAL, OUT-OF-SAMPLE-CONFIRMED ANSWER"
+)
 
 # MARKER_END_PART5
 
@@ -1456,6 +1521,19 @@ box(
     "this finding on the decayed, post-1994 number, not the full-sample "
     "one.</b>",
     kind="fact", title="UPDATE FROM PART V.10"
+)
+box(
+    "Part V.11 re-tested Part V.10's post-1994 number with an actual "
+    "rolling, out-of-sample hedge (Part V.8's methodology) instead of an "
+    "in-sample regression, and found it does not survive: post-1994 "
+    "alpha is not statistically significant in either leg, at either "
+    "frequency, once beta is estimated only from trailing data and "
+    "re-hedged monthly. Pre-1994 alpha remains strongly confirmed. "
+    "<b>This is the current, most rigorous answer &mdash; treat this "
+    "project's momentum finding as real and robust pre-1994, and not "
+    "currently demonstrated to be forward-sizeable in the post-"
+    "publication era.</b>",
+    kind="fact", title="UPDATE FROM PART V.11"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -1537,13 +1615,19 @@ bullets([
     "book's life should apply retroactively, especially to positions "
     "still being sized on the old conclusion.",
     "<b>Size a position on the decayed number, not the full-sample "
-    "number.</b> Part V.10 split the one surviving edge (US momentum) at "
-    "its 1993 publication date and found real decay: alpha down 30-47% "
-    "post-1994, one cut losing significance outright. The full-sample "
-    "average was never the honest number to size against once a signal "
-    "is old enough to have a publication date &mdash; the post-publication "
-    "sub-sample is, because that's the regime any new capital actually "
-    "trades into.",
+    "number &mdash; and check that decayed number was itself estimated "
+    "out-of-sample.</b> Part V.10 split the one surviving edge (US "
+    "momentum) at its 1993 publication date and found real decay: alpha "
+    "down 30-47% post-1994, one cut losing significance outright. That "
+    "was already a large correction &mdash; but it was still an "
+    "in-sample estimate. Part V.11 re-tested the same period with an "
+    "actual rolling, out-of-sample hedge and found the post-1994 alpha "
+    "does not survive at all, in either leg. The full-sample average was "
+    "never the honest number to size against once a signal is old enough "
+    "to have a publication date, and an in-sample per-era regression "
+    "isn't the final word either &mdash; only a hedge that could "
+    "actually have been traded forward tells you what capital entering "
+    "today can expect.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -1576,9 +1660,10 @@ p("<b>The product:</b> a subscription analytics service with two parts &mdash; "
   "performance is genuine stock-selection skill or just uncontrolled market "
   "exposure &mdash; Part V.7's finding made this check a required feature, "
   "not an optional one &mdash; and, for any signal drawn from published "
-  "academic research, a pre/post-publication decay split, Part V.10's "
-  "check, a second differentiator most factor-data vendors don't surface "
-  "at all) and a <b>risk side</b> (the regime-switching "
+  "academic research, a pre/post-publication decay split re-confirmed "
+  "with an actual out-of-sample hedge, not just an in-sample regression "
+  "(Parts V.10-11's check), a second differentiator most factor-data "
+  "vendors don't surface at all) and a <b>risk side</b> (the regime-switching "
   "stress-VaR methodology from Part III, run against a client's actual "
   "position correlations and leverage, reporting calm-regime vs. "
   "stress-regime tail loss side by side).")
@@ -1629,15 +1714,19 @@ bullets([
     "of its 12 alpha tests are significant. This project's one previously-"
     "reported positive finding did not survive the same scrutiny applied to "
     "the negative one.",
-    "<b>US 12-1 momentum's alpha decays after its 1993 publication date, "
-    "but does not disappear (Part V.10).</b> A pre/post-1994 split found "
-    "real, textbook-consistent decay &mdash; alpha down 30-47% "
-    "post-1994, with one cut (combined book, daily) losing significance "
-    "entirely &mdash; but three of the four cuts tested remain "
-    "significant through 2017 alone. This is still the project's "
-    "strongest surviving finding, but any claim built on it should be "
-    "sized against the decayed, post-1994 number, not the full-sample "
-    "average.",
+    "<b>US 12-1 momentum's post-1994 alpha does not survive an actual "
+    "out-of-sample hedge (Parts V.10-11, superseding an earlier, more "
+    "optimistic in-sample reading).</b> An in-sample pre/post-1994 split "
+    "(Part V.10) found real decay but apparent survival in three of four "
+    "cuts. Re-testing the same post-1994 period with a rolling, "
+    "out-of-sample beta hedge &mdash; the standard this project already "
+    "requires for its negative findings &mdash; found no statistically "
+    "significant alpha in either leg, at either frequency (Part V.11); "
+    "the hedged combined book's post-1994 average return is outright "
+    "negative. Pre-1994 alpha remains real and robust under the same "
+    "test. This project's momentum finding should be read as strong and "
+    "genuine before 1994, and not currently demonstrated to be "
+    "forward-sizeable in the more-than-two-decades since.",
     "<b>The 52-week-high result's cause: resolved, and it's the boring "
     "answer.</b> Two behavioral/statistical explanations were ruled out by "
     "direct test: crash-window concentration (Part V.4) and a value/growth "
@@ -1708,14 +1797,19 @@ p("The project's real empirical result (Part V.3) delivered a finding more "
   "a different signal, US 12-1 momentum, did, and Part V.10 went one step "
   "further than any earlier milestone: instead of asking whether the "
   "finding was real, it asked how much of it a trader could still expect "
-  "to capture today, and found a genuinely mixed, honest answer &mdash; "
-  "real decay, not disappearance.")
+  "to capture today, and found a genuinely mixed, honest answer at "
+  "first &mdash; real decay, not disappearance. Part V.11 pushed the same "
+  "question one step further still, replacing an in-sample estimate with "
+  "an actual out-of-sample hedge, and the honest answer got more sobering: "
+  "no statistically significant post-1994 alpha survives in either leg. "
+  "Even this project's own most reassuring recent finding kept shrinking "
+  "every time it was checked with a sharper tool.")
 p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "investment framework that explicitly forbids trusting a blend without "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 9 then ran the India findings through "
+  "needed. Milestones 3 through 10 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -1731,30 +1825,35 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "treating as a validated success, the success turned out not to be one "
   "&mdash; while a signal nobody had flagged as special (US momentum) "
   "turned out to hold real, statistically robust alpha once someone "
-  "finally looked properly &mdash; alpha that a further check (Part V.10) "
-  "then showed had partially decayed since its 1993 publication, without "
-  "disappearing.")
+  "finally looked properly &mdash; alpha that Part V.10 then showed had "
+  "partially decayed since its 1993 publication, and that Part V.11 then "
+  "showed does not clear this project's own bar for a forward-sizeable "
+  "edge once tested with an actual out-of-sample hedge, in the era since "
+  "publication.")
 p("The fix that survived all of that scrutiny is more modest, and the "
   "project's one real positive finding is different, than any earlier "
   "draft of this conclusion claimed: there is no demonstrated, "
   "beta-independent stock-selection skill in the 52-week-high signal or "
-  "in short-term reversal, in either direction, as currently built. The "
-  "one signal that does show a robust, largely beta-independent edge "
-  "&mdash; 12-1 momentum, on the US mirror specifically &mdash; was found "
-  "not by anyone's original hypothesis about which signal should work, "
-  "but by finally applying the project's own hard-won standard of rigor "
-  "evenly, to a winner as well as a loser. That is the project working as "
-  "intended, including on itself: not every finding needs to be confirmed "
-  "to be useful, a compelling pattern &mdash; positive or negative "
-  "&mdash; is a hypothesis until it survives testing at every level of "
-  "rigor available, and the single most important thread running through "
-  "this entire guide is a project that kept correcting its own most "
-  "recent, best-supported-looking result, six times in a row &mdash; five "
-  "outright retractions and, finally, a sixth check that neither confirmed "
-  "nor retracted but simply demanded a more precise, smaller claim &mdash; "
-  "and found its one durable finding only after it stopped exempting its "
-  "own successes from the same scrutiny, then kept refining that finding "
-  "instead of declaring victory and stopping.")
+  "in short-term reversal, in either direction, as currently built, and "
+  "the one signal that does show a robust, largely beta-independent edge "
+  "&mdash; 12-1 momentum, on the US mirror specifically &mdash; has only "
+  "been demonstrated to hold in the era before its own publication. Every "
+  "one of those findings was reached not by anyone's original hypothesis "
+  "about which signal should work, but by finally applying the project's "
+  "own hard-won standard of rigor evenly, to a winner as well as a loser, "
+  "and to a signal's own more recent, more comfortable-looking result as "
+  "well as its oldest one. That is the project working as intended, "
+  "including on itself: not every finding needs to be confirmed to be "
+  "useful, a compelling pattern &mdash; positive or negative &mdash; is a "
+  "hypothesis until it survives testing at every level of rigor "
+  "available, and the single most important thread running through this "
+  "entire guide is a project that kept correcting its own most recent, "
+  "best-supported-looking result, seven times in a row &mdash; six "
+  "outright retractions or downward revisions, and one nuanced check "
+  "(Part V.10) that briefly looked like a stopping point before Part "
+  "V.11 showed it wasn't &mdash; and never found a result durable enough "
+  "to stop re-checking, only one narrow enough (pre-1994 momentum) to "
+  "currently trust.")
 
 # ============================================================ GLOSSARY
 story.append(PageBreak())

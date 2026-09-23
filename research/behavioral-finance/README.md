@@ -537,6 +537,52 @@ answer instead of an open one.
 
 **Reproduce this**: `python investigations/momentum_publication_decay.py`.
 
+## Does the post-1994 alpha survive an actual out-of-sample hedge? (Milestone 10)
+
+Milestone 9's decay split is a real improvement over a full-sample average, but it has the
+same limitation Milestone 6's beta regression had before Milestone 7 closed the loop: it
+fits one beta **in-sample**, using the whole post-1994 sub-sample's own data, then asks
+whether the average residual differs from zero. A real fund cannot do that — it has to
+estimate beta from only trailing history and hedge forward. This milestone
+(`investigations/momentum_hedged_decay_backtest.py`) reuses Milestone 7's rolling,
+out-of-sample beta hedge (re-estimated every monthly rebalance from only the preceding
+252 trading days, applied forward, never looking ahead) on the momentum long leg and
+combined book, then applies the identical 1994-01-01 split to the resulting **hedged**
+daily return series.
+
+| | Long leg, pre-1994 | Long leg, post-1994 | Combined, pre-1994 | Combined, post-1994 |
+|---|---|---|---|---|
+| Hedged ann. return | +9.62%/yr | +3.29%/yr | +7.93%/yr | **-0.31%/yr** |
+| Daily alpha (HAC) | **p=0.0010** | p=0.1485 (n.s.) | **p=0.0244** | p=0.5900 (n.s.) |
+| Monthly alpha (HAC) | **p=0.0017** | p=0.1886 (n.s.) | p=0.0506 (n.s., borderline) | p=0.5049 (n.s.) |
+
+**This is a further, sharper correction, not a confirmation of Milestone 9's "survives in
+three of four cuts" framing.** Once beta is estimated the way a real fund would have to
+estimate it — from trailing data only, re-hedged every month, never fit on the same period
+being tested — the post-1994 alpha is **not statistically distinguishable from zero in
+either leg**, at either frequency. The combined book's hedged post-1994 average return is
+outright negative (-0.31%/yr). Pre-1994, the same methodology strongly confirms alpha in
+both legs (p≤0.025 in three of four cuts), so the hedge itself isn't simply too noisy to
+detect a real effect when one is present — it detects it clearly pre-1994 and finds nothing
+post-1994. The gap between Milestone 9's "three of four cuts survive" and this milestone's
+"none survive" is entirely explained by the in-sample vs. out-of-sample distinction: an
+in-sample regression can fit the specific quirks of the post-1994 data it's being tested
+against, while a rolling hedge estimated only from prior data cannot.
+
+**Updated conclusion, superseding Milestone 9's**: US 12-1 momentum's alpha was real and
+strong before 1994 and has **not** been demonstrated to survive, in a form an actual fund
+could have traded, in the more-than-two-decades since. The project's single most credible
+candidate for a genuine, durable edge does not clear the bar once tested with the same
+standard of rigor (an actual rolling out-of-sample hedge, not a static or per-era
+regression coefficient) that Milestone 7 already established as this project's own
+required standard. This does not mean the original Milestone 8 finding was wrong for its
+sample — the full-sample and pre-1994 alpha are both real and robust — it means the
+finding cannot currently be sized as a forward-looking edge without further work (e.g., a
+faster-adapting hedge, or evidence the post-1994 weakness is itself a regime effect rather
+than permanent decay).
+
+**Reproduce this**: `python investigations/momentum_hedged_decay_backtest.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -717,6 +763,11 @@ python investigations/momentum_reversal_beta.py
 # see "Has US momentum's alpha decayed since publication?" above)
 python investigations/momentum_publication_decay.py
 
+# Investigation — does that post-1994 alpha survive an actual out-of-sample hedge, not just
+# an in-sample regression? (no — see "Does the post-1994 alpha survive an actual
+# out-of-sample hedge?" above)
+python investigations/momentum_hedged_decay_backtest.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -727,17 +778,20 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
 
 1. **An investment framework** — a composite behavioral mispricing score usable as a
    screening/tilt signal alongside fundamental analysis, now with real empirical caveats
-   attached (see "Empirical results" through "Has US momentum's alpha decayed since
-   publication?" above): don't trust it blind on a large-cap-only universe, check which
-   sub-signal is actually carrying any edge before combining them, and beta-neutralize
+   attached (see "Empirical results" through "Does the post-1994 alpha survive an actual
+   out-of-sample hedge?" above): don't trust it blind on a large-cap-only universe, check
+   which sub-signal is actually carrying any edge before combining them, and beta-neutralize
    long-short legs before crediting any performance difference to a behavioral effect
-   rather than to uncontrolled market exposure. Exactly one cell in this entire project —
-   US 12-1 momentum's long leg — has survived every check applied: decomposition,
-   cross-market replication, a beta-adjusted significance test, and a publication-decay
-   split, remaining significant in its own right through the post-1994 era alone. That is
-   this repo's one credible candidate for a genuine, demonstrated (if now smaller) edge;
-   everything else, including the project's own earlier "positive" reversal finding, and
-   the momentum combined book's daily-frequency alpha specifically, did not fully hold up.
+   rather than to uncontrolled market exposure. No cell in this project currently survives
+   every check applied at this repo's own highest standard of rigor: US 12-1 momentum's
+   long leg passed decomposition, cross-market replication, and a beta-adjusted
+   significance test, and even an in-sample publication-decay split (Milestone 9) — but
+   once tested with an actual rolling, out-of-sample hedge instead of an in-sample
+   regression (Milestone 10), its post-1994 alpha is not statistically distinguishable
+   from zero either. The pre-1994 alpha remains this repo's one genuinely robust,
+   hedge-confirmed finding; nothing in this project has yet demonstrated a
+   forward-sizeable edge in the post-publication era, for any signal, in either
+   direction.
 2. **Risk-management lessons** — a stress-testing playbook (derived from the Q1 simulation)
    for any leveraged or "market-neutral" strategy: never calibrate tail risk on a calm-regime
    correlation matrix alone.
@@ -789,12 +843,20 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   52-week-high signal against reversal too: none of its 12 alpha tests (2 markets × 3 legs
   × 2 frequencies) are significant. This project's one previously-reported positive finding
   did not survive the same scrutiny applied to the negative one.
-- **US 12-1 momentum's alpha decays after publication, as expected, but doesn't
-  disappear (Milestone 9).** Split at 1994-01-01: the long leg's alpha shrinks ~33% (daily)
-  to ~38% (monthly) post-1994 but stays significant in both; the combined book's alpha
-  shrinks 30-47% and loses significance at daily frequency (p=0.116) while remaining
-  significant monthly (p=0.035). The decay magnitude matches McLean & Pontiff's (2016)
-  documented average post-publication effect across anomalies generally — this is the
-  expected pattern, not an anomaly within the anomaly. Treat this as this project's one
-  real, still-standing finding, sized smaller and stated more precisely than Milestone 8's
-  full-sample numbers alone would suggest.
+- **US 12-1 momentum's alpha decays after publication, as expected (Milestone 9) — and
+  does not survive an actual out-of-sample hedge post-1994 (Milestone 10, superseding
+  Milestone 9's framing).** Milestone 9's in-sample per-era regression found the long
+  leg's alpha shrinking ~33-38% post-1994 but remaining significant, and the combined
+  book losing significance only at daily frequency. Milestone 10 re-ran the same split on
+  a rolling, out-of-sample beta-hedged return series (re-estimated every rebalance from
+  only trailing data, exactly as Milestone 7 built for the 52-week-high signal) and found
+  a sharper result: **pre-1994 alpha is strongly confirmed in both legs (p≤0.025), but
+  post-1994 alpha is not statistically significant in either leg, at either frequency**
+  (p=0.15-0.59), and the hedged combined book's post-1994 average return is outright
+  negative (-0.31%/yr). The gap between the two milestones is the in-sample vs.
+  out-of-sample distinction, not a data error: an in-sample regression can fit quirks
+  specific to the sample it's tested against; a hedge estimated only from prior data
+  cannot, and here it finds nothing post-1994. Treat this project's momentum finding as
+  real and strong pre-1994, and **not currently demonstrated to be forward-sizeable**
+  in the post-publication era — the more precise, and more sobering, replacement for
+  Milestone 9's "decays but doesn't disappear" framing.
