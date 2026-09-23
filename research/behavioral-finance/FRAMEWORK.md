@@ -75,9 +75,22 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   markets, both frequencies.** There is no demonstrated stock-selection skill in this
   signal, long or short, once its uncontrolled market exposure is accounted for. **Rule,
   corrected from the "long-only" conclusion above: this signal is not currently a
-  demonstrated source of alpha in either direction. Before it can be used as a behavioral
-  tilt, both legs need to be beta-neutralized (sized to target zero net beta, not equal
-  notional) and re-tested for alpha on the hedged residual — not done in this repo yet.**
+  demonstrated source of alpha in either direction.**
+- **Milestone 6's regression alpha was independently confirmed, not just re-derived, by
+  actually building and testing a hedged version.** A single full-sample regression
+  coefficient could in principle have missed a real, time-varying alpha. Milestone 7 built
+  the real thing instead: a rolling, strictly out-of-sample beta hedge (re-estimated every
+  rebalance from only the preceding ~year of data, applied forward, never using data from
+  the period being hedged — the way a real fund would operate it). The hedge cut the
+  correlation with the market from strongly negative to near zero and roughly halved the
+  loss in both markets — but the residual return remained statistically indistinguishable
+  from zero everywhere (p between 0.17 and 0.45). **Rule: when a regression finds no alpha,
+  don't stop there if the claim matters — build the actual hedged strategy and test the
+  real thing. In this case the two methods agreed, which is what makes the "no alpha"
+  conclusion trustworthy rather than an artifact of one modeling choice.** A live version of
+  this signal would still need beta-neutralized position sizing (not just a market-return
+  overlay) and would face real hedging transaction costs, given the rolling beta itself is
+  quite unstable over time in both markets — not modeled here.
 - **Check for a beta mismatch between the legs before reaching for a behavioral
   explanation — not after three milestones of chasing more exotic ones.** This project
   tested crash-window concentration, a value/growth confound, and formal momentum-crash

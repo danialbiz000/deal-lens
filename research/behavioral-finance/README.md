@@ -378,9 +378,8 @@ skill in the 52-week-high signal, in either direction**, once market beta is pro
 accounted for. The corrected, honest recommendation: the signal's long leg is a reasonable
 lower-beta way to stay long the market, not a demonstrated source of alpha; anyone wanting
 to test for real, beta-independent skill in this signal would need to explicitly
-beta-neutralize both legs (e.g., size each leg to target zero net beta, not equal notional)
-and re-run this same regression on the beta-hedged residual — a natural next step this
-project has not yet taken.
+beta-neutralize both legs and re-run this same regression on the beta-hedged residual —
+**done next, in Milestone 7 below.**
 
 **The real methodological lesson, stated plainly**: this project spent three milestones
 (2, 3, 5) chasing increasingly sophisticated behavioral and statistical explanations —
@@ -391,6 +390,55 @@ everything the more exotic hypotheses were built to explain. **Rule, now stated 
 `FRAMEWORK.md`: check for a beta mismatch between the legs before reaching for a
 behavioral explanation, not after.** **Reproduce this**:
 `python investigations/short_leg_beta.py`.
+
+## Does real alpha survive an actual beta hedge? (Milestone 7)
+
+Milestone 6 used one full-sample regression coefficient to estimate beta and asked whether
+the leftover average return (the intercept) was significantly different from zero. That's
+a legitimate test, but it isn't the same as actually trading a beta-hedged version of the
+strategy: a single, full-sample beta assumes constant market exposure over 20+ years, which
+real betas don't have. This milestone builds and tests the real thing
+(`investigations/beta_hedged_backtest.py`): at every monthly rebalance, beta is re-estimated
+from only the **trailing 252 trading days** (roughly one year) of the combined book's own
+history — strictly out-of-sample, never using data from the period being hedged — and that
+beta is used to hedge the *next* month's daily returns by subtracting `beta × market return`
+from the strategy's own daily return. This mirrors how a real fund would operationally
+hedge: periodic re-estimation, applied forward, no look-ahead.
+
+| | NSE (India) | US (Kaggle mirror) |
+|---|---|---|
+| Days covered (needs 252d trailing history to start) | 5,142 | 11,417 |
+| Rolling hedge beta: mean (std across time) | −0.26 (0.31) | −0.44 (0.50) |
+| Correlation of hedged returns with the market | −0.07 | −0.02 |
+| Unhedged annualized return / vol / Sharpe (same window) | −14.3% / 23.9% / −0.53 | −14.7% / 33.5% / −0.30 |
+| Beta-hedged annualized return / vol / Sharpe (same window) | −7.1% / 22.7% / −0.21 | −7.5% / 31.3% / −0.09 |
+| Hedged daily return significantly ≠ 0? | p=0.35 | p=0.45 |
+| Hedged monthly return significantly ≠ 0? | p=0.42 | p=0.17 |
+
+**Independent confirmation of Milestone 6, by a stronger method.** The rolling hedge
+substantially cuts the strategy's correlation with the market (from the strongly negative
+correlation implied by Milestone 6's static betas, down to −0.02 to −0.07) and **roughly
+halves the annualized loss** in both markets — consistent with a large share of the
+original loss being mechanical beta exposure, not something specific to the "losers"
+basket. But even after this real, out-of-sample hedge, **the residual return is not
+statistically distinguishable from zero in either market, at either frequency** (all
+p-values between 0.17 and 0.45) — there is still no significant alpha, positive or
+negative, once market exposure is genuinely (not just statistically) removed.
+
+**Two honest caveats, not swept under the rug.** First, the hedge is imperfect — the
+residual correlation isn't exactly zero, and the rolling beta itself is quite unstable over
+time (its standard deviation is comparable to or larger than its mean in both markets),
+meaning a real hedging program would need frequent rebalancing and would incur hedging
+transaction costs this script doesn't model. Second, while building this script a real bug
+was caught before any numbers were reported: an early version estimated beta as
+`np.cov(...) / np.var(...)`, but `np.cov`'s default degrees-of-freedom (`ddof=1`) doesn't
+match `np.var`'s default (`ddof=0`), silently inflating every beta estimate by a factor of
+roughly `n/(n-1)` (~0.4% here — immaterial to the conclusion, but a real, textbook
+finite-sample bug all the same). Fixed by using `np.polyfit`'s OLS slope instead, and
+locked in with a synthetic-fixture test (`tests/test_beta_hedged_backtest.py`) asserting
+exact beta recovery on a zero-noise series.
+
+**Reproduce this**: `python investigations/beta_hedged_backtest.py`.
 
 ## Data provenance: the NSE GitHub mirror
 
@@ -559,6 +607,10 @@ python investigations/momentum_crash_significance.py
 # beta?" above; this is the actual explanation)
 python investigations/short_leg_beta.py
 
+# Investigation — does real alpha survive an actual, out-of-sample rolling beta hedge?
+# (no — see "Does real alpha survive an actual beta hedge?" above)
+python investigations/beta_hedged_backtest.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -609,8 +661,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   markets that returned ~20%/year over the sample. Once beta is controlled for, **alpha is
   insignificant in every leg, every market, every frequency (12 of 12 regressions)** — there
   is no demonstrated stock-selection skill in this signal, in either direction, in this
-  repo as it stands. Anything built on this repo should beta-neutralize the legs before
-  claiming a behavioral edge from this signal.
+  repo as it stands. **Milestone 7 confirmed this independently**, with an actual rolling,
+  out-of-sample beta hedge rather than a single full-sample regression coefficient: the
+  hedge cuts the loss roughly in half but the residual return is still not statistically
+  distinguishable from zero, in either market, at either frequency. Anything built on this
+  repo should beta-neutralize the legs before claiming a behavioral edge from this signal —
+  and even then, per Milestone 7, expect an imperfect hedge (rolling beta is itself quite
+  unstable over time in both markets) and real hedging transaction costs not modeled here.
 - **Momentum and reversal did not replicate consistently across the two markets tested**
   (see "Replication on a second market") — treat any single-market anomaly finding in this
   repo as provisional until it's been checked on at least one more, independent universe.

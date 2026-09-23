@@ -1190,8 +1190,8 @@ box(
     "reasonable lower-beta way to stay invested, not a demonstrated "
     "behavioral edge. Testing for real, beta-independent skill would "
     "require explicitly beta-neutralizing both legs and re-running this "
-    "same regression on the hedged residual &mdash; a natural next step "
-    "this project has not yet taken.",
+    "same regression on the hedged residual &mdash; done next, in "
+    "Section 5.8.",
     title="WHAT THIS CHANGES"
 )
 box(
@@ -1205,6 +1205,63 @@ box(
     "built to explain. Order hypothesis tests from cheapest and most "
     "mechanical to most exotic, not the reverse.",
     kind="fact", title="THE LESSON, AGAIN"
+)
+
+h1("5.8  Milestone 7 &mdash; Does real alpha survive an actual beta hedge?")
+p("Milestone 6 used one full-sample regression coefficient to estimate "
+  "beta and asked whether the leftover average return was significantly "
+  "different from zero. That is a legitimate test, but it assumes "
+  "constant market exposure across 20+ years, which real betas don't "
+  "have. This milestone builds and tests the real thing "
+  "(<i>investigations/beta_hedged_backtest.py</i>): at every monthly "
+  "rebalance, beta is re-estimated from only the <b>trailing 252 trading "
+  "days</b> (roughly one year) of the combined book's own history &mdash; "
+  "strictly out-of-sample, never using data from the period being hedged "
+  "&mdash; and that beta is used to hedge the <i>next</i> month's daily "
+  "returns. This mirrors how a real fund would operationally hedge: "
+  "periodic re-estimation applied forward, no look-ahead.")
+data_table(
+    ["", "NSE (India)", "US (Kaggle mirror)"],
+    [
+        ["Days covered (needs 252d history)", "5,142", "11,417"],
+        ["Rolling hedge beta: mean (std)", "-0.26 (0.31)", "-0.44 (0.50)"],
+        ["Correlation of hedged returns w/ market", "-0.07", "-0.02"],
+        ["Unhedged ann. return / vol / Sharpe", "-14.3% / 23.9% / -0.53", "-14.7% / 33.5% / -0.30"],
+        ["Hedged ann. return / vol / Sharpe", "-7.1% / 22.7% / -0.21", "-7.5% / 31.3% / -0.09"],
+        ["Hedged daily return significant?", "p=0.35", "p=0.45"],
+        ["Hedged monthly return significant?", "p=0.42", "p=0.17"],
+    ],
+    col_widths=[2.4*inch, 2.2*inch, 2.2*inch],
+    small=True,
+)
+p("<b>Independent confirmation of Milestone 6, by a stronger method.</b> "
+  "The rolling hedge substantially cuts the strategy's correlation with "
+  "the market (from strongly negative down to -0.02 to -0.07) and "
+  "<b>roughly halves the annualized loss</b> in both markets &mdash; "
+  "consistent with a large share of the original loss being mechanical "
+  "beta exposure, not something specific to the &quot;losers&quot; "
+  "basket. But even after this real, out-of-sample hedge, <b>the "
+  "residual return is not statistically distinguishable from zero in "
+  "either market, at either frequency</b> (p between 0.17 and 0.45). No "
+  "significant alpha, positive or negative, survives once market "
+  "exposure is genuinely &mdash; not just statistically &mdash; removed.")
+box(
+    "Two honest caveats. First, the hedge is imperfect: residual "
+    "correlation isn't exactly zero, and the rolling beta itself is "
+    "quite unstable over time (its standard deviation is comparable to "
+    "or larger than its mean in both markets) &mdash; a real hedging "
+    "program would need frequent rebalancing and would incur "
+    "transaction costs this script doesn't model. Second, a real, "
+    "textbook bug was caught and fixed before any of these numbers were "
+    "reported: an early version estimated beta as "
+    "<i>np.cov(...) / np.var(...)</i>, but NumPy's <i>cov</i> defaults to "
+    "a different degrees-of-freedom convention (ddof=1) than its "
+    "<i>var</i> (ddof=0) &mdash; silently inflating every beta estimate "
+    "by roughly n/(n-1) (about 0.4% here, immaterial to the conclusion, "
+    "but a real bug regardless). Fixed by using an OLS slope instead, "
+    "and locked in with a synthetic-fixture test asserting exact beta "
+    "recovery on a zero-noise series.",
+    kind="fact", title="TWO HONEST CAVEATS"
 )
 
 # MARKER_END_PART5
@@ -1248,8 +1305,10 @@ p("<b>Decompose the legs before discarding a signal &mdash; still correct, "
   "skill in this signal, in either direction. <b>Corrected rule:</b> this "
   "signal is not a demonstrated source of alpha as currently built; using "
   "it as a behavioral tilt requires beta-neutralizing both legs first and "
-  "re-testing the hedged residual for alpha &mdash; a step this project "
-  "has not yet taken. And more generally: check for a beta mismatch "
+  "re-testing the hedged residual for alpha &mdash; done in Part V.8, "
+  "which independently confirmed the same conclusion with an actual "
+  "rolling, out-of-sample hedge rather than a single regression "
+  "coefficient. And more generally: check for a beta mismatch "
   "between a long-short book's legs before reaching for a behavioral "
   "explanation, not after three rounds of increasingly exotic ones.")
 
@@ -1420,12 +1479,15 @@ bullets([
     "LTCM's actual, never fully disclosed book. Its reported multiple should "
     "be read as an order of magnitude, not a precise historical "
     "reconstruction.",
-    "<b>No beta-neutral version of the 52-week-high signal has been "
-    "tested.</b> Part V.7 explains the raw long-short book's losses via "
-    "uncontrolled beta, but does not itself construct or test a "
-    "beta-hedged version to check whether real, beta-independent alpha "
-    "exists once that exposure is removed -- a natural next step this "
-    "project has not taken.",
+    "<b>The beta-hedge test (Part V.8) is itself imperfect, by design and "
+    "by honest admission.</b> The rolling hedge leaves a small residual "
+    "correlation with the market (-0.02 to -0.07, not exactly zero), the "
+    "estimated beta is quite unstable across time in both markets (its "
+    "standard deviation rivals its mean), and no hedging transaction "
+    "costs are modeled. None of that changes the direction of the "
+    "finding (still no significant residual alpha), but a live "
+    "implementation would need a more robust hedging scheme and would "
+    "bear real costs this analysis doesn't capture.",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -1458,7 +1520,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 6 then ran the India finding through "
+  "needed. Milestones 3 through 7 then ran the India finding through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -1466,26 +1528,28 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "value/growth confound was tested and rejected; a formally-compelling-"
   "looking momentum-crash mechanism was tested and rejected too, once "
   "proper statistical significance testing replaced descriptive pattern-"
-  "matching; and the actual explanation, when it finally arrived, was the "
+  "matching; the actual explanation, when it finally arrived, was the "
   "most basic and least glamorous of all the candidates tested &mdash; an "
   "uncontrolled beta mismatch between the strategy's two legs, checked "
-  "last instead of first.")
-p("The fix that survived all of that scrutiny is more modest than any of "
-  "the earlier drafts of this conclusion claimed: there is no demonstrated, "
-  "beta-independent stock-selection skill anywhere in the 52-week-high "
-  "signal as currently built, in either direction. The long leg is a "
-  "reasonable lower-beta way to stay invested, not a proven behavioral "
-  "edge; using this signal as a genuine tilt would require beta-"
-  "neutralizing both legs and re-testing the hedged residual, which this "
-  "project has not yet done. That more modest, more honest conclusion is "
-  "the project working as intended, including on itself: not every "
-  "finding needs to be confirmed to be useful, a compelling pattern is a "
-  "hypothesis until it survives testing at every level of rigor available "
-  "&mdash; descriptive, then formally statistical, then mechanically basic "
-  "&mdash; and the single most important thread running through this "
-  "entire guide is a project that kept correcting its own most recent, "
-  "best-supported-looking result, three times in a row, right up to the "
-  "final one.")
+  "last instead of first; and even that finding wasn't taken on faith from "
+  "a single regression coefficient &mdash; a real, out-of-sample hedged "
+  "version was built and tested, and it agreed.")
+p("The fix that survived all of that scrutiny, twice confirmed by "
+  "independent methods, is more modest than any of the earlier drafts of "
+  "this conclusion claimed: there is no demonstrated, beta-independent "
+  "stock-selection skill anywhere in the 52-week-high signal as currently "
+  "built, in either direction. The long leg is a reasonable lower-beta "
+  "way to stay invested, not a proven behavioral edge. That more modest, "
+  "more honest conclusion is the project working as intended, including "
+  "on itself: not every finding needs to be confirmed to be useful, a "
+  "compelling pattern is a hypothesis until it survives testing at every "
+  "level of rigor available &mdash; descriptive, then formally "
+  "statistical, then mechanically basic, then an actual out-of-sample "
+  "implementation of the fix &mdash; and the single most important thread "
+  "running through this entire guide is a project that kept correcting "
+  "its own most recent, best-supported-looking result, four times in a "
+  "row, and then checked its own correction one more time before calling "
+  "it done.")
 
 # ============================================================ GLOSSARY
 story.append(PageBreak())
