@@ -1,5 +1,12 @@
 # Behavioral Finance Research Project
 
+> **New to this project?** `docs/behavioral_finance_guide.pdf` is a plain-language
+> companion guide (English) covering everything below with examples, psychology, and
+> the full milestone-by-milestone decision log — no quant-finance background assumed.
+> Regenerate it with `python docs/build_guide.py` after any milestone that changes the
+> findings; the PDF states its own "as of" scope, this README is the always-current
+> source if the two ever drift.
+
 ## Research question
 
 Markets are conventionally modeled as (weak-form to semi-strong-form) informationally

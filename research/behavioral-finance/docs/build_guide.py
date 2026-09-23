@@ -1,0 +1,1300 @@
+# -*- coding: utf-8 -*-
+"""Builds the Behavioral Finance Research Project guide PDF.
+
+A plain-language companion to the code and README/FRAMEWORK/case_studies in
+this repo -- explains every concept with an example before using it, narrates
+the project's milestones and decisions, and states the real vs. not-yet-
+validated results honestly. Regenerate after each milestone that changes the
+project's findings (see README.md's own milestone log for what's current).
+
+Usage: pip install reportlab && python docs/build_guide.py
+Output: docs/behavioral_finance_guide.pdf
+"""
+from reportlab.lib.pagesizes import LETTER
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT
+from reportlab.platypus import (
+    BaseDocTemplate, PageTemplate, Frame, Paragraph, Spacer, Table, TableStyle,
+    PageBreak, KeepTogether, NextPageTemplate, FrameBreak
+)
+from reportlab.platypus.tableofcontents import TableOfContents
+from reportlab.pdfgen import canvas as canvas_mod
+import os
+
+OUT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "behavioral_finance_guide.pdf")
+
+PAGE_W, PAGE_H = LETTER
+MARGIN = 0.9 * inch
+
+styles = getSampleStyleSheet()
+
+# ---- custom styles ----
+styles.add(ParagraphStyle(name="CoverTitle", fontName="Helvetica-Bold", fontSize=27,
+                           leading=32, alignment=TA_CENTER, textColor=colors.HexColor("#12233d"),
+                           spaceAfter=14))
+styles.add(ParagraphStyle(name="CoverSubtitle", fontName="Helvetica", fontSize=14,
+                           leading=19, alignment=TA_CENTER, textColor=colors.HexColor("#4a5a72"),
+                           spaceAfter=6))
+styles.add(ParagraphStyle(name="CoverMeta", fontName="Helvetica", fontSize=10.5,
+                           leading=15, alignment=TA_CENTER, textColor=colors.HexColor("#6b7a8f")))
+
+styles.add(ParagraphStyle(name="PartTitle", fontName="Helvetica-Bold", fontSize=20,
+                           leading=24, spaceBefore=6, spaceAfter=16,
+                           textColor=colors.HexColor("#12233d"),
+                           keepWithNext=True))
+styles.add(ParagraphStyle(name="H1", fontName="Helvetica-Bold", fontSize=15,
+                           leading=19, spaceBefore=18, spaceAfter=8,
+                           textColor=colors.HexColor("#173a63"), keepWithNext=True))
+styles.add(ParagraphStyle(name="H2", fontName="Helvetica-Bold", fontSize=12.3,
+                           leading=16, spaceBefore=12, spaceAfter=6,
+                           textColor=colors.HexColor("#2b5282"), keepWithNext=True))
+styles.add(ParagraphStyle(name="Body", fontName="Helvetica", fontSize=10.1,
+                           leading=14.6, alignment=TA_JUSTIFY, spaceAfter=8,
+                           textColor=colors.HexColor("#1c1c1c")))
+styles.add(ParagraphStyle(name="BodyItalic", parent=styles["Body"], fontName="Helvetica-Oblique"))
+styles.add(ParagraphStyle(name="MyBullet", parent=styles["Body"], leftIndent=16,
+                           bulletIndent=4, spaceAfter=5))
+styles.add(ParagraphStyle(name="Caption", fontName="Helvetica-Oblique", fontSize=8.7,
+                           leading=11.5, textColor=colors.HexColor("#5a6472"), spaceAfter=10))
+styles.add(ParagraphStyle(name="TOCHeading", parent=styles["H1"], spaceBefore=0))
+styles.add(ParagraphStyle(name="TOC1", fontName="Helvetica-Bold", fontSize=10.5,
+                           leading=16, textColor=colors.HexColor("#173a63")))
+styles.add(ParagraphStyle(name="TOC2", fontName="Helvetica", fontSize=9.7,
+                           leading=14, leftIndent=14, textColor=colors.HexColor("#333")))
+styles.add(ParagraphStyle(name="GlossTerm", fontName="Helvetica-Bold", fontSize=10.1,
+                           leading=14.6, textColor=colors.HexColor("#173a63"), spaceBefore=6))
+
+TABLE_HEAD_BG = colors.HexColor("#173a63")
+TABLE_ROW_BG = colors.HexColor("#eef2f7")
+DECISION_BG = colors.HexColor("#fbf3e3")
+DECISION_BORDER = colors.HexColor("#c9922c")
+FACT_BG = colors.HexColor("#eaf1fb")
+FACT_BORDER = colors.HexColor("#3f6ea5")
+
+story = []
+toc = TableOfContents()
+toc.levelStyles = [styles["TOC1"], styles["TOC2"]]
+
+
+def h1(text):
+    story.append(Paragraph(text, styles["H1"]))
+
+
+def h2(text):
+    story.append(Paragraph(text, styles["H2"]))
+
+
+def part(text):
+    story.append(Paragraph(text, styles["PartTitle"]))
+
+
+def p(text, style="Body"):
+    story.append(Paragraph(text, styles[style]))
+
+
+def bullets(items):
+    for it in items:
+        story.append(Paragraph("&bull;&nbsp;&nbsp;" + it, styles["MyBullet"]))
+
+
+def spacer(h=8):
+    story.append(Spacer(1, h))
+
+
+def box(text, kind="decision", title=None):
+    bg = DECISION_BG if kind == "decision" else FACT_BG
+    border = DECISION_BORDER if kind == "decision" else FACT_BORDER
+    default_title = "DECISION &amp; RATIONALE" if kind == "decision" else "KEY FACT"
+    label = title or default_title
+    inner_style = ParagraphStyle(name="BoxBody", parent=styles["Body"], spaceAfter=0)
+    label_style = ParagraphStyle(name="BoxLabel", fontName="Helvetica-Bold", fontSize=8.6,
+                                  leading=11, textColor=border, spaceAfter=4)
+    content = [Paragraph(label, label_style), Paragraph(text, inner_style)]
+    t = Table([[content]], colWidths=[PAGE_W - 2 * MARGIN])
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), bg),
+        ("BOX", (0, 0), (-1, -1), 1, border),
+        ("LEFTPADDING", (0, 0), (-1, -1), 10),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+        ("TOPPADDING", (0, 0), (-1, -1), 8),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+    ]))
+    story.append(Spacer(1, 4))
+    story.append(t)
+    story.append(Spacer(1, 8))
+
+
+def data_table(header, rows, col_widths=None, small=False):
+    data = [header] + rows
+    t = Table(data, colWidths=col_widths, repeatRows=1)
+    fs = 8.3 if small else 9
+    style = [
+        ("BACKGROUND", (0, 0), (-1, 0), TABLE_HEAD_BG),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
+        ("FONTSIZE", (0, 0), (-1, -1), fs),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, TABLE_ROW_BG]),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#c3ccd6")),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+    ]
+    t.setStyle(TableStyle(style))
+    story.append(t)
+    spacer(10)
+
+
+def toc_entry(text, level, key):
+    """No-op: TOC entries are populated automatically by GuideDocTemplate.
+    afterFlowable watching for PartTitle/H1 styled paragraphs (see bottom of
+    this script). Kept as a call site marker so section boundaries stay
+    readable in this script without a second source of truth for headings."""
+    return
+
+
+# ============================================================ COVER PAGE
+story.append(Spacer(1, 1.6 * inch))
+story.append(Paragraph("Behavioral Finance Research Project", styles["CoverTitle"]))
+story.append(Paragraph("Why Markets Aren't Rational, and What You Can Do About It",
+                        styles["CoverSubtitle"]))
+spacer(28)
+story.append(Paragraph(
+    "A project guide covering research design, methodology, five real-world case "
+    "studies, the psychology behind each one, the milestone-by-milestone decisions "
+    "made while building it, the real (not simulated) results obtained, and how "
+    "the findings translate into practice.",
+    ParagraphStyle(name="CoverDesc", parent=styles["Body"], alignment=TA_CENTER,
+                    fontSize=11, leading=16, textColor=colors.HexColor("#33465f"))
+))
+spacer(60)
+story.append(Paragraph("Prepared as a companion guide to the code repository "
+                        "<i>research/behavioral-finance/</i>", styles["CoverMeta"]))
+story.append(Paragraph("Written in English for readers without a quant-finance background; "
+                        "every concept is introduced with a plain-language example before "
+                        "it is used.", styles["CoverMeta"]))
+story.append(PageBreak())
+
+# ============================================================ TOC PAGE
+story.append(Paragraph("Contents", styles["TOCHeading"]))
+spacer(6)
+story.append(toc)
+story.append(PageBreak())
+
+# ============================================================ EXECUTIVE SUMMARY
+toc_entry("Executive Summary", 0, "exec")
+h1("Executive Summary")
+p("Financial theory has long assumed that markets are, to a first approximation, "
+  "rational: prices reflect available information, and systematic mispricing should "
+  "be rare and quickly corrected by sophisticated investors. This project tests that "
+  "assumption from two directions at once, using real code and, wherever technically "
+  "possible, real data rather than narrative alone.")
+p("<b>Direction one (diagnosis):</b> why do sophisticated, model-driven institutions "
+  "sometimes fail catastrophically, precisely because their models assumed rational, "
+  "well-behaved markets? Long-Term Capital Management (1998), the &quot;Quant Quake&quot; "
+  "(2007), Amaranth Advisors (2006), and the 2008 financial crisis are examined as "
+  "cases where a locally reasonable model broke because it could not see how fast "
+  "correlation and panic move together once other market participants stop behaving "
+  "independently.")
+p("<b>Direction two (exploitation):</b> can well-documented behavioral biases &mdash; "
+  "anchoring, underreaction, overreaction &mdash; be turned into a measurable, "
+  "tradable edge, the way real firms such as Fuller &amp; Thaler Asset Management and "
+  "LSV Asset Management have built businesses on doing? This project builds a signal "
+  "library and backtest engine, and runs it against a real 21-year daily price "
+  "history for 48 India-listed companies (the only market data source technically "
+  "reachable from the environment this project was built in &mdash; see Part V for "
+  "why that constraint mattered and how it was worked around).")
+p("The honest headline result from that empirical run: a blended "
+  "&quot;behavioral score&quot; combining three signals looked like a roughly "
+  "break-even strategy &mdash; and that blend was hiding two very different stories. "
+  "One component signal (anchoring to the 52-week high) lost money persistently and "
+  "dramatically; another (short-term reversal) had a real, positive, cost-adjusted "
+  "edge. The project's central methodological lesson &mdash; never trust a blended "
+  "score without checking what is inside it &mdash; came directly out of this finding, "
+  "not from a textbook.")
+p("The guide that follows explains every concept used (behavioral and quantitative) "
+  "in plain language with real examples, walks through all five case studies in "
+  "detail, narrates the project's milestones and the reasoning behind each decision, "
+  "and translates the findings into an investment framework, a risk-management "
+  "playbook, and a business idea.")
+spacer(4)
+
+# ============================================================ PART I
+story.append(NextPageTemplate("normal"))
+story.append(PageBreak())
+toc_entry("Part I &mdash; Why This Project Exists", 0, "part1")
+part("Part I &mdash; Why This Project Exists")
+
+h1("1.1  The theory markets are supposed to follow")
+p("The Efficient Market Hypothesis (EMH), the dominant framework in academic finance "
+  "since the 1960s-70s, holds that asset prices reflect all available information at "
+  "essentially every moment. Its practical implication is stark: if EMH holds strictly, "
+  "no strategy should reliably beat a passive index over time, because any predictable "
+  "pattern would immediately be traded away by rational, profit-seeking investors the "
+  "moment it appeared.")
+p("EMH is not a strawman invented for this project to knock down &mdash; it is a "
+  "genuinely useful default. Most of the time, for most large, liquid securities, "
+  "prices really do incorporate public information quickly. The interesting question "
+  "is not &quot;is EMH ever true&quot; (it often is, approximately) but "
+  "&quot;when and how does it fail, and can those failures be anticipated, measured, "
+  "or profited from?&quot;")
+
+h1("1.2  Two stories that motivate the whole project")
+box(
+    "In 1998, a hedge fund whose partners included two Nobel-laureate economists "
+    "(Myron Scholes and Robert Merton, co-creators of the option-pricing theory "
+    "taught in every finance program) lost about 90% of its capital in roughly six "
+    "weeks, despite running trades its own models considered close to riskless. "
+    "In January 2021, a struggling video-game retailer's stock rose by roughly an "
+    "order of magnitude in a few weeks, not because of any change in the company's "
+    "prospects, but because a large, loosely coordinated group of retail traders on "
+    "a Reddit forum decided to buy it &mdash; and forced some of the most "
+    "sophisticated short-selling hedge funds in the world to take large losses "
+    "covering their bets. Both episodes are covered in full in Part IV.",
+    kind="fact", title="TWO EPISODES THAT FRAME THE PROJECT"
+)
+p("These two stories point in opposite directions &mdash; one is about a "
+  "sophisticated model failing, the other about an unsophisticated crowd winning "
+  "&mdash; but they share a single underlying fact: humans, not equations, decide "
+  "what a price is. A model can be mathematically elegant and still miss the fact "
+  "that, under stress, people (whether panicking institutional traders or excited "
+  "retail traders) start behaving in a correlated, non-independent way that no "
+  "amount of historical calibration prepared it for.")
+
+h1("1.3  The project's two-track design")
+p("Two concrete, falsifiable questions structure everything that follows:")
+bullets([
+    "<b>Q1 (diagnosis).</b> Can the mechanism by which rational-market risk models "
+    "fail under stress be shown mechanically, with real numbers, rather than just "
+    "asserted narratively?",
+    "<b>Q2 (exploitation).</b> Do specific, named behavioral biases produce a "
+    "real, measurable, cost-adjusted return premium when turned into a systematic "
+    "trading signal, over a long sample, on real market data?",
+])
+box(
+    "The project could have been written as a pure literature review &mdash; "
+    "summarizing what Kahneman, Tversky, Thaler, and others found, and describing "
+    "LTCM and GameStop narratively. That would have been faster, but it would not "
+    "have produced anything falsifiable: a narrative account can always be told to "
+    "confirm whatever conclusion the writer wanted. The decision here was to require "
+    "runnable code and, wherever technically possible, real executed numbers for "
+    "every claim &mdash; even when (as happened repeatedly, see Part V) the "
+    "environment made that harder than expected. A claim in this project is either "
+    "backed by a number that was actually computed, or it is explicitly flagged as "
+    "not yet validated. Nothing in between.",
+)
+
+spacer(6)
+# MARKER_END_PART1
+
+# ============================================================ PART II
+story.append(PageBreak())
+toc_entry("Part II &mdash; Core Behavioral Concepts, Explained Before They're Used", 0, "part2")
+part("Part II &mdash; Core Behavioral Concepts, Explained Before They're Used")
+p("Every case study and every trading signal in this project rests on one of the "
+  "concepts below. Each is introduced with an everyday example first, then the "
+  "specific market mechanism it produces, so that later sections can use the term "
+  "without re-explaining it.")
+
+h1("2.1  Anchoring")
+p("<b>Everyday example:</b> if a car salesperson opens negotiation at $30,000, most "
+  "buyers end up settling closer to that number than if the same car had been "
+  "opened at $25,000 &mdash; even though the opening number carries no real "
+  "information about the car's actual worth. The first number seen becomes a "
+  "psychological reference point (an &quot;anchor&quot;) that subsequent judgments "
+  "are adjusted from, insufficiently.")
+p("<b>Market mechanism:</b> investors use a stock's 52-week high as exactly this "
+  "kind of reference point. Even when good news arrives that should push the price "
+  "well past the old high, many investors hesitate to buy through a level they've "
+  "mentally anchored on as &quot;expensive,&quot; so the price drifts up slowly "
+  "instead of jumping &mdash; the mechanism behind the 52-week-high signal used in "
+  "this project's Q2 signal library (Part III) and central to the George &amp; "
+  "Hwang (2004) academic finding it's based on.")
+
+h1("2.2  Herding (Social Proof)")
+p("<b>Everyday example:</b> seeing a long line outside one restaurant and an empty "
+  "one next door, most passersby join the line &mdash; not because they have "
+  "independently evaluated either restaurant's food, but because a crowd is itself "
+  "treated as evidence of quality. This is useful most of the time (crowds often do "
+  "know something) and can be badly wrong when the crowd itself started for an "
+  "unrelated reason.")
+p("<b>Market mechanism:</b> in a crisis, investors and institutions sell what "
+  "everyone else is selling, and buy what's flowing toward safety (a "
+  "&quot;flight to quality&quot;), regardless of the specific fundamental merits of "
+  "what they're selling or buying. This is the central mechanism in the LTCM case "
+  "(Part IV): LTCM's own trades were not herding, but the rest of the market's "
+  "correlated flight to safety broke the correlation assumptions LTCM's model "
+  "depended on.")
+
+h1("2.3  Overconfidence and Illusion of Control")
+p("<b>Everyday example:</b> most drivers rate themselves as &quot;above average&quot; "
+  "&mdash; a statistical impossibility for a majority to be true, and a "
+  "well-replicated psychological finding. A string of good outcomes (safe drives, "
+  "in this analogy) is easy to misread as evidence of skill rather than of "
+  "favorable conditions that happened to hold.")
+p("<b>Market mechanism:</b> a trader with a strong track record under one market "
+  "regime can mistake that track record for proof their model handles all "
+  "regimes, and size positions accordingly. This is the central mechanism in the "
+  "Amaranth Advisors case (Part IV): trader Brian Hunter's prior profitable "
+  "natural-gas positions preceded a concentrated bet sized well beyond what the "
+  "fund could survive being wrong about.")
+
+h1("2.4  Underreaction and Overreaction")
+p("<b>Everyday example:</b> told a piece of surprising news, some people barely "
+  "update their prior opinion at all (underreaction &mdash; &quot;I'll believe it "
+  "when I see more evidence&quot;), while others swing to the opposite extreme "
+  "immediately (overreaction &mdash; &quot;this changes everything&quot;). Both are "
+  "documented, opposite failures of the same rational-updating standard (Bayesian "
+  "updating: revising a belief by exactly as much as new evidence warrants, no "
+  "more, no less).")
+p("<b>Market mechanism, underreaction:</b> after a company reports a surprising "
+  "earnings beat, its stock price often keeps drifting upward for weeks afterward "
+  "instead of jumping immediately to the new fair value &mdash; a well-documented "
+  "anomaly called post-earnings-announcement drift (PEAD), because analysts and "
+  "investors update their models too slowly. This underreaction is also the "
+  "mechanism behind price <i>momentum</i> more generally: information diffuses "
+  "slowly, so a trend already underway tends to continue.")
+p("<b>Market mechanism, overreaction:</b> a sharp, sudden price move (a panic sale "
+  "or a euphoric rally) often partially reverses over the following weeks as the "
+  "overreaction unwinds &mdash; the mechanism behind the short-term "
+  "<i>reversal</i> signal used in this project, and, as it turned out, the single "
+  "signal that actually worked in the real backtest (Part V).")
+
+h1("2.5  Extrapolation Bias")
+p("<b>Everyday example:</b> a company that has grown fast for three years straight "
+  "is often assumed, informally, to keep growing at a similar pace &mdash; even "
+  "though few businesses sustain any given growth rate indefinitely. People "
+  "extrapolate recent trends further into the future than the trends themselves "
+  "justify.")
+p("<b>Market mechanism:</b> investors chase exciting recent growth stories "
+  "(&quot;glamour&quot; stocks) and shun boring, currently out-of-favor companies, "
+  "bidding growth stocks up beyond what their fundamentals justify and value stocks "
+  "down below theirs. Lakonishok, Shleifer &amp; Vishny's 1994 paper (the founding "
+  "research behind LSV Asset Management, Part IV) argued this extrapolation bias, "
+  "not extra risk, explains much of the historical outperformance of value stocks.")
+
+h1("2.6  Attention and Availability Bias")
+p("<b>Everyday example:</b> people tend to overestimate the probability of dying in "
+  "a plane crash relative to a car crash, because plane crashes are rare but "
+  "vivid and heavily covered by media, so examples come to mind (are "
+  "&quot;available&quot;) more easily than the much more common, less-covered car "
+  "crash.")
+p("<b>Market mechanism:</b> retail investors disproportionately buy stocks that "
+  "have recently grabbed their attention &mdash; extreme returns, heavy news or "
+  "social-media coverage &mdash; rather than researching broadly across the market "
+  "first (Barber &amp; Odean, 2008). This is the central mechanism behind the "
+  "GameStop episode (Part IV): a stock became a coordinated retail target largely "
+  "because it was already attention-grabbing, not because of a broad, independent "
+  "fundamental re-evaluation by thousands of separate investors.")
+
+h1("2.7  Crowding: Herding at Institutional Scale")
+p("<b>Everyday example:</b> if every restaurant critic in a city independently "
+  "decides &quot;fusion cuisine is the next big trend&quot; and reviews "
+  "accordingly, the city can end up with far more fusion restaurants than genuine "
+  "demand supports &mdash; not because any critic copied another, but because they "
+  "were all reasoning from similar assumptions and similar data.")
+p("<b>Market mechanism:</b> many quantitative hedge funds, working independently "
+  "with different proprietary signals, can still end up holding very similar "
+  "positions if their signals are built on the same underlying academic factors "
+  "(value, momentum). Their portfolios look diversified from the inside but are "
+  "secretly correlated with each other. This is the central mechanism behind the "
+  "2007 &quot;Quant Quake&quot; (Part IV): once one large fund was forced to sell, "
+  "the selling pressure looked, to every other similarly-positioned fund's model, "
+  "like a signal to sell the same names.")
+
+# MARKER_END_PART2
+
+# ============================================================ PART III
+story.append(PageBreak())
+toc_entry("Part III &mdash; Quantitative Methodology, Explained", 0, "part3")
+part("Part III &mdash; Quantitative Methodology, Explained")
+
+h1("3.1  What is Value-at-Risk, and why does a &quot;calm-regime&quot; model miss the point?")
+p("<b>Plain-language definition:</b> Value-at-Risk (VaR) at the 99% confidence level "
+  "answers the question &quot;on a bad-but-not-extreme day (one of the worst 1% of "
+  "days), roughly how much could this portfolio lose?&quot; It is the financial "
+  "-industry equivalent of an insurer asking &quot;how much should we expect to pay "
+  "out in a bad year, one we'd expect to see about once every hundred years?&quot;")
+p("<b>Why a Gaussian (bell-curve) model of VaR is dangerous:</b> the easiest way to "
+  "estimate VaR is to assume returns follow a normal (bell-curve) distribution, "
+  "calibrated on however many years of historical data are available, and to "
+  "assume the *correlations* between different positions &mdash; how much they tend "
+  "to move together &mdash; stay roughly constant. Both assumptions are usually "
+  "reasonable in ordinary conditions. Both usually fail together, at the worst "
+  "possible time: during a genuine crisis, returns move by more than a bell curve "
+  "predicts (&quot;fat tails&quot;), and positions that used to move mostly "
+  "independently start moving together (correlations spike toward 1), because "
+  "everyone is reacting to the same underlying fear at once.")
+box(
+    "Two houses on the same street, insured separately against fire. Ordinarily, "
+    "one house catching fire tells an insurer almost nothing about whether the "
+    "neighboring house will too &mdash; fires are close to independent events, so "
+    "insuring both together looks safe. But a wildfire changes that: it can burn "
+    "down both houses at once, because now the two risks share a single common "
+    "cause. A risk model calibrated only on ordinary house fires will badly "
+    "underestimate the insurer's exposure to a wildfire year, not because the "
+    "model is bad at estimating ordinary fires, but because it never saw the "
+    "correlation-raising event in its calibration data. This is exactly the "
+    "mechanism this project's Part III.3 simulation quantifies for a leveraged "
+    "trading book.",
+    kind="fact", title="ANALOGY: TWO HOUSES AND A WILDFIRE"
+)
+
+h2("3.2  The Q1 risk simulation: setup")
+p("Rather than simply asserting that Gaussian VaR models understate tail risk, "
+  "this project built a Monte Carlo simulation (<i>risk_simulation/"
+  "fat_tails_vs_normal.py</i> in the code repository) that computes the "
+  "underestimation directly. It models a leveraged, six-asset relative-value "
+  "book (weights summing to roughly 9x gross exposure, loosely evocative of the "
+  "kind of leveraged spread trades LTCM ran) under two return-generating "
+  "processes:")
+bullets([
+    "<b>The model the risk desk believes:</b> a Gaussian (bell-curve) distribution, "
+    "with a modest, constant 0.25 pairwise correlation between assets, calibrated "
+    "on &quot;calm regime&quot; data &mdash; exactly the kind of risk model a desk "
+    "would build from a few years of ordinary historical returns.",
+    "<b>The process that actually generates the data:</b> the same calm regime "
+    "most days, but with a small (1%) daily probability of switching into a "
+    "&quot;stress regime&quot; where volatility roughly triples and pairwise "
+    "correlation jumps to 0.92 &mdash; combined with fat-tailed (Student-t) "
+    "shocks in both regimes for realistic extreme-day behavior.",
+])
+box(
+    "This project's sandbox environment had no general internet access when this "
+    "simulation was built (see Part V for the full story), which ruled out "
+    "downloading real historical crisis data to measure this effect directly. "
+    "Rather than skip the question or fake a result, the decision was to build a "
+    "Monte Carlo simulation that needs no external data at all &mdash; every "
+    "number it reports is a genuine, reproducible output of code that actually "
+    "ran, even though the underlying scenario is stylized rather than a literal "
+    "reconstruction of any single historical event. The parameters (0.25 to 0.92 "
+    "correlation, 3x volatility) were chosen to be qualitatively consistent with "
+    "what is publicly known about the LTCM episode's shape, not fit to LTCM's "
+    "actual (never fully disclosed) book &mdash; the report is explicit that the "
+    "resulting multiple should be read as &quot;this is the order of magnitude of "
+    "the effect,&quot; not a precise historical reconstruction.",
+)
+
+h2("3.3  The Q1 results (real, executed numbers)")
+data_table(
+    ["Tail depth", "Gaussian (calm-regime) VaR", "True (simulated) VaR", "True Expected Shortfall (CVaR)"],
+    [
+        ["99.0%", "7.67% of book", "8.15% of book  (1.06x)", "10.37% of book  (1.35x)"],
+        ["99.9%", "10.19% of book", "13.26% of book  (1.30x)", "16.83% of book  (1.65x)"],
+    ],
+    col_widths=[0.9*inch, 1.8*inch, 1.9*inch, 1.9*inch],
+)
+p("Worst single day across 500,000 simulated trading days: a loss of 58.9% of the "
+  "book &mdash; a scale of move a Gaussian, calm-regime model treats as "
+  "essentially impossible, but which falls naturally out of a process that "
+  "occasionally lets volatility and correlation rise together. The gap between "
+  "the Gaussian model and reality is modest right at the 99% line (that quantile "
+  "happens to sit near the boundary between regimes in this parameterization) but "
+  "compounds quickly deeper into the tail &mdash; which is itself an important "
+  "lesson: a risk model can look adequate at the confidence level a regulator or "
+  "risk committee checks routinely, and still be dangerously wrong exactly where "
+  "it matters most, a few notches further into the tail.")
+
+h1("3.4  Turning behavioral biases into tradable formulas")
+p("Part II described three biases in plain language. Here is how each becomes a "
+  "number that can be computed for every stock, every day, and used to rank a "
+  "universe of companies:")
+data_table(
+    ["Signal", "Formula (plain language)", "Bias it targets"],
+    [
+        ["12-1 month momentum", "Cumulative return over the trailing ~12 months, "
+         "excluding the most recent month (to avoid contaminating the signal with "
+         "short-term reversal, below)", "Underreaction"],
+        ["52-week-high proximity", "Current price divided by the highest price "
+         "reached in the trailing 52 weeks (1.0 = at the high)", "Anchoring"],
+        ["Short-term reversal", "Negative of the trailing ~1-month return "
+         "(a recent loser scores positively, betting on a bounce)", "Overreaction"],
+    ],
+    col_widths=[1.5*inch, 3.6*inch, 1.5*inch],
+)
+p("A <b>composite score</b> blends all three by converting each to a "
+  "cross-sectional z-score (how many standard deviations a stock is above or "
+  "below the average stock, on that signal, on that day) and averaging &mdash; "
+  "the intended purpose being a single number that combines all three biases into "
+  "one rank. Part V explains why this turned out to be a more dangerous "
+  "simplification than it first appears.")
+
+h1("3.5  How the backtest actually works")
+p("The methodology follows the standard approach used in the academic momentum "
+  "and reversal literature, so results are comparable to published findings "
+  "rather than being an artifact of a bespoke design:")
+bullets([
+    "Once a month, every stock in the universe is ranked by its current signal "
+    "score.",
+    "The strategy goes equally-weighted <i>long</i> the top group (the best-ranked "
+    "names) and equally-weighted <i>short</i> the bottom group (the worst-ranked "
+    "names) &mdash; a &quot;long-short&quot; portfolio, so its return reflects the "
+    "spread between the best and worst names, not the market's overall direction.",
+    "The portfolio is held for one month, then re-ranked and rebalanced.",
+])
+p("Three metrics summarize the result:")
+bullets([
+    "<b>Sharpe ratio:</b> average return divided by the volatility (bumpiness) of "
+    "that return, annualized. A Sharpe of 1.0 is generally considered good for a "
+    "systematic strategy; a Sharpe near 0 means the strategy earned close to "
+    "nothing per unit of risk taken; a negative Sharpe means it lost money "
+    "relative to its own risk.",
+    "<b>Maximum drawdown:</b> the largest peak-to-trough decline the strategy "
+    "experienced at any point in the backtest &mdash; a measure of the worst "
+    "single stretch an investor in the strategy would have had to sit through.",
+    "<b>Turnover and transaction costs:</b> every rebalance that changes which "
+    "names are held costs money in practice (bid-ask spread, market impact). The "
+    "backtest engine tracks how much of the portfolio changes each month "
+    "(turnover) and deducts a simple cost (basis points per unit of turnover) to "
+    "report both a &quot;gross&quot; return (before costs) and a &quot;net&quot; "
+    "return (after costs) &mdash; because a strategy that looks good gross and "
+    "disappears net of realistic costs is a very common way quantitative research "
+    "misleads itself.",
+])
+
+# MARKER_END_PART3
+
+# ============================================================ PART IV
+story.append(PageBreak())
+toc_entry("Part IV &mdash; Five Case Studies, in Depth", 0, "part4")
+part("Part IV &mdash; Five Case Studies, in Depth")
+p("Each case below follows the same structure: what happened, with a timeline; "
+  "which behavioral mechanism from Part II explains it, in plain language; and "
+  "why the case matters for this project's central question.")
+
+h1("4.1  Long-Term Capital Management (1998)")
+h2("What happened")
+p("Long-Term Capital Management was a hedge fund founded in 1994 by John "
+  "Meriwether, with partners that included Myron Scholes and Robert Merton, who "
+  "shared the 1997 Nobel Memorial Prize in Economic Sciences for the "
+  "Black-Scholes-Merton option-pricing framework taught in every finance "
+  "curriculum. The fund ran highly leveraged convergence/relative-value "
+  "arbitrage: betting that prices of closely related securities would converge "
+  "toward their historically &quot;fair&quot; relationship. Individual trades had "
+  "small expected edges, so the fund used enormous leverage &mdash; over 25:1 on "
+  "its balance sheet, with derivative notional exposure exceeding $1 trillion "
+  "&mdash; to turn small, statistically reliable-looking edges into a large "
+  "return.")
+p("From 1994-1997 the fund returned roughly 20-40% annually, a track record that "
+  "built exactly the kind of confidence Part II.3 (overconfidence) describes. "
+  "Russia's default and rouble devaluation on August 17, 1998 triggered a global "
+  "&quot;flight to quality&quot;: investors worldwide fled toward the safest, "
+  "most liquid assets (US Treasuries) and away from everything else, regardless "
+  "of the specific fundamental link between the assets they were selling. "
+  "Spreads LTCM's model treated as largely independent instead moved together, "
+  "in the same direction, and kept widening instead of converging. The fund lost "
+  "about $1.9 billion in August alone; by September 21, capital had fallen from "
+  "roughly $4.7 billion at the start of the year to about $600 million, against "
+  "essentially unchanged notional exposure. On September 23, 1998, with the fund "
+  "days from a disorderly default that regulators feared could force a fire-sale "
+  "across Wall Street, the Federal Reserve Bank of New York organized (but did "
+  "not fund) a $3.625 billion recapitalization by 14 banks in exchange for 90% "
+  "of the fund's equity.")
+h2("The behavioral mechanism, explained")
+p("This is a herding case (Part II.2), but with an important twist: the herding "
+  "was not LTCM's own. LTCM's individual trades were, in isolation, "
+  "defensible. What broke the model was that every other market participant "
+  "started behaving in a correlated way at once &mdash; a collective flight to "
+  "safety that a &quot;rational agents, independent decisions&quot; model does "
+  "not naturally produce. The lesson generalizes: a model of rational markets is "
+  "only as good as its assumption that other participants keep behaving "
+  "independently under stress, and that is precisely the assumption that breaks "
+  "in a genuine crisis &mdash; the exact mechanism quantified in Part III's Q1 "
+  "simulation.")
+h2("Why it matters here")
+p("LTCM is the founding case for this entire project: a fund staffed by the "
+  "people who literally wrote the mathematics of modern option pricing still "
+  "lost 90% of its capital in six weeks, not because the mathematics was wrong, "
+  "but because the mathematics assumed away exactly the kind of correlated human "
+  "behavior that shows up under real stress.")
+
+h1("4.2  The &quot;Quant Quake&quot; (August 2007) and Amaranth Advisors (2006)")
+h2("What happened &mdash; Quant Quake")
+p("Between roughly August 6-9, 2007, a large number of market-neutral "
+  "quantitative equity funds &mdash; using different individual signals, run by "
+  "different firms, with no apparent common trigger in company fundamentals "
+  "&mdash; suffered simultaneous, sharply correlated losses over a few trading "
+  "days, followed by a partial rebound once the selling pressure eased. Several "
+  "well-known quant strategies lost on the order of 5-10%+ in that single week "
+  "&mdash; an extreme move for supposedly market-neutral, low-volatility books. "
+  "The standard academic reconstruction (Khandani &amp; Lo, 2007/2011) attributes "
+  "this to <b>crowding</b>: many quant managers had, independently, arrived at "
+  "similar factor tilts (value, momentum), so their books were far more "
+  "correlated with each other than any of them individually realized. When one "
+  "or more large funds were forced to deleverage a quant book quickly (for "
+  "reasons believed unrelated to those specific positions), the forced selling "
+  "looked, to every other similarly-built model, like a signal to sell the same "
+  "names.")
+h2("What happened &mdash; Amaranth")
+p("Amaranth Advisors was a large multi-strategy hedge fund that lost "
+  "approximately $6.5 billion in September 2006, almost entirely from "
+  "concentrated, highly leveraged natural-gas futures and options positions run "
+  "by a single trader, Brian Hunter. Hunter's core position was a calendar "
+  "spread &mdash; long winter-month natural-gas futures against short "
+  "summer-month contracts, betting the spread would widen &mdash; sized large "
+  "enough, relative to actual market open interest, that Amaranth's own trading "
+  "could move the market it was betting on. A mild start to the 2006 hurricane "
+  "season pushed the spread the wrong way; over roughly a week in mid-September "
+  "2006 the fund lost more than half its capital.")
+h2("The behavioral mechanisms, explained")
+p("Quant Quake is a crowding case (Part II.7): herding among the most "
+  "sophisticated participants in the market, the group a naive "
+  "efficient-markets story would expect to be immune to it. Amaranth is an "
+  "overconfidence case (Part II.3): Hunter's prior profitable natural-gas trades "
+  "made a concentrated, survivable-only-if-right position look more justified "
+  "than the fund's risk limits should have allowed.")
+h2("Why they matter here")
+p("Together, these two cases show that neither sophistication (Quant Quake) nor "
+  "a genuinely skilled track record (Amaranth) protects against the specific "
+  "behavioral failure modes this project studies &mdash; they just change which "
+  "failure mode shows up.")
+
+h1("4.3  The 2008 Financial Crisis and the Gaussian Copula")
+h2("What happened")
+p("The 2007-2008 crisis is usually told as a subprime mortgage story, but the "
+  "mechanism that turned a real but containable housing problem into a systemic "
+  "banking crisis mirrors this project's Q1 simulation almost exactly. Banks "
+  "packaged mortgage pools into collateralized debt obligations (CDOs), tranched "
+  "by seniority. A senior tranche's safety depends critically on how correlated "
+  "the underlying mortgage defaults are: independent defaults make a senior "
+  "tranche very safe; correlated defaults (a national downturn hitting every "
+  "region at once) make that protection evaporate. The industry-standard tool "
+  "for pricing this correlation risk was the Gaussian copula (David X. Li, 2000), "
+  "which reduced the hard problem of modeling thousands of correlated defaults "
+  "to a single correlation parameter, estimated from a history drawn almost "
+  "entirely from a multi-decade housing boom during which national home prices "
+  "had never fallen.")
+p("When US home prices began falling nationally in 2006-2007 &mdash; a regime "
+  "the calibration window had essentially no examples of &mdash; mortgage "
+  "defaults stopped being independent and started moving together, for the same "
+  "underlying reason, in every region at once. Senior tranches priced as "
+  "extremely safe took losses far larger and faster than the model implied, and "
+  "because these instruments were held throughout the banking system, the losses "
+  "hit systemically important institutions almost simultaneously (Bear Stearns, "
+  "March 2008; Lehman Brothers' bankruptcy, September 15, 2008; AIG's roughly "
+  "$182 billion federal rescue, driven largely by credit default swaps written "
+  "against these same instruments).")
+h2("The behavioral mechanism, explained")
+p("This is structurally the identical mistake as a calm-regime Gaussian VaR "
+  "model (Part III.1's wildfire analogy): a correlation parameter estimated from "
+  "a period that never included the correlation-raising regime, and therefore "
+  "blind to how fast that correlation could rise once it arrived. Two "
+  "behavioral/institutional layers sit on top of the pure model failure: "
+  "<b>herding into a shared industry model</b> (using it was a competitive "
+  "necessity even for desks that suspected it understated risk &mdash; a "
+  "rational individual response to career/franchise risk producing an "
+  "irrational collective outcome), and a <b>correlated trust collapse</b> once "
+  "losses started (nobody could tell who was exposed to how much bad paper, so "
+  "short-term lenders pulled back from everyone at once &mdash; the same "
+  "flight-to-quality mechanism as LTCM, at systemic scale).")
+h2("Why it matters here")
+p("This is the largest-scale version, in modern financial history, of the "
+  "pattern this project's Q1 simulation makes explicit in miniature: a model "
+  "that is locally reasonable, calibrated on real data, and wrong specifically "
+  "about how correlation behaves in the rare regime that does the damage.")
+
+h1("4.4  GameStop and the &quot;Meme Stock&quot; Squeeze (January 2021)")
+h2("What happened")
+p("Through 2020, several large hedge funds, most prominently Melvin Capital, "
+  "held large short positions in GameStop (GME), a struggling brick-and-mortar "
+  "video-game retailer, on a conventional view that the business was in "
+  "structural decline. Starting in mid-to-late January 2021, a large, "
+  "coordinated wave of retail buying &mdash; organized largely on the Reddit "
+  "forum r/wallstreetbets &mdash; pushed the share price up by roughly an order "
+  "of magnitude in a few weeks. Two mechanisms compounded pure buying pressure: "
+  "a <b>short squeeze</b> (as the price rose, short sellers faced margin calls "
+  "and were forced to buy shares to close losing positions, pushing the price up "
+  "further) and a <b>gamma squeeze</b> (heavy buying of short-dated call options "
+  "forced the market-makers who sold those calls to buy the underlying stock to "
+  "stay hedged, an amplifying loop running through market structure rather than "
+  "anyone's fundamental view). Melvin Capital's short position lost the fund a "
+  "very large share of its capital in January 2021 and received a $2.75 billion "
+  "capital injection from Citadel and Point72 on January 25, 2021. Robinhood and "
+  "other brokerages restricted buying of GameStop and similar stocks on January "
+  "28, 2021, citing clearinghouse deposit requirements &mdash; a decision that "
+  "triggered US congressional hearings in February 2021.")
+h2("The behavioral mechanisms, explained")
+p("This case runs the <i>opposite</i> direction from the others: retail herding "
+  "(Part II.2, at internet speed and scale) overwhelming institutional "
+  "positioning, amplified by attention-driven trading (Part II.6 &mdash; "
+  "GameStop became a target largely because it was already attention-grabbing, "
+  "consistent with Barber &amp; Odean's research on individual investors "
+  "disproportionately buying stocks that recently grabbed their attention) and "
+  "by the gamified design of mobile-first trading apps.")
+h2("Why it matters here")
+p("GameStop is included specifically to prevent this project's thesis from "
+  "collapsing into &quot;institutions are rational, retail is irrational&quot; "
+  "&mdash; a genuinely coordinated crowd can overwhelm sophisticated positioning "
+  "just as forcefully as institutional herding overwhelmed LTCM's models, just "
+  "pointed in the opposite direction.")
+
+h1("4.5  The Other Side: Funds Built to Exploit These Biases")
+p("Every case above is a story about a bias causing a loss. These three firms "
+  "are the counter-evidence: specific, named biases treated as a persistent, "
+  "exploitable source of return.")
+h2("Fuller &amp; Thaler Asset Management")
+p("Founded in 1993 by Richard Thaler &mdash; awarded the 2017 Nobel Memorial "
+  "Prize in Economic Sciences for work on how limited rationality affects "
+  "economic decisions &mdash; together with Russell Fuller. Their signature "
+  "mechanism is closely related to Part II.4's underreaction concept: "
+  "post-earnings-announcement drift, the well-documented finding that stock "
+  "prices keep drifting in the direction of an earnings surprise for weeks "
+  "after the announcement, because analysts anchor on their pre-announcement "
+  "estimates and update too slowly. Their flagship retail vehicle has long "
+  "traded as &quot;Undiscovered Managers Behavioral Value&quot; (ticker UBVLX).")
+h2("LSV Asset Management")
+p("Founded in 1994 by academic economists Josef Lakonishok, Andrei Shleifer, "
+  "and Robert Vishny, whose own research (Lakonishok, Shleifer &amp; Vishny, "
+  "<i>Journal of Finance</i> 49(5), 1994, pp. 1541-1578) argued that much of "
+  "value stocks' historical outperformance over &quot;glamour&quot; growth "
+  "stocks is explained by investors extrapolating recent growth too far into "
+  "the future (Part II.5), not by value stocks simply being riskier.")
+h2("AQR Capital Management")
+p("Founded in 1998 by Cliff Asness, whose University of Chicago PhD "
+  "dissertation (under advisors including Eugene Fama, himself closely "
+  "associated with the efficient markets hypothesis) was on momentum in stock "
+  "returns. AQR treats behavioral anomalies as one input among several "
+  "(alongside risk-based explanations), run with heavy quantitative discipline "
+  "&mdash; a useful middle case between Fuller &amp; Thaler's purely behavioral "
+  "framing and a pure risk-based factor story.")
+p("The working assumption behind all three &mdash; and behind this project's "
+  "signal library in Part III &mdash; is that specific, named biases produce "
+  "persistent, not merely historical, mispricing. Part V.2's empirical result "
+  "tests that assumption directly, with a real, non-cherry-picked outcome.")
+
+# MARKER_END_PART4
+
+# ============================================================ PART V
+story.append(PageBreak())
+toc_entry("Part V &mdash; Project Journal: Milestones, Decisions, Results", 0, "part5")
+part("Part V &mdash; Project Journal: Milestones, Decisions, Results")
+p("This part narrates the project as it actually happened, in order, including "
+  "the constraints that forced decisions and the results that changed the "
+  "project's direction. Every decision below is stated together with the "
+  "reasoning behind it, per this guide's brief: nothing is presented as "
+  "self-evidently correct without the &quot;why.&quot;")
+
+h1("5.1  Scoping the project")
+p("The project started from a broad brief: research the role of human "
+  "irrationality in markets, with concrete applications to finance and "
+  "business. Before writing anything, the scope was narrowed by asking four "
+  "questions: what output format was wanted, which behavioral angle to anchor "
+  "on, what methodology/evidence to use, and what concrete impact the research "
+  "should produce.")
+box(
+    "The answers chosen were: a <b>quantitative research project with runnable "
+    "code</b> (not a pure literature review); anchored on <b>both</b> failed "
+    "&quot;rational market&quot; bets (LTCM-style) <b>and</b> behavioral funds "
+    "that exploit bias; using <b>public market data plus case-study "
+    "comparison</b>; aimed at producing an <b>investment framework, "
+    "risk-management lessons, and a business idea</b>. This combination was "
+    "chosen specifically because it forces the project to be falsifiable in "
+    "both directions at once (Part I.3) rather than only telling the flattering "
+    "half of the story (either &quot;markets are irrational, here's how to "
+    "profit&quot; or &quot;here's why smart people fail,&quot; without testing "
+    "either claim against real numbers).",
+)
+
+h1("5.2  Milestone 1 &mdash; Building the pipeline under a hard constraint")
+p("The first concrete obstacle appeared immediately: the development "
+  "environment's outbound network access is restricted by an egress proxy to a "
+  "specific allowlist. Direct testing (curl requests to each host, and reading "
+  "the proxy's own status endpoint, which logs connection failures) confirmed "
+  "that Yahoo Finance, Stooq, SEC EDGAR, and FRED &mdash; every conventional "
+  "free market-data source &mdash; were all blocked with a 403 policy denial.")
+box(
+    "The tempting shortcut here would have been to generate synthetic "
+    "&quot;market-looking&quot; data and present backtest results computed on "
+    "it as if they were real findings &mdash; exactly the kind of "
+    "model-dressed-as-reality mistake this project's whole thesis warns "
+    "against. The decision instead was to build the complete, real pipeline "
+    "(data loader, signal library, backtest engine) as production-quality code, "
+    "but to sharply separate two categories of claim: results that were "
+    "<b>actually computed by running code in this environment</b> (which get "
+    "stated as fact) versus code that is <b>complete and believed correct but "
+    "not yet exercised on real data</b> (which gets stated as an explicit, "
+    "flagged limitation, never as a finding). The one part of the research that "
+    "needed no external data at all &mdash; the Q1 tail-risk simulation "
+    "(Part III.2-3.3) &mdash; was built first specifically because it could "
+    "produce a genuine, real result despite the network constraint.",
+)
+p("Milestone 1 shipped: the research design document, the full signal and "
+  "backtest codebase (validated only against synthetic test fixtures at this "
+  "point, with that limitation stated explicitly), the Q1 risk simulation with "
+  "its real executed numbers, three initial case studies (LTCM, Quant Quake / "
+  "Amaranth, the behavioral funds), and a first version of the practical "
+  "framework document.")
+box(
+    "At the end of milestone 1, a new working practice was established at the "
+    "user's request: after every milestone, provide a recap of the reasoning "
+    "behind what was built, followed by explicit questions checking whether the "
+    "project's focus was still correctly calibrated to what was actually "
+    "wanted. This is why milestones 2 and 3 below each open with what the "
+    "previous recap's questions surfaced.", kind="fact", title="PROCESS DECISION"
+)
+
+h1("5.3  Milestone 2 &mdash; Real data, and a result that changed the project")
+p("The milestone-1 recap asked, among other things, how to handle the "
+  "no-internet constraint going forward. The chosen answer was to actively "
+  "search for a reachable data source rather than accept the limitation as "
+  "final.")
+box(
+    "Rather than assume every external host was blocked, a range of unrelated "
+    "hosts was tested directly &mdash; not just financial-data providers but "
+    "also generic ones (a plain package index, a generic search engine). This "
+    "showed the block was not &quot;no internet at all&quot; but a specific "
+    "allowlist: <i>api.github.com</i> and <i>raw.githubusercontent.com</i> were "
+    "reachable while general financial-data hosts and even a plain "
+    "general-purpose website were not. That distinction mattered: it meant "
+    "GitHub-hosted datasets were a real option, not a dead end.",
+)
+p("A web search for GitHub-hosted multi-ticker daily price datasets surfaced a "
+  "real candidate: a community-uploaded CSV of 63 raw ticker symbols covering "
+  "NSE (India) large/mid-cap companies from 2000 to 2021. Before using it, the "
+  "data was checked for basic quality (no duplicate date/symbol rows, no "
+  "zero or negative prices) and then for a subtler issue: several apparent "
+  "&quot;different companies&quot; turned out, on inspection of their trading "
+  "date ranges, to be the <i>same</i> company under a former ticker symbol.")
+box(
+    "The evidence for this was date-range contiguity: symbol A's last trading "
+    "date and symbol B's first trading date lined up with no overlap and no "
+    "gap, for 14 separate symbol pairs (or longer chains) &mdash; the exact "
+    "signature of an NSE ticker rename. Each chain was then cross-checked "
+    "against publicly known Indian corporate history (for example, "
+    "&quot;TELCO&quot; was Tata Motors' ticker before a rename; "
+    "&quot;SESAGOA&quot; became &quot;SSLT&quot; then &quot;VEDL&quot; as Sesa "
+    "Goa became Sesa Sterlite became Vedanta Ltd) before merging. One pair, "
+    "HDFC and HDFCBANK, was deliberately <i>not</i> merged, because the two "
+    "were genuinely separate listed companies for the entire sample period "
+    "(they only merged in 2023, after the data ends). This is the kind of "
+    "judgment call that is easy to get wrong silently in a backtest &mdash; "
+    "merging two unrelated companies, or failing to merge one company's own "
+    "history &mdash; so it was done from evidence, and locked in afterward "
+    "with a dedicated automated test (visible in the code repository's "
+    "<i>tests/test_loaders.py</i>) rather than left as a one-off manual step.",
+)
+p("With 48 clean, continuous company series covering 21 years, the full "
+  "signal-and-backtest pipeline was run for the first time on real market "
+  "data.")
+data_table(
+    ["Signal", "Split", "Gross annual return", "Gross Sharpe", "Net Sharpe", "Max drawdown"],
+    [
+        ["Composite (all 3)", "deciles", "-3.59%", "0.01", "-0.03", "-74.3%"],
+        ["Composite (all 3)", "quintiles", "-1.33%", "0.05", "0.00", "-63.2%"],
+        ["12-1 momentum only", "quintiles", "-1.73%", "0.04", "0.01", "-60.8%"],
+        ["52-week-high only", "quintiles", "-13.71%", "-0.51", "-0.54", "-97.1%"],
+        ["Short-term reversal only", "quintiles", "+4.46%", "0.30", "0.22", "-64.1%"],
+    ],
+    col_widths=[1.5*inch, 0.75*inch, 1.2*inch, 0.85*inch, 0.8*inch, 0.9*inch],
+    small=True,
+)
+p("The composite score alone would have supported a bland, roughly-correct-"
+  "sounding conclusion: &quot;no real edge here.&quot; Decomposing it into its "
+  "three parts told a much more informative and more dangerous story: the "
+  "52-week-high (anchoring) signal was actively destructive, losing money "
+  "persistently and suffering a 97% drawdown, while the short-term reversal "
+  "(overreaction) signal had a genuine, positive, cost-adjusted edge. Averaging "
+  "them together hid both facts.")
+p("A follow-up check tested whether the anchoring signal's damage was simply an "
+  "artifact of the 2008 and 2020 crashes (both periods where a "
+  "&quot;buy recent winners&quot; strategy is known from the academic "
+  "literature to be exposed to sharp reversals &mdash; &quot;momentum crash "
+  "risk&quot;). Excluding both crash windows entirely, the strategy's Sharpe "
+  "ratio outside them was still -0.46, and its cumulative loss "
+  "<i>excluding</i> the crashes (-90%) was actually larger than its loss "
+  "<i>during</i> them (-53%) &mdash; ruling out &quot;it only lost money "
+  "in the two crashes&quot; as the explanation, and leaving the true cause an "
+  "open question flagged honestly rather than resolved with a plausible-"
+  "sounding guess. (Part V.4 below picks this exact question back up.)")
+box(
+    "The milestone-2 recap surfaced this same lesson back to the practice "
+    "guiding the project itself: a mediocre-looking blended result should "
+    "always be decomposed before being trusted, a rule now stated explicitly "
+    "in the practical framework (Part VI.1). The recap also asked whether "
+    "tying the eventual business idea to this repository's own existing "
+    "software platform (a private-equity deal-screening tool the code "
+    "happened to live alongside) was the right framing. The answer was no "
+    "&mdash; the business idea was rewritten from scratch as a standalone "
+    "analytics service (Part VI.3), decoupled from any specific existing "
+    "platform, per that explicit feedback.",
+)
+
+h1("5.4  Milestone 3 &mdash; Replication and an open investigation (in progress)")
+p("The milestone-2 recap's questions produced three directions to pursue next: "
+  "search for a second, independent market's data to check whether the "
+  "NSE findings replicate elsewhere; investigate <i>why</i> the 52-week-high "
+  "signal lost money, specifically testing whether it was confounded with a "
+  "value/growth effect (India's sample spans a two-decade secular bull market, "
+  "so a signal that is effectively short &quot;cheap, beaten-down&quot; names "
+  "could be fighting a value effect rather than purely testing anchoring); and "
+  "continue expanding the codebase and case-study library rather than "
+  "wrapping up.")
+p("As of this document, a second, independent dataset has been located and "
+  "verified reachable: a GitHub-hosted mirror of the well-known Kaggle "
+  "&quot;Huge Stock Market Dataset,&quot; one file per US-listed ticker, with "
+  "price history for many large-cap names (Apple, Microsoft, Amazon, and "
+  "others confirmed individually) extending back to the 1980s. This gives a "
+  "second market to test the NSE findings against &mdash; a different country, "
+  "different market structure, different time period overlap &mdash; before "
+  "generalizing any conclusion beyond &quot;true for this one Indian large-cap "
+  "sample.&quot; <b>This second backtest, and the value/growth confound test "
+  "for the 52-week-high result, were in progress at the time this guide was "
+  "written and are not yet reflected in the numbers above</b> &mdash; this "
+  "guide will be updated once they complete, and the project's code "
+  "repository is the definitive source for whichever of those two documents "
+  "is more current.")
+box(
+    "This guide itself &mdash; a parallel, plain-language deliverable "
+    "explaining the whole project for a reader without a quant-finance "
+    "background &mdash; was requested mid-stream, specifically to run "
+    "alongside the ongoing quantitative work rather than after it. Producing "
+    "it required pausing new quantitative analysis briefly to write it, which "
+    "is why milestone 3's two open questions (replication, the value/growth "
+    "confound) are reported here as in-progress rather than resolved.",
+    kind="fact", title="WHY THIS GUIDE EXISTS"
+)
+
+# MARKER_END_PART5
+
+# ============================================================ PART VI
+story.append(PageBreak())
+toc_entry("Part VI &mdash; From Research to Practice", 0, "part6")
+part("Part VI &mdash; From Research to Practice")
+
+h1("6.1  An investment framework: the Behavioral Mispricing Score")
+p("The composite score from Part III.4 is designed to be used as a "
+  "<b>tilt or flag layered on top of an existing fundamentals-driven "
+  "screen</b>, never as a standalone strategy &mdash; the same pattern every "
+  "fund in Part IV.5 actually follows (they all pair behavioral signals with "
+  "fundamental discipline, not raw signal-following). A stock that screens well "
+  "fundamentally <i>and</i> sits in the top behavioral decile is a stronger "
+  "candidate than either signal alone would suggest; a stock flagged as a "
+  "behavioral &quot;loser&quot; deserves a second look even when its "
+  "fundamentals look fine.")
+box(
+    "Rule, stated as a direct consequence of Part V.3's finding, not as generic "
+    "best practice borrowed from a textbook: <b>never trust a blended score "
+    "without checking what each of its components does on its own.</b> The "
+    "composite here looked mediocre; decomposing it found one component "
+    "actively losing money with a 97% drawdown and another with a genuine, "
+    "positive, cost-adjusted edge. Any score this project's code produces "
+    "should be reported and validated component-by-component before a blended "
+    "version of it is trusted for a decision.",
+)
+
+h1("6.2  A risk-management playbook, from the Q1 simulation")
+bullets([
+    "<b>Never calibrate tail risk on a calm-regime correlation matrix alone.</b> "
+    "The Part III simulation shows a Gaussian VaR model calibrated on "
+    "&quot;normal&quot; data understates the true 99.9% tail loss by roughly "
+    "1.3x, purely because it cannot see correlations rising toward 1 under "
+    "stress. Any leveraged strategy needs a stress-regime correlation scenario "
+    "as a second, explicit check, not just a historical-calibration number.",
+    "<b>Leverage does not just scale losses &mdash; it changes which losses are "
+    "survivable.</b> LTCM's underlying spread moves were not physically "
+    "unprecedented; 25:1+ leverage turned a bad quarter into insolvency. "
+    "Position and leverage limits should be set against the stress-regime tail "
+    "estimate, not the calm-regime one.",
+    "<b>Crowding is a correlation risk invisible from inside your own "
+    "portfolio.</b> The 2007 Quant Quake shows a well-diversified-looking book "
+    "can be secretly correlated with every other fund running a similar "
+    "signal. A practical mitigant: track how crowded a factor appears to be "
+    "(e.g., the realized correlation of a strategy's returns to a public "
+    "factor index) and de-risk when it's high, independent of the strategy's "
+    "own apparent confidence.",
+    "<b>A winning streak is not evidence against tail risk.</b> Amaranth's "
+    "Brian Hunter had a strong record before the 2006 blowup; recent success "
+    "under one regime is weak evidence a concentrated position is safe under a "
+    "different one. Concentration limits need an explicit override that "
+    "doesn't relax just because a book has been working.",
+    "<b>Treat &quot;the model says it's fine&quot; as a hypothesis, not a "
+    "fact</b> &mdash; especially near known regime-change triggers (sovereign "
+    "defaults, liquidity crunches, crowded-factor unwinds). This is the "
+    "project's central thesis applied reflexively to its own tooling, not just "
+    "to the markets it studies.",
+])
+
+h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
+p("Off-the-shelf factor data (momentum, value, quality) is typically sold by "
+  "large vendors as pre-blended, black-box composites, priced for institutions "
+  "with large budgets. Smaller systematic funds, family offices, independent "
+  "RIAs, and research desks either cannot afford that tier, or cannot see "
+  "<i>inside</i> the composite to know which component is actually carrying "
+  "the edge on their specific universe &mdash; exactly the failure mode this "
+  "project hit directly on the NSE data (Part V.3).")
+box(
+    "This idea was originally framed as an extension of the specific software "
+    "platform this research happened to be built alongside. That framing was "
+    "dropped after explicit feedback that the business idea should stand on "
+    "its own, independent of any particular existing product. The pitch below "
+    "reflects that: a standalone service, differentiated on the same "
+    "transparency principle (decomposed, auditable signals; never a "
+    "pre-blended black box) that Part V.3's finding demonstrated the value of "
+    "directly.",
+)
+p("<b>The product:</b> a subscription analytics service with two parts &mdash; "
+  "a <b>signal side</b> (the momentum / 52-week-high / reversal library, run "
+  "per client against <i>their</i> universe, reported as separate, "
+  "individually-backtested components, never pre-blended) and a "
+  "<b>risk side</b> (the regime-switching stress-VaR methodology from Part III, "
+  "run against a client's actual position correlations and leverage, reporting "
+  "calm-regime vs. stress-regime tail loss side by side).")
+p("<b>Target customer:</b> small-to-mid systematic equity funds, family "
+  "offices, and independent RIAs priced out of institutional factor-data tiers "
+  "but sophisticated enough to want decomposed, re-validated signals rather "
+  "than a black box; secondarily, finance graduate programs and CFA/PE prep "
+  "courses, as a teaching tool for the exact &quot;don't trust the "
+  "blend&quot; lesson this project surfaced.")
+p("<b>Revenue model:</b> a per-seat analytics subscription, tiered by number "
+  "of tracked universes/portfolios &mdash; the same go-to-market as existing "
+  "quant factor-data vendors, priced and scoped for the segment those vendors "
+  "serve poorly, differentiated specifically on transparency: every number "
+  "traces to runnable code and a stated backtest window, not a proprietary "
+  "methodology.")
+p("<b>Moat:</b> not the signals themselves (all public, published research) "
+  "&mdash; the moat is the discipline of per-client, per-universe decomposed "
+  "validation instead of a generic pre-blended score, which is exactly what a "
+  "larger vendor selling a standardized product across all clients "
+  "structurally cannot do cheaply.")
+
+# MARKER_END_PART6
+
+# ============================================================ PART VII
+story.append(PageBreak())
+toc_entry("Part VII &mdash; Limitations and Honesty Statement", 0, "part7")
+part("Part VII &mdash; Limitations and Honesty Statement")
+p("Stated together in one place because a project whose entire thesis is "
+  "&quot;don't trust a model's output just because it looks rigorous&quot; "
+  "owes the same discipline to its own outputs.")
+bullets([
+    "<b>Survivorship bias.</b> Both the NSE mirror and the US mirror located in "
+    "milestone 3 use a present-day-chosen company list, not point-in-time "
+    "index membership. A rigorous version needs a survivorship-bias-free "
+    "universe (e.g., CRSP, or a maintained point-in-time constituents file).",
+    "<b>Data provenance.</b> The NSE dataset is a personal, community-uploaded "
+    "GitHub repository, not an official exchange or licensed vendor feed. "
+    "Results from it are a genuine methodology demonstration on real prices, "
+    "not investment-grade research, until cross-checked against an official "
+    "source.",
+    "<b>India-specific findings, not yet shown to generalize.</b> The one "
+    "empirical result set so far (Part V.3) is one market, one large-cap-only "
+    "universe, one 21-year window. Milestone 3's US-market replication "
+    "(Part V.4) exists specifically to test whether it generalizes.",
+    "<b>Transaction costs are a simple linear model</b>, not a real "
+    "market-impact model; a strategy sized for real capital would need a "
+    "proper implementation-shortfall estimate.",
+    "<b>No out-of-sample / walk-forward validation is wired up by default.</b> "
+    "A real deployment should split into a strict in-sample fit period and "
+    "out-of-sample test period, and check for performance decay after each "
+    "anomaly's academic publication date &mdash; a well-documented risk for "
+    "momentum and reversal specifically.",
+    "<b>The Q1 simulation's parameters are illustrative</b>, calibrated "
+    "loosely to the LTCM episode's qualitative shape (correlations that were "
+    "low/moderate in normal times moving toward 1 in crisis), not fit to "
+    "LTCM's actual, never fully disclosed book. Its reported multiple should "
+    "be read as an order of magnitude, not a precise historical "
+    "reconstruction.",
+    "<b>The 52-week-high result's cause is not yet confirmed.</b> Momentum-"
+    "crash risk and a value/growth confound are both plausible, "
+    "neither is proven; Part V.4's in-progress investigation exists "
+    "specifically to test the second explanation.",
+])
+
+# ============================================================ CONCLUSIONS
+story.append(PageBreak())
+toc_entry("Conclusions", 0, "concl")
+part("Conclusions")
+p("The Efficient Market Hypothesis is a useful default, not a law of nature. "
+  "This project's five case studies show it failing in genuinely different "
+  "ways &mdash; a Nobel-laureate-staffed fund undone by other investors' "
+  "correlated panic; sophisticated quant funds undone by their own hidden "
+  "crowding; an entire industry's risk model undone by a correlation "
+  "assumption nobody's calibration data ever tested; a struggling retailer's "
+  "stock undone (in the institutional short-sellers' favor, this time) by "
+  "coordinated retail attention &mdash; which is itself evidence against any "
+  "single, tidy story of &quot;why markets are irrational.&quot; There isn't "
+  "one mechanism; there are several, each traceable to a specific, "
+  "well-documented piece of human psychology.")
+p("The project's real empirical result (Part V.3) delivered a finding more "
+  "useful than a simple confirmation of either extreme view would have been: "
+  "not &quot;markets are irrational, biases always pay,&quot; and not "
+  "&quot;the anomalies are all arbitraged away, don't bother.&quot; Instead: "
+  "one specific, named bias (anchoring, via the 52-week-high signal) actively "
+  "lost money on this universe, while a different one (overreaction, via "
+  "short-term reversal) had a real, cost-adjusted edge &mdash; and the two "
+  "were invisible from inside a single blended composite. That is, in "
+  "miniature, the entire project's argument: rigor means checking the "
+  "specific mechanism, not trusting the reassuring-looking aggregate.")
+p("The practical output (Part VI) turns that into three concrete artifacts: an "
+  "investment framework that explicitly forbids trusting a blend without "
+  "decomposing it; a risk-management playbook built directly from a "
+  "real simulated result, not a generic checklist; and a business idea whose "
+  "differentiation <i>is</i> the decomposition discipline the research itself "
+  "needed. Milestone 3, in progress as of this writing, exists to find out "
+  "whether the India finding is a real, general pattern or an artifact of one "
+  "market and one time period &mdash; the next test of the same standard the "
+  "rest of this project has tried to hold itself to throughout.")
+
+# ============================================================ GLOSSARY
+story.append(PageBreak())
+toc_entry("Glossary", 0, "gloss")
+part("Glossary")
+glossary = [
+    ("Anchoring", "Relying too heavily on an initial reference point (e.g. a "
+     "52-week high, an opening price) when making subsequent judgments."),
+    ("Composite score", "A single number blending several individual signals "
+     "into one rank; this project's central finding is that a composite can "
+     "hide a component that is actively harmful."),
+    ("Correlation regime shift", "A change in how much different assets move "
+     "together &mdash; typically a jump from low/moderate to near-1 "
+     "correlation during a market crisis."),
+    ("Crowding", "Many independent, sophisticated participants arriving at "
+     "similar positions without coordinating, producing hidden correlation "
+     "across supposedly diversified portfolios."),
+    ("Decile / quintile backtest", "A methodology that ranks a universe by a "
+     "signal, then goes long the best-ranked group and short the worst-ranked "
+     "group, to isolate the return spread the signal actually predicts."),
+    ("Efficient Market Hypothesis (EMH)", "The theory that asset prices "
+     "reflect all available information, implying no strategy should "
+     "reliably beat a passive index."),
+    ("Extrapolation bias", "Assuming a recent trend (e.g. fast earnings "
+     "growth) will continue further into the future than it typically does."),
+    ("Fat tails", "A return distribution with more extreme outcomes than a "
+     "normal (bell-curve) distribution predicts."),
+    ("Herding", "Following the crowd's behavior rather than independently "
+     "evaluating a decision &mdash; useful most of the time, dangerous when "
+     "the crowd itself started moving for an unrelated reason."),
+    ("Leverage", "Borrowed capital or notional derivative exposure used to "
+     "scale a position beyond what the investor's own capital would allow; "
+     "it magnifies both gains and losses."),
+    ("Maximum drawdown", "The largest peak-to-trough decline a strategy "
+     "experiences at any point in a backtest."),
+    ("Momentum", "The tendency of a security's recent trend to continue, "
+     "typically attributed to underreaction."),
+    ("Overconfidence", "Overestimating the reliability of one's own "
+     "judgment or model, often reinforced by a recent string of favorable "
+     "outcomes."),
+    ("Post-earnings-announcement drift (PEAD)", "The tendency of a stock "
+     "price to keep drifting in the direction of an earnings surprise for "
+     "weeks after the announcement, rather than repricing immediately."),
+    ("Reversal", "The tendency of a very recent, sharp price move to "
+     "partially revert, typically attributed to overreaction."),
+    ("Sharpe ratio", "Average return divided by return volatility, "
+     "annualized; a standard measure of risk-adjusted performance."),
+    ("Survivorship bias", "The distortion introduced by only including, in a "
+     "historical study, entities that are still around today (e.g. still-"
+     "listed companies), which tends to overstate historical performance."),
+    ("Value-at-Risk (VaR)", "An estimate of how much a portfolio could lose "
+     "over a given horizon at a given confidence level (e.g. the worst-case "
+     "loss on all but the worst 1% of days)."),
+]
+for term, definition in glossary:
+    story.append(Paragraph(term, styles["GlossTerm"]))
+    story.append(Paragraph(definition, styles["Body"]))
+
+# ============================================================ SOURCES
+story.append(PageBreak())
+toc_entry("Sources and Further Reading", 0, "sources")
+part("Sources and Further Reading")
+sources = [
+    "Roger Lowenstein, <i>When Genius Failed: The Rise and Fall of "
+    "Long-Term Capital Management</i> (2000).",
+    "President's Working Group on Financial Markets, report on hedge fund "
+    "leverage and LTCM (April 1999).",
+    "Amir Khandani &amp; Andrew Lo, &quot;What Happened To The Quants In "
+    "August 2007?&quot;, <i>Journal of Investment Management</i>, 2011 "
+    "(working paper 2007).",
+    "Contemporaneous financial press coverage of Amaranth Advisors' "
+    "September 2006 collapse (e.g. <i>Wall Street Journal</i>, "
+    "September-October 2006).",
+    "David X. Li, &quot;On Default Correlation: A Copula Function "
+    "Approach&quot;, <i>Journal of Fixed Income</i>, 2000.",
+    "Felix Salmon, &quot;Recipe for Disaster: The Formula That Killed Wall "
+    "Street&quot;, <i>Wired</i>, February 2009.",
+    "Michael Lewis, <i>The Big Short</i> (2010).",
+    "US House Financial Services Committee hearing, &quot;Game Stopped? Who "
+    "Wins and Loses When Short Sellers, Social Media, and Retail Investors "
+    "Collide&quot; (February 18, 2021).",
+    "Brad Barber &amp; Terrance Odean, &quot;All That Glitters: The Effect "
+    "of Attention and News on the Buying Behavior of Individual and "
+    "Institutional Investors&quot;, <i>Review of Financial Studies</i>, "
+    "2008.",
+    "Narasimhan Jegadeesh &amp; Sheridan Titman, &quot;Returns to Buying "
+    "Winners and Selling Losers: Implications for Stock Market "
+    "Efficiency&quot;, <i>Journal of Finance</i>, 1993.",
+    "William George &amp; Chuan-Yang Hwang, &quot;The 52-Week High and "
+    "Momentum Investing&quot;, <i>Journal of Finance</i>, 2004.",
+    "Narasimhan Jegadeesh, &quot;Evidence of Predictable Behavior of "
+    "Security Returns&quot;, <i>Journal of Finance</i>, 1990.",
+    "Josef Lakonishok, Andrei Shleifer &amp; Robert Vishny, &quot;Contrarian "
+    "Investment, Extrapolation, and Risk&quot;, <i>Journal of Finance</i> "
+    "49(5), 1994, pp. 1541-1578.",
+    "Richard Thaler, <i>Misbehaving: The Making of Behavioral "
+    "Economics</i> (2015).",
+    "Kent Daniel &amp; Tobias Moskowitz, &quot;Momentum Crashes&quot;, "
+    "<i>Journal of Financial Economics</i>, 2016.",
+    "Werner De Bondt &amp; Richard Thaler, &quot;Does the Stock Market "
+    "Overreact?&quot;, <i>Journal of Finance</i>, 1985.",
+]
+for s in sources:
+    story.append(Paragraph("&bull;&nbsp;&nbsp;" + s, styles["MyBullet"]))
+
+p("All code, full case-study write-ups, and the underlying data-loading and "
+  "backtest engine referenced throughout this guide live in the project's "
+  "code repository, folder <i>research/behavioral-finance/</i>, which remains "
+  "the definitive, most up-to-date source as milestone 3 and beyond continue.",
+  style="BodyItalic")
+
+# MARKER_END_ALL_CONTENT
+
+# ============================================================ DOCUMENT BUILD
+
+
+class GuideDocTemplate(BaseDocTemplate):
+    """Populates the TOC automatically from PartTitle (level 0) and H1
+    (level 1) styled paragraphs as the document is laid out, and draws a
+    running header/footer (skipped on the cover page)."""
+
+    def afterFlowable(self, flowable):
+        if isinstance(flowable, Paragraph):
+            style_name = getattr(flowable.style, "name", "")
+            if style_name == "PartTitle":
+                self.notify("TOCEntry", (0, flowable.getPlainText(), self.page))
+            elif style_name == "H1":
+                self.notify("TOCEntry", (1, flowable.getPlainText(), self.page))
+
+
+def _draw_page_furniture(canvas_obj, doc_obj):
+    canvas_obj.saveState()
+    page_num = canvas_obj.getPageNumber()
+    if page_num > 1:
+        canvas_obj.setFont("Helvetica", 8)
+        canvas_obj.setFillColor(colors.HexColor("#8a94a3"))
+        canvas_obj.drawString(MARGIN, PAGE_H - 0.55 * inch, "Behavioral Finance Research Project")
+        canvas_obj.drawRightString(PAGE_W - MARGIN, PAGE_H - 0.55 * inch, "Project Guide")
+        canvas_obj.setStrokeColor(colors.HexColor("#c3ccd6"))
+        canvas_obj.line(MARGIN, PAGE_H - 0.62 * inch, PAGE_W - MARGIN, PAGE_H - 0.62 * inch)
+        canvas_obj.setFont("Helvetica", 8.5)
+        canvas_obj.setFillColor(colors.HexColor("#5a6472"))
+        canvas_obj.drawCentredString(PAGE_W / 2, 0.5 * inch, str(page_num))
+    canvas_obj.restoreState()
+
+
+frame = Frame(MARGIN, MARGIN, PAGE_W - 2 * MARGIN, PAGE_H - 2 * MARGIN, id="normal_frame")
+
+doc = GuideDocTemplate(
+    OUT_PATH,
+    pagesize=LETTER,
+    leftMargin=MARGIN, rightMargin=MARGIN, topMargin=MARGIN, bottomMargin=MARGIN,
+    title="Behavioral Finance Research Project - Guide",
+    author="Behavioral Finance Research Project",
+)
+doc.addPageTemplates([PageTemplate(id="normal", frames=[frame], onPage=_draw_page_furniture)])
+doc.multiBuild(story)
+
+print(f"PDF built: {OUT_PATH}")
+
