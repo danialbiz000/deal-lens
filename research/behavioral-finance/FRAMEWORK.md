@@ -57,18 +57,26 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   loss is real and not an artifact of an unrelated factor — which makes it more, not less,
   important to keep this specific signal excluded from the composite until its true cause
   is understood.
-- **Update, now that the cause is understood: the fix is long-only, not exclusion.**
-  `README.md`, "Testing momentum-crash risk directly," decomposed the 52-week-high
-  signal's long and short legs separately and found the long leg (buying stocks near
-  their 52-week high) is a genuinely positive, standalone strategy in both markets
-  (Sharpe 0.45–1.20 outside bear-market regimes) — the entire loss comes from the short
-  leg (shorting stocks far from their high), which is negative in every regime tested and
-  gets dramatically worse specifically when realized volatility is high and the market is
-  in a trailing downturn, the textbook momentum-crash signature. **Rule: don't discard a
-  component signal wholesale because its long-short backtest lost money — decompose the
-  legs first. A signal that only works long is still a usable signal, folded into the
-  composite as a long-only tilt (e.g., a positive-only floor on the 52-week-high z-score)
-  rather than a symmetric long-short bet.**
+- **The fix is long-only, not exclusion — and this part is solid even though the "why"
+  isn't.** `README.md`, "Testing momentum-crash risk directly," decomposed the
+  52-week-high signal's long and short legs separately and found the long leg (buying
+  stocks near their 52-week high) is a genuinely positive, standalone strategy in both
+  markets — the entire loss comes from the short leg. That decomposition is statistically
+  robust (Milestone 5: significant in every specification tested, both markets, both
+  frequencies). **Rule: don't discard a component signal wholesale because its
+  long-short backtest lost money — decompose the legs first. A signal that only works
+  long is still a usable signal, folded into the composite as a long-only tilt (e.g., a
+  positive-only floor on the 52-week-high z-score) rather than a symmetric long-short
+  bet.**
+- **But don't claim to know *why* the short leg fails — that part did not survive formal
+  testing.** The descriptive regime comparison in Milestone 4 looked like strong evidence
+  for momentum-crash risk (a documented, named mechanism). Milestone 5 turned that into
+  HAC-regression significance tests, at daily and monthly frequency, in both markets — and
+  the short leg (where the mechanism specifically predicts the damage should concentrate)
+  showed no statistically significant regime-conditioning anywhere. **Rule: a compelling
+  descriptive pattern is a hypothesis, not a finding, until it's been tested formally — and
+  "formally tested, not confirmed" is a genuinely different, weaker claim than "strongly
+  supported," even when the same numbers motivated both. Report the weaker claim.**
 
 ## 2. Risk-management lessons
 
@@ -107,16 +115,27 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
    liquidity crunches, crowded-factor unwinds) — which is really the
    project's whole thesis applied to your own tooling, not just to the
    market you're modeling.
-6. **The Q1 mechanism and the Q2 empirical finding are the same lesson, closing the
-   loop.** `risk_simulation/fat_tails_vs_normal.py` showed, in a stylized simulation,
-   that a strategy's tail risk compounds specifically when volatility and correlation
-   rise together. `README.md`'s momentum-crash-risk investigation then found the exact
-   same signature in a real, executed backtest: the 52-week-high short leg's losses
-   compound specifically in high-realized-volatility, trailing-bear-market regimes — not
-   a simulated illustration this time, a real strategy on real prices. **Any short
-   position built on a behavioral signal should be regime-tested the same way before
-   being sized**, not assumed safe because its unconditional backtest Sharpe looks
-   acceptable.
+6. **The Q1 mechanism and the Q2 investigation asked the same question — Q1 answered it
+   with a simulation, Q2's real data gave a more honest, weaker answer.**
+   `risk_simulation/fat_tails_vs_normal.py` showed, in a stylized simulation, that tail
+   risk compounds specifically when volatility and correlation rise together. `README.md`'s
+   momentum-crash-risk investigation set out to find the same signature in a real
+   backtest, and a first descriptive pass (Milestone 4) looked like it had. Formal
+   significance testing (Milestone 5) did not confirm it. **Any short position built on
+   a behavioral signal should still be regime-tested before being sized** — that
+   precaution doesn't depend on this specific mechanism being confirmed — but "regime-
+   tested" has to mean the HAC-regression version, not the regime-bucket version, given
+   what happened here when the two disagreed.
+7. **A compelling descriptive pattern is a hypothesis, not a finding — this project
+   produced its own cautionary tale.** Milestone 4's regime-bucket comparison (Sharpe by
+   volatility tercile, bull vs. bear) looked like a clean, four-signature confirmation of
+   momentum-crash risk. Formal HAC-regression testing at daily and monthly frequency
+   (Milestone 5) found none of the regime-conditioning coefficients significant in the
+   leg the theory actually predicts (the short leg), in either market. Both analyses used
+   the same underlying data; only the statistical rigor differed. **Rule: never size a
+   position, write a risk limit, or make a claim in a report based on a descriptive
+   regime split alone — run the regression with proper standard errors first, and expect
+   a real chance that the compelling-looking pattern won't survive it.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

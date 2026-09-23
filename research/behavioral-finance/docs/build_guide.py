@@ -1013,6 +1013,15 @@ box(
 )
 
 h1("5.5  Milestone 4 &mdash; Testing momentum-crash risk directly")
+box(
+    "<b>Update (Section 5.6, Milestone 5): the formal statistical test does "
+    "NOT confirm the regime-conditioning mechanism this section describes.</b> "
+    "This section is kept as written at the time &mdash; the pattern-matching "
+    "genuinely looked this compelling &mdash; but Section 5.6 walks it back "
+    "with real numbers. Read that section before treating anything below as "
+    "confirmed.",
+    kind="fact", title="READ THIS FIRST"
+)
 p("The one remaining candidate explanation from milestone 3 &mdash; generic "
   "momentum-crash risk (Daniel &amp; Moskowitz, &quot;Momentum Crashes,&quot; "
   "2016; see Part II.4 and Part IV.1) &mdash; was tested directly at the "
@@ -1057,17 +1066,72 @@ box(
     "&mdash; no statistical t-tests were run on the regime differences, and "
     "the volatility-tercile cutoffs were computed over each dataset's full "
     "history rather than a rolling window a live system would need. With "
-    "that caveat stated plainly: four independent, mutually consistent "
-    "signatures (volatility monotonicity, bear-state conditioning, the "
-    "specific worst-bucket match, and short-leg concentration), replicated "
-    "across two unrelated markets, is about as strong a case as this kind "
-    "of historical analysis can make without moving to a formal statistical "
-    "test. <b>The practical conclusion changed as a result</b>: the "
-    "52-week-high signal should not be discarded &mdash; its long leg "
-    "works &mdash; but it should never be shorted as originally designed. "
-    "Part VI.1 updates the investment framework accordingly: a long-only "
-    "tilt, not a symmetric long-short bet.",
-    kind="fact", title="HOW HARD TO LEAN ON THIS"
+    "that caveat stated plainly, at this point in the project four "
+    "independent, mutually consistent signatures looked like about as "
+    "strong a case as this kind of historical analysis could make short of "
+    "formal statistics &mdash; which is exactly what Section 5.6 adds, and "
+    "exactly what changes the conclusion.",
+    kind="fact", title="HOW HARD TO LEAN ON THIS, AS UNDERSTOOD AT THE TIME"
+)
+
+h1("5.6  Milestone 5 &mdash; Formally testing momentum-crash risk")
+p("The user explicitly asked for the pattern-matching in Section 5.5 to "
+  "become &quot;a statistical test with proven reliability&quot; before "
+  "opening a pull request. Two upgrades were made "
+  "(<i>investigations/momentum_crash_significance.py</i>): the volatility "
+  "tercile threshold now uses an <b>expanding window</b> (each day's "
+  "&quot;high vol&quot; label uses only data through the previous day, "
+  "fixing the one look-ahead caveat Section 5.5 flagged), and strategy "
+  "returns are regressed on the regime indicators using "
+  "<b>Newey-West (HAC) standard errors</b> &mdash; the standard correction "
+  "for serial correlation from monthly-rebalanced, overlapping holding "
+  "periods, the same style of correction the original Daniel &amp; "
+  "Moskowitz paper itself uses. Tests were run at both daily frequency "
+  "(HAC lag 21) and monthly frequency (one return per rebalance, HAC lag "
+  "6, matching the paper's own testing frequency).")
+data_table(
+    ["Return series", "Daily: high_vol x bear", "Monthly: bear", "Monthly: vol_rank"],
+    [
+        ["NSE short leg (theory's predicted locus)", "p=0.57", "p=0.67", "p=0.09 (wrong sign)"],
+        ["NSE long leg", "p=0.94", "p=0.0007", "p=0.0046"],
+        ["US short leg (theory's predicted locus)", "p=0.65", "p=0.34", "p=0.61"],
+        ["US long leg", "p=0.15", "p<0.0001", "p=0.0139"],
+    ],
+    col_widths=[2.3*inch, 1.5*inch, 1.3*inch, 1.6*inch],
+    small=True,
+)
+p("<b>The specific regime-conditioning mechanism does not survive formal "
+  "testing.</b> The short leg &mdash; the one momentum-crash theory "
+  "specifically predicts should blow up in high-volatility, bear-market "
+  "regimes &mdash; shows no statistically significant regime-conditioning "
+  "in either market, at either frequency, in any specification tested. "
+  "NSE's short leg even has a wrong-signed coefficient at the 10% level "
+  "(losses <i>shrinking</i>, not growing, as volatility rises) &mdash; "
+  "evidence against the hypothesis in that specific cut, not for it. The "
+  "regime effects that <i>are</i> highly significant (p&lt;0.01, every "
+  "specification) show up in the long leg instead &mdash; a far more "
+  "mundane explanation (a long-biased position carries positive "
+  "market-beta exposure and underperforms generally in bear markets) than "
+  "the specific short-squeeze mechanism the hypothesis describes.")
+box(
+    "What remains statistically ironclad, every specification, both "
+    "markets, both frequencies: the long leg's average return is "
+    "significantly positive and the short leg's is significantly negative "
+    "&mdash; the decomposition itself, not the proposed explanation for "
+    "it. With roughly 24 regime-effect coefficients tested across both "
+    "frequencies and markets, seeing 2-4 marginally significant results at "
+    "the 5-10% level is within what pure chance produces under a true "
+    "null &mdash; not meaningfully more than a false-positive rate. "
+    "<b>Corrected conclusion:</b> the long-only recommendation stands "
+    "(Part VI.1) &mdash; it rests on the robust decomposition, not on the "
+    "crash-risk story. But the project cannot claim to know <i>why</i> the "
+    "short leg fails. That remains genuinely open. This is the project's "
+    "own central thesis &mdash; don't trust a reassuring pattern until "
+    "it's tested &mdash; applied to its own most recent finding, at the "
+    "exact point it mattered most: the explanation that looked "
+    "best-supported in the whole investigation turned out not to survive "
+    "the one test that actually tests it.",
+    title="WHAT SURVIVES AND WHAT DOESN'T"
 )
 
 # MARKER_END_PART5
@@ -1097,15 +1161,20 @@ box(
     "should be reported and validated component-by-component before a blended "
     "version of it is trusted for a decision.",
 )
-p("<b>Updated after Part V.5:</b> once the 52-week-high signal's cause was "
-  "understood &mdash; a short leg exposed to momentum-crash risk, not a "
-  "broken thesis &mdash; the right fix turned out to be more specific than "
-  "&quot;exclude it.&quot; The long leg (buying stocks near their 52-week "
-  "high) is a genuinely positive, standalone strategy on its own. <b>Rule: "
-  "don't discard a component signal wholesale because its long-short "
-  "backtest lost money &mdash; decompose the legs first.</b> A signal that "
-  "only works long is still worth including, as a long-only tilt rather "
-  "than a symmetric long-short bet.")
+p("<b>The fix is long-only, not exclusion &mdash; and this part is solid "
+  "even though the &quot;why&quot; isn't (Part V.5-V.6).</b> The long leg "
+  "(buying stocks near their 52-week high) is a genuinely positive, "
+  "standalone strategy on its own, and that finding is statistically "
+  "robust in every specification tested. <b>Rule: don't discard a "
+  "component signal wholesale because its long-short backtest lost money "
+  "&mdash; decompose the legs first.</b> A signal that only works long is "
+  "still worth including, as a long-only tilt rather than a symmetric "
+  "long-short bet. <b>But don't claim to know why the short leg fails</b> "
+  "&mdash; the specific momentum-crash mechanism looked compelling under a "
+  "descriptive regime split (Part V.5) but did not survive formal "
+  "HAC-regression significance testing (Part V.6). A compelling "
+  "descriptive pattern is a hypothesis, not a finding, until it's tested "
+  "formally.")
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
 bullets([
@@ -1137,16 +1206,31 @@ bullets([
     "defaults, liquidity crunches, crowded-factor unwinds). This is the "
     "project's central thesis applied reflexively to its own tooling, not just "
     "to the markets it studies.",
-    "<b>The Q1 mechanism and the Q2 empirical finding are the same lesson, "
-    "closing the loop.</b> Part III's simulation showed, stylized, that tail "
-    "risk compounds when volatility and correlation rise together. Part V.5 "
-    "then found the identical signature in a real, executed backtest: a "
-    "short position's losses compounding specifically in high-volatility, "
-    "trailing-bear-market regimes &mdash; not a simulated illustration this "
-    "time, a real strategy on real prices. Any short position built on a "
-    "behavioral signal should be regime-tested the same way before being "
-    "sized, not assumed safe because its unconditional Sharpe looks "
-    "acceptable.",
+    "<b>The Q1 mechanism and the Q2 investigation asked the same question "
+    "&mdash; Q1 answered it with a simulation, Q2's real data gave a more "
+    "honest, weaker answer.</b> Part III's simulation showed, stylized, that "
+    "tail risk compounds when volatility and correlation rise together. Part "
+    "V.5's momentum-crash-risk investigation set out to find the same "
+    "signature in a real backtest, and a first descriptive pass looked like "
+    "it had. Formal significance testing (Part V.6) did not confirm it. Any "
+    "short position built on a behavioral signal should still be "
+    "regime-tested before being sized &mdash; that precaution doesn't depend "
+    "on this specific mechanism being confirmed &mdash; but &quot;regime-"
+    "tested&quot; has to mean the HAC-regression version, not the "
+    "regime-bucket version, given what happened here when the two "
+    "disagreed.",
+    "<b>A compelling descriptive pattern is a hypothesis, not a finding "
+    "&mdash; this project produced its own cautionary tale.</b> Part V.5's "
+    "regime-bucket comparison looked like a clean, four-signature "
+    "confirmation of momentum-crash risk. Formal HAC-regression testing at "
+    "daily and monthly frequency (Part V.6) found none of the "
+    "regime-conditioning coefficients significant in the leg the theory "
+    "actually predicts, in either market. Both analyses used the same "
+    "underlying data; only the statistical rigor differed. Never size a "
+    "position, write a risk limit, or make a claim based on a descriptive "
+    "regime split alone &mdash; run the regression with proper standard "
+    "errors first, and expect a real chance the compelling-looking pattern "
+    "won't survive it.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -1215,15 +1299,20 @@ bullets([
     "two markets tested (Part V.4) &mdash; treat either result, in isolation, "
     "as provisional rather than a confirmed anomaly. Only the 52-week-high "
     "signal's loss held up in both.",
-    "<b>The 52-week-high result's cause: strongly supported, not formally "
-    "proven.</b> Two candidate explanations (crash-window concentration; a "
-    "value/growth confound) were directly tested and rejected (Part V.3-V.4). "
-    "Momentum-crash risk was then tested directly and found consistent on "
-    "four independent signatures in both markets (Part V.5) &mdash; but this "
-    "is pattern-matching against a known mechanism with real data, not a "
-    "formal statistical significance test (no t-stats on the regime splits; "
-    "volatility-tercile thresholds use the full sample rather than a "
-    "rolling window). Strong evidence, stated as such, not proof.",
+    "<b>The 52-week-high result's cause remains genuinely open.</b> Two "
+    "candidate explanations were ruled out by direct test: crash-window "
+    "concentration and a value/growth confound, in either market "
+    "(Part V.3-V.4). A third, momentum-crash risk, looked strongly "
+    "supported under a descriptive regime-bucket comparison (Part V.5) but "
+    "did NOT survive formal HAC-regression significance testing at daily or "
+    "monthly frequency, in either market (Part V.6): the short leg, where "
+    "the mechanism specifically predicts the damage should concentrate, "
+    "shows no significant regime-conditioning anywhere it was tested. What "
+    "IS statistically robust, every specification: the long leg's average "
+    "return is significantly positive and the short leg's significantly "
+    "negative &mdash; the decomposition itself, not the proposed "
+    "explanation for it. Treat &quot;why the short leg fails&quot; as "
+    "unresolved.",
     "<b>Transaction costs are a simple linear model</b>, not a real "
     "market-impact model; a strategy sized for real capital would need a "
     "proper implementation-shortfall estimate.",
@@ -1274,21 +1363,29 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 and 4 then ran the India finding through the same "
-  "skepticism the project applies to everything else, and it did not survive "
-  "unchanged: momentum and reversal turned out to be universe-dependent, not "
-  "general truths, while the 52-week-high signal's damage held up across two "
-  "very different markets and eras, survived a direct test against its most "
-  "plausible alternative explanation (a value/growth confound), and was then "
-  "traced to a specific, well-documented mechanism (momentum-crash risk "
-  "concentrated in its short leg) with real evidence, not just a process of "
-  "elimination. The fix that fell out of that chase was more useful than "
-  "either &quot;keep it&quot; or &quot;discard it&quot; would have been: the "
-  "signal's long leg works fine on its own, so the answer was neither "
-  "&mdash; trade it long-only. That is the project working as intended: not "
-  "every finding needs to be confirmed to be useful, and chasing a wrong "
-  "signal down to its actual mechanism produced a better answer than "
-  "stopping at the first plausible-sounding explanation would have.")
+  "needed. Milestones 3 through 5 then ran the India finding through the "
+  "same skepticism the project applies to everything else, and it did not "
+  "survive unchanged: momentum and reversal turned out to be universe-"
+  "dependent, not general truths; the 52-week-high signal's damage held up "
+  "across two very different markets and eras and survived a direct test "
+  "against its most plausible alternative explanation (a value/growth "
+  "confound); and the specific mechanism proposed for <i>why</i> it fails "
+  "(momentum-crash risk) looked compelling under a descriptive pass but did "
+  "not survive formal, autocorrelation-corrected significance testing, in "
+  "either market, at either frequency. Each step used a stronger method "
+  "than the one before it, and each stronger method found something the "
+  "weaker one had missed or overclaimed.")
+p("The fix that survived all of that scrutiny was more useful than either "
+  "&quot;keep it&quot; or &quot;discard it&quot; would have been: the "
+  "signal's long leg works, robustly, on its own, so the answer is neither "
+  "&mdash; trade it long-only &mdash; and that answer does not depend on "
+  "knowing why the short leg fails, which the project now states honestly "
+  "as unresolved rather than as a named, confirmed mechanism. That is the "
+  "project working as intended, including on itself: not every finding "
+  "needs to be confirmed to be useful, a compelling descriptive pattern is "
+  "a hypothesis and not a finding until it survives formal testing, and the "
+  "single most important correction in this entire guide is one the "
+  "project made about its own most recent, best-supported-looking result.")
 
 # ============================================================ GLOSSARY
 story.append(PageBreak())
@@ -1336,6 +1433,16 @@ glossary = [
     ("Post-earnings-announcement drift (PEAD)", "The tendency of a stock "
      "price to keep drifting in the direction of an earnings surprise for "
      "weeks after the announcement, rather than repricing immediately."),
+    ("Newey-West (HAC) standard errors", "A correction to a regression's "
+     "standard errors that accounts for serial correlation in the data "
+     "(e.g. from overlapping monthly holding periods); without it, "
+     "significance tests on this kind of strategy-return data can look "
+     "more confident than the data actually supports."),
+    ("p-value", "The probability of seeing a result at least this extreme "
+     "if there were truly no effect. Conventionally, p<0.05 is called "
+     "\"statistically significant\" -- but with many tests run at once, "
+     "some will cross that bar by chance alone (see this guide's own "
+     "Milestone 5 for a worked example)."),
     ("Reversal", "The tendency of a very recent, sharp price move to "
      "partially revert, typically attributed to overreaction."),
     ("Sharpe ratio", "Average return divided by return volatility, "
@@ -1394,6 +1501,10 @@ sources = [
     "<i>Journal of Financial Economics</i>, 2016.",
     "Werner De Bondt &amp; Richard Thaler, &quot;Does the Stock Market "
     "Overreact?&quot;, <i>Journal of Finance</i>, 1985.",
+    "Whitney Newey &amp; Kenneth West, &quot;A Simple, Positive "
+    "Semi-Definite, Heteroskedasticity and Autocorrelation Consistent "
+    "Covariance Matrix&quot;, <i>Econometrica</i>, 1987 -- the standard "
+    "reference for the HAC standard errors used in Part V.6.",
 ]
 for s in sources:
     story.append(Paragraph("&bull;&nbsp;&nbsp;" + s, styles["MyBullet"]))

@@ -208,6 +208,12 @@ trading date in both datasets).
 
 ## Testing momentum-crash risk directly (Milestone 4)
 
+> **Update (Milestone 5): the formal statistical test below does *not* confirm the
+> regime-conditioning mechanism this section describes.** This section is kept as
+> written at the time — the pattern-matching genuinely looked this compelling — but
+> "Formally testing momentum-crash risk" further down walks it back with real numbers.
+> Read that section before treating anything below as confirmed.
+
 Milestone 3 left one candidate explanation for the 52-week-high signal's losses
 untested: generic momentum-crash risk (Daniel & Moskowitz, 2016) — a documented property
 of "long recent winners, short recent losers" strategies, where the *short* leg (recent
@@ -244,20 +250,81 @@ distribution is right-skewed in NSE (skew +0.13 to +0.40) — the fingerprint of
 position that loses steadily most of the time and occasionally gets hit by a sharp squeeze
 against it, exactly the mechanism the hypothesis describes.
 
-**How hard to lean on this**: this is pattern-matching against a well-documented
-mechanism using real data, not a formal significance test (no t-stats on the regime
-differences were computed) and the volatility-tercile cutoffs were set using the full
-sample's distribution, which a live version would need to compute on a rolling/expanding
-basis instead to avoid look-ahead in the regime *definition* itself (the regime *label*
-assigned to each day is still lagged and look-ahead-free; the *thresholds* that define
-"high vol" are not). With that caveat, four independent, mutually consistent signatures
-(volatility monotonicity, bear-state conditioning, the specific worst-bucket match, and
-the short-leg concentration) across two unrelated markets is about as strong a case as this
-kind of historical analysis can make. **Practical implication, folded into
-`FRAMEWORK.md`**: the 52-week-high signal should not be discarded outright — its long leg
-works — but it should never be shorted as designed; a long-only or long-tilted version of
-this signal is the version worth keeping. **Reproduce this**:
+**How hard to lean on this, as understood at the time**: this is pattern-matching against
+a well-documented mechanism using real data, not a formal significance test (no t-stats on
+the regime differences were computed) and the volatility-tercile cutoffs were set using the
+full sample's distribution, which a live version would need to compute on a
+rolling/expanding basis instead to avoid look-ahead in the regime *definition* itself. With
+that caveat, four independent, mutually consistent signatures across two unrelated markets
+looked, at this point in the project, like about as strong a case as this kind of
+historical analysis could make short of formal statistics — which is exactly what the next
+section adds, and exactly what changes the conclusion. **Reproduce this**:
 `python investigations/momentum_crash_risk.py`.
+
+## Formally testing momentum-crash risk (Milestone 5)
+
+The user explicitly asked for the pattern-matching above to be turned into "a statistical
+test with proven reliability" before opening a PR. Two upgrades were made
+(`investigations/momentum_crash_significance.py`):
+
+1. **Look-ahead-free regime thresholds.** The volatility tercile cutoff is now computed on
+   an *expanding* window (each day's "high vol" label uses only volatility data through the
+   previous day), not the full sample — fixing the one caveat flagged above.
+2. **Formal significance testing**: daily strategy/long-leg/short-leg returns are
+   regressed on regime dummies (`high_vol`, `bear`, `high_vol × bear`) and, separately, on
+   the volatility-tercile rank, using **Newey-West (HAC) standard errors** (21-trading-day
+   lag, the standard correction for serial correlation from monthly-rebalanced holding
+   periods — the same style of correction the Daniel & Moskowitz paper itself uses). A
+   second version aggregates to **monthly returns at each rebalance** (one observation per
+   holding period, HAC lag 6) — the frequency the paper's own tests are run at, and a check
+   on whether daily-return noise was swamping a real monthly-level effect either way.
+
+**Result: the specific regime-conditioning mechanism does *not* survive formal testing.
+What survives is only the more basic decomposition finding.**
+
+| Return series | Daily: `high_vol×bear` interaction | Monthly: `bear` | Monthly: `vol_rank` |
+|---|---|---|---|
+| NSE — short leg (where the theory predicts the damage) | p=0.57 | p=0.67 | p=0.09 (**wrong sign**) |
+| NSE — long leg | p=0.94 | **p=0.0007**  | **p=0.0046** |
+| US — short leg (where the theory predicts the damage) | p=0.65 | p=0.34 | p=0.61 |
+| US — long leg | p=0.15 | **p<0.0001** | **p=0.0139** |
+
+(Full coefficient tables, both frequencies, both legs, both the dummy and monotonicity
+specifications: `python investigations/momentum_crash_significance.py`.)
+
+**What this means, stated plainly**: the short leg — the one the momentum-crash mechanism
+specifically predicts should blow up in high-volatility, bear-market regimes — shows **no
+statistically significant regime-conditioning in either market, at either frequency, in
+any specification**. The regime effects that *are* statistically significant (bear-state
+and volatility-rank coefficients, both highly significant, p<0.01) show up in the **long
+leg instead** — which is a much more mundane explanation (a long-biased position carries
+positive market-beta exposure and underperforms in bear markets generally) than the
+specific "short squeeze on rebounding losers" mechanism the momentum-crash hypothesis
+describes. NSE's short leg even has the *wrong-signed* coefficient at the 10% level
+(losses shrinking, not growing, as volatility rises) — direct evidence against, not for,
+the hypothesis in that specific cut.
+
+**What remains statistically ironclad, across every single specification, both markets,
+both frequencies**: the long leg's average daily/monthly return is significantly positive
+(p<0.05 daily, p<0.0001 monthly, both markets) and the short leg's is significantly
+negative (same). The **decomposition finding — long works, short doesn't — is real and
+robust**. The **specific proposed mechanism for *why* the short leg fails is not
+confirmed** by this test; it remains a plausible, literature-grounded hypothesis that
+looked compelling under simple descriptive splits but did not hold up under multiple-
+testing-aware, autocorrelation-corrected regression. With ~24 regime-effect coefficients
+tested across both frequencies and markets, seeing 2-4 marginally significant results at
+the 5-10% level is within what pure chance would produce — not meaningfully more than a
+false-positive rate under a true null.
+
+**Practical implication, corrected in `FRAMEWORK.md`**: the long-only recommendation
+stands — it rests on the robust decomposition, not on the crash-risk story. But the
+project should **not** claim to know *why* the short leg fails. That remains an open
+question. This is the project's own "don't trust the reassuring pattern" thesis applied to
+its most recent finding about itself, at the point where it mattered most: the pattern
+that looked like the best-supported explanation in the whole investigation turned out not
+to survive the one test that actually tests it. **Reproduce this**:
+`python investigations/momentum_crash_significance.py` (needs `statsmodels`, added to
+`requirements.txt`).
 
 ## Data provenance: the NSE GitHub mirror
 
@@ -414,8 +481,13 @@ print(result.summary())
 # Investigation — is the 52-week-high result a value/growth confound? (rejected; see above)
 python investigations/52w_high_value_confound.py
 
-# Investigation — is the 52-week-high result momentum-crash risk? (strongly supported; see above)
+# Investigation — is the 52-week-high result momentum-crash risk? (descriptive pass;
+# looked compelling, see the formal test below before trusting it)
 python investigations/momentum_crash_risk.py
+
+# Investigation — same question, formally: HAC regressions, daily + monthly frequency
+# (result: NOT statistically confirmed — see "Formally testing momentum-crash risk" above)
+python investigations/momentum_crash_significance.py
 
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
@@ -454,15 +526,18 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   that were low/moderate in normal times moving toward 1 in the crisis), not fit to LTCM's
   actual undisclosed book. Treat the multiple as "this is the order of magnitude of the
   effect," not a precise historical reconstruction.
-- **The 52-week-high signal's cause: two explanations ruled out, momentum-crash risk
-  strongly (not formally) supported.** Not purely the 2008/2020 crash windows (Milestone 2);
-  not a value/growth confound, in either market (Milestone 3); and directly consistent with
-  momentum-crash risk on four independent signatures — volatility monotonicity, bear-state
-  conditioning, the specific worst-regime match, and short-leg concentration — in both
-  markets (Milestone 4, "Testing momentum-crash risk directly"). That's pattern-matching
-  against a known mechanism with real data, not a formal significance test (no t-stats on
-  the regime splits, and the volatility-tercile thresholds use the full sample rather than
-  a rolling/expanding window) — strong evidence, not proof.
+- **The 52-week-high signal's cause remains genuinely open.** Two explanations were ruled
+  out by direct test: not purely the 2008/2020 crash windows (Milestone 2), not a
+  value/growth confound in either market (Milestone 3). A third — generic momentum-crash
+  risk — looked strongly supported under a descriptive, regime-bucket comparison (Milestone
+  4), but **did not survive formal HAC-regression significance testing at daily or monthly
+  frequency, in either market** (Milestone 5, "Formally testing momentum-crash risk"): the
+  short leg, where the mechanism specifically predicts the damage should concentrate, shows
+  no significant regime-conditioning anywhere it was tested. What *is* statistically robust,
+  every specification, both markets: the long leg's average return is significantly
+  positive and the short leg's significantly negative — the decomposition itself, not the
+  proposed explanation for it. Treat "why the short leg fails" as unresolved, not as
+  momentum-crash risk confirmed, in anything built on this repo.
 - **Momentum and reversal did not replicate consistently across the two markets tested**
   (see "Replication on a second market") — treat any single-market anomaly finding in this
   repo as provisional until it's been checked on at least one more, independent universe.
