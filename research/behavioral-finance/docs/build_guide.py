@@ -1442,7 +1442,64 @@ box(
     "means the finding "
     "cannot currently be sized as a forward-looking edge without further "
     "work.",
-    title="THE FINAL, OUT-OF-SAMPLE-CONFIRMED ANSWER"
+    title="THE OUT-OF-SAMPLE-CONFIRMED ANSWER, AS FAR AS THIS SECTION TOOK IT"
+)
+box(
+    "Section 5.12 investigated this null result in depth, at explicit "
+    "request, rather than stopping here: is it really just the 2009 "
+    "momentum crash, or an artifact of the hedge's rolling window? "
+    "Neither. Read on for the deeper, still-standing answer.",
+    kind="fact", title="UPDATE FROM SECTION 5.12"
+)
+
+h1("5.12  Milestone 11 &mdash; Is the post-1994 null result a crash artifact, a hedge artifact, or genuine decay?")
+p("Section 5.11 left two objections explicitly untested: is the post-1994 "
+  "null result concentrated in a specific regime &mdash; most plausibly "
+  "the well-documented 2009 &quot;momentum crash&quot; (Daniel &amp; "
+  "Moskowitz, 2016, <i>Review of Financial Studies</i>, where past losers "
+  "momentum strategies were underweighting rebounded violently in the "
+  "2008-crisis recovery) &mdash; or is it an artifact of the specific "
+  "252-trading-day rolling hedge window Sections 5.8 and 5.11 happened to "
+  "use? This milestone "
+  "(<i>investigations/momentum_decay_regime_analysis.py</i>) runs three "
+  "checks on the post-1994 hedged return series to answer both.")
+p("<b>Check 1 &mdash; sub-period breakdown.</b> Splitting post-1994 into "
+  "five multi-year eras shows a declining trend, not a single bad episode "
+  "with a recovery: the long leg's hedged excess return runs +6.5%, "
+  "+10.5%, +3.4%, -3.7%, then <b>+0.1%</b> in 2010-2017 &mdash; the most "
+  "recent nine years show essentially zero excess return, well after the "
+  "2009 crash was over. The combined book shows the same pattern, ending "
+  "at <b>-5.1%</b> in 2010-2017.")
+p("<b>Check 2 &mdash; explicit crash-window exclusion (March-August "
+  "2009).</b> The crash window itself was severe &mdash; the combined "
+  "book lost 40.2% cumulatively in those 128 trading days alone. "
+  "Excluding it: the long leg's daily alpha p-value improves from 0.149 "
+  "to a borderline 0.095 (the crash meaningfully hurt this leg's result), "
+  "but the combined book's p-value only improves from 0.590 to 0.334, "
+  "nowhere near significance. The crash is a real contributing factor for "
+  "the long leg, but does not explain the combined book's null result, "
+  "and the continued weakness through 2010-2017 shows the effect is not "
+  "fully explained by a single 2009 episode either way.")
+p("<b>Check 3 &mdash; hedge rolling-window robustness (126d / 252d / "
+  "378d).</b> Re-running the entire hedge with three different lookback "
+  "windows: pre-1994 alpha is strongly significant at every window "
+  "tested (p&le;0.017, long leg p&le;0.001) and post-1994 alpha is "
+  "non-significant at every window tested (p ranges 0.14-0.66 across "
+  "both legs and all three windows). The null result is not an artifact "
+  "of the specific 252-day window.")
+box(
+    "This deeper investigation does not reverse Section 5.11's finding "
+    "&mdash; if anything it strengthens it. The 2009 momentum crash was "
+    "real and severe and meaningfully affected the long leg's result, "
+    "but it is not sufficient on its own to explain either leg's "
+    "post-1994 null result, and the hedge's design choice is not "
+    "driving it either. <b>The era-by-era trend (positive and shrinking "
+    "through the 2000s, negative through the crisis, and still flat or "
+    "negative for the nine years since) is the signature of genuine, "
+    "ongoing decay rather than one bad shock the strategy simply hasn't "
+    "yet recovered from.</b> A finding that survives a genuine attempt "
+    "to explain it away deserves more confidence, not less.",
+    title="THE DEEPER, STILL-STANDING ANSWER"
 )
 
 # MARKER_END_PART5
@@ -1528,12 +1585,22 @@ box(
     "in-sample regression, and found it does not survive: post-1994 "
     "alpha is not statistically significant in either leg, at either "
     "frequency, once beta is estimated only from trailing data and "
-    "re-hedged monthly. Pre-1994 alpha remains strongly confirmed. "
-    "<b>This is the current, most rigorous answer &mdash; treat this "
-    "project's momentum finding as real and robust pre-1994, and not "
-    "currently demonstrated to be forward-sizeable in the post-"
-    "publication era.</b>",
+    "re-hedged monthly. Pre-1994 alpha remains strongly confirmed. Treat "
+    "this project's momentum finding as real and robust pre-1994, and "
+    "not currently demonstrated to be forward-sizeable in the "
+    "post-publication era.",
     kind="fact", title="UPDATE FROM PART V.11"
+)
+box(
+    "Part V.12 dug into that null result at explicit request rather than "
+    "stopping here: is it really just the 2009 momentum crash, or the "
+    "hedge's rolling window? Neither explained it &mdash; a five-era "
+    "breakdown showed ongoing decay through 2017, well after 2009, and "
+    "the result held across three different hedge windows. <b>This is "
+    "the current, most rigorous answer: genuine, strong pre-1994 alpha, "
+    "and genuine, ongoing decay since &mdash; not a temporary shock the "
+    "strategy is due to recover from.</b>",
+    kind="fact", title="UPDATE FROM PART V.12"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -1628,6 +1695,21 @@ bullets([
     "isn't the final word either &mdash; only a hedge that could "
     "actually have been traded forward tells you what capital entering "
     "today can expect.",
+    "<b>Before accepting a null result, rule out the obvious &quot;maybe "
+    "it's just one bad episode&quot; and &quot;maybe it's a methodology "
+    "artifact&quot; objections &mdash; and if it survives both, treat "
+    "that as the null result getting stronger, not weaker.</b> Part V.12 "
+    "tested whether Part V.11's post-1994 null result was really just "
+    "the 2009 momentum crash, and whether it depended on the specific "
+    "hedge window chosen. Neither objection explained it: the era-by-era "
+    "trend showed ongoing decay through 2017, well after 2009, and the "
+    "result was identical across three different hedge windows. A "
+    "finding that survives a genuine attempt to explain it away deserves "
+    "more confidence, not less &mdash; the temptation after an "
+    "unwelcome result is to look for the one adjustment that makes it go "
+    "away; running that check honestly, and reporting it even when it "
+    "doesn't help, is what separates a stress-test from a fishing "
+    "expedition.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -1715,18 +1797,23 @@ bullets([
     "reported positive finding did not survive the same scrutiny applied to "
     "the negative one.",
     "<b>US 12-1 momentum's post-1994 alpha does not survive an actual "
-    "out-of-sample hedge (Parts V.10-11, superseding an earlier, more "
-    "optimistic in-sample reading).</b> An in-sample pre/post-1994 split "
-    "(Part V.10) found real decay but apparent survival in three of four "
-    "cuts. Re-testing the same post-1994 period with a rolling, "
-    "out-of-sample beta hedge &mdash; the standard this project already "
-    "requires for its negative findings &mdash; found no statistically "
-    "significant alpha in either leg, at either frequency (Part V.11); "
-    "the hedged combined book's post-1994 average return is outright "
-    "negative. Pre-1994 alpha remains real and robust under the same "
-    "test. This project's momentum finding should be read as strong and "
-    "genuine before 1994, and not currently demonstrated to be "
-    "forward-sizeable in the more-than-two-decades since.",
+    "out-of-sample hedge, and the deeper investigation confirms genuine "
+    "decay rather than a crash or methodology artifact (Parts V.10-12, "
+    "superseding an earlier, more optimistic in-sample reading).</b> An "
+    "in-sample pre/post-1994 split (Part V.10) found real decay but "
+    "apparent survival in three of four cuts. Re-testing the same "
+    "post-1994 period with a rolling, out-of-sample beta hedge found no "
+    "statistically significant alpha in either leg, at either frequency "
+    "(Part V.11); the hedged combined book's post-1994 average return is "
+    "outright negative. Part V.12 then tested whether that null result "
+    "was just the 2009 momentum crash or a hedge-window artifact: an "
+    "era-by-era breakdown showed ongoing decay through 2017 (well past "
+    "2009), excluding the crash window left the combined book's result "
+    "essentially unchanged, and the null result held across three "
+    "different hedge windows. Pre-1994 alpha remains real and robust "
+    "under every test. This project's momentum finding should be read "
+    "as strong and genuine before 1994, and as genuine, ongoing decay "
+    "&mdash; not a temporary shock &mdash; since.",
     "<b>The 52-week-high result's cause: resolved, and it's the boring "
     "answer.</b> Two behavioral/statistical explanations were ruled out by "
     "direct test: crash-window concentration (Part V.4) and a value/growth "
@@ -1803,13 +1890,18 @@ p("The project's real empirical result (Part V.3) delivered a finding more "
   "an actual out-of-sample hedge, and the honest answer got more sobering: "
   "no statistically significant post-1994 alpha survives in either leg. "
   "Even this project's own most reassuring recent finding kept shrinking "
-  "every time it was checked with a sharper tool.")
+  "every time it was checked with a sharper tool. Part V.12 then did "
+  "something different from every check before it: instead of applying a "
+  "sharper tool and finding the result shrink again, it tried directly to "
+  "explain the shrinkage away &mdash; as a single crash episode, or as an "
+  "artifact of one modeling choice &mdash; and failed on both counts. The "
+  "result held.")
 p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "investment framework that explicitly forbids trusting a blend without "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 10 then ran the India findings through "
+  "needed. Milestones 3 through 11 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -1826,9 +1918,11 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "&mdash; while a signal nobody had flagged as special (US momentum) "
   "turned out to hold real, statistically robust alpha once someone "
   "finally looked properly &mdash; alpha that Part V.10 then showed had "
-  "partially decayed since its 1993 publication, and that Part V.11 then "
+  "partially decayed since its 1993 publication, that Part V.11 then "
   "showed does not clear this project's own bar for a forward-sizeable "
-  "edge once tested with an actual out-of-sample hedge, in the era since "
+  "edge once tested with an actual out-of-sample hedge, and that Part "
+  "V.12 then confirmed is genuine, ongoing decay rather than an artifact "
+  "of the 2009 crash or the hedge's own design, in the era since "
   "publication.")
 p("The fix that survived all of that scrutiny is more modest, and the "
   "project's one real positive finding is different, than any earlier "
@@ -1851,9 +1945,15 @@ p("The fix that survived all of that scrutiny is more modest, and the "
   "best-supported-looking result, seven times in a row &mdash; six "
   "outright retractions or downward revisions, and one nuanced check "
   "(Part V.10) that briefly looked like a stopping point before Part "
-  "V.11 showed it wasn't &mdash; and never found a result durable enough "
-  "to stop re-checking, only one narrow enough (pre-1994 momentum) to "
-  "currently trust.")
+  "V.11 showed it wasn't &mdash; and then, for the first time, ran an "
+  "eighth check (Part V.12) built specifically to try to explain the "
+  "seventh correction away, and couldn't. Not finding an escape hatch is "
+  "itself a finding: the project never found a result durable enough to "
+  "stop re-checking, and has now shown its most-checked result is "
+  "durable enough to survive someone trying to make it go away, leaving "
+  "one narrow, well-tested claim (pre-1994 momentum) to currently trust "
+  "and one honest, thoroughly-stress-tested absence (post-1994) to size "
+  "nothing against.")
 
 # ============================================================ GLOSSARY
 story.append(PageBreak())

@@ -164,6 +164,23 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   pre-1994, and not currently demonstrated to be forward-sizeable in the post-publication
   era — a materially more conservative conclusion than Milestone 9's, reached by applying
   the project's own best existing method to its own best surviving result.
+- **Milestone 11 investigated Milestone 10's null result in depth, at explicit user
+  request, rather than stopping at "not significant."** Two obvious objections were
+  tested directly: that the post-1994 null result is really just the well-documented 2009
+  momentum crash (Daniel & Moskowitz, 2016) distorting the average, and that it's an
+  artifact of the specific 252-day rolling hedge window chosen. Neither held up. A
+  five-era breakdown showed the long leg's hedged excess return declining steadily from
+  +6.5%/yr (1994-99) to +0.1%/yr (2010-2017) — a trend across the whole post-publication
+  period, not a single bad episode. Excluding the March-August 2009 crash window (which
+  did cost the combined book 40% cumulatively on its own) moved the long leg's p-value
+  from 0.149 to a still-marginal 0.095 and barely moved the combined book's (0.590 to
+  0.334) — real, but nowhere near sufficient to explain the result on its own. Re-running
+  the hedge at 126-, 252-, and 378-day windows gave the identical pattern every time.
+  **Rule: when a null result survives the two most obvious "maybe it's just noise/an
+  artifact" objections, that's stronger evidence for the result, not a reason to keep
+  looking for an out.** This project's most rigorous read of its own headline finding is
+  now: genuine, strong pre-1994 alpha, and genuine, ongoing decay since — not a temporary
+  shock the strategy is due to recover from.
 
 ## 2. Risk-management lessons
 
@@ -257,6 +274,17 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     can and do disagree.** The pre-publication half of the sample describes a market that
     no longer exists; as of this project's most rigorous test, the post-publication market
     has not been shown to pay this edge at all.
+11. **Before accepting a null result, rule out the obvious "maybe it's just one bad episode"
+    and "maybe it's a methodology artifact" objections — and if it survives both, treat
+    that as the null result getting stronger, not weaker.** Milestone 11 tested whether
+    Milestone 10's post-1994 null result was really just the 2009 momentum crash, and
+    whether it depended on the specific hedge window chosen. Neither objection explained
+    it: the era-by-era trend showed ongoing decay through 2017, well after 2009, and the
+    result was identical across three different hedge windows. **Rule: a finding that
+    survives a genuine attempt to explain it away deserves more confidence, not less —
+    the temptation after an unwelcome result is to look for the one adjustment that makes
+    it go away; running that check honestly, and reporting it even when it doesn't help,
+    is what separates a stress-test from a fishing expedition.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

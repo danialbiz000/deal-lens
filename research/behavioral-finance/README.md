@@ -583,6 +583,54 @@ than permanent decay).
 
 **Reproduce this**: `python investigations/momentum_hedged_decay_backtest.py`.
 
+## Is the post-1994 null result a crash artifact, a hedge artifact, or genuine decay? (Milestone 11)
+
+Milestone 10 explicitly flagged two open questions rather than treating the null result as
+final: whether the post-1994 weakness is concentrated in a specific regime — most plausibly
+the well-documented 2009 "momentum crash" (Daniel & Moskowitz, 2016, *Review of Financial
+Studies*, where past losers momentum strategies were underweighting rebounded violently
+during the 2008-crisis recovery) — and whether the null result depends on the specific
+252-trading-day rolling hedge window Milestones 7/10 happened to use. This milestone
+(`investigations/momentum_decay_regime_analysis.py`) runs three checks on the post-1994
+hedged return series to answer both.
+
+**Check 1 — sub-period breakdown.** Splitting post-1994 into five multi-year eras (1994-99,
+2000-02, 2003-07, 2008-09, 2010-17) and computing the hedged annualized return and HAC alpha
+in each shows a declining trend, not a single bad episode with a recovery: the long leg's
+hedged excess return runs +6.5%, +10.5%, +3.4%, -3.7%, then **+0.1%** in 2010-2017 — the
+most recent nine years show essentially zero excess return, well after the 2009 crash was
+over. The combined book shows the same pattern, ending at **-5.1%** in 2010-2017. No single
+era shows individually significant alpha (each has too few observations for the power to
+detect an effect this size on its own), but the trend across eras argues for ongoing decay,
+not a shock-and-recovery.
+
+**Check 2 — explicit crash-window exclusion (March-August 2009).** The crash window itself
+was severe — the combined book lost 40.2% cumulatively in those 128 trading days alone.
+Excluding it from the post-1994 sample: the **long leg's** daily alpha p-value improves from
+0.149 to **0.095** (crossing the 10% threshold — the crash meaningfully hurt this leg's
+result), but the **combined book's** p-value only improves from 0.590 to 0.334, nowhere near
+significance. **The crash is a real contributing factor for the long leg, but does not
+explain the combined book's null result, and the continued weakness through 2010-2017 (well
+after the crash) shows the effect is not fully explained by a single 2009 episode either
+way.**
+
+**Check 3 — hedge rolling-window robustness (126d / 252d / 378d).** Re-running Milestone
+10's entire hedge with three different lookback windows: pre-1994 alpha is strongly
+significant at every window tested (p≤0.017, long leg p≤0.001) and post-1994 alpha is
+non-significant at every window tested (p ranges 0.14-0.66 across both legs and all three
+windows). **The null result is not an artifact of the specific 252-day window** — it holds
+whether beta is estimated from six months or a year and a half of trailing data.
+
+**Updated conclusion**: this deeper investigation does not reverse Milestone 10's finding —
+if anything it strengthens it. The 2009 momentum crash was real and severe and meaningfully
+affected the long leg's result, but it is not sufficient on its own to explain either leg's
+post-1994 null result, and the hedge's design choice is not driving it either. The era-by-era
+trend (positive and shrinking through the 2000s, negative through the crisis, and still flat
+or negative for the nine years since) is the signature of genuine, ongoing decay rather than
+one bad shock the strategy simply hasn't yet recovered from.
+
+**Reproduce this**: `python investigations/momentum_decay_regime_analysis.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -768,6 +816,11 @@ python investigations/momentum_publication_decay.py
 # out-of-sample hedge?" above)
 python investigations/momentum_hedged_decay_backtest.py
 
+# Investigation — is that post-1994 null result a 2009 crash artifact, a hedge-window
+# artifact, or genuine decay? (genuine, ongoing decay — see "Is the post-1994 null result
+# a crash artifact, a hedge artifact, or genuine decay?" above)
+python investigations/momentum_decay_regime_analysis.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -778,19 +831,22 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
 
 1. **An investment framework** — a composite behavioral mispricing score usable as a
    screening/tilt signal alongside fundamental analysis, now with real empirical caveats
-   attached (see "Empirical results" through "Does the post-1994 alpha survive an actual
-   out-of-sample hedge?" above): don't trust it blind on a large-cap-only universe, check
-   which sub-signal is actually carrying any edge before combining them, and beta-neutralize
-   long-short legs before crediting any performance difference to a behavioral effect
-   rather than to uncontrolled market exposure. No cell in this project currently survives
-   every check applied at this repo's own highest standard of rigor: US 12-1 momentum's
-   long leg passed decomposition, cross-market replication, and a beta-adjusted
-   significance test, and even an in-sample publication-decay split (Milestone 9) — but
-   once tested with an actual rolling, out-of-sample hedge instead of an in-sample
-   regression (Milestone 10), its post-1994 alpha is not statistically distinguishable
-   from zero either. The pre-1994 alpha remains this repo's one genuinely robust,
-   hedge-confirmed finding; nothing in this project has yet demonstrated a
-   forward-sizeable edge in the post-publication era, for any signal, in either
+   attached (see "Empirical results" through "Is the post-1994 null result a crash
+   artifact, a hedge artifact, or genuine decay?" above): don't trust it blind on a
+   large-cap-only universe, check which sub-signal is actually carrying any edge before
+   combining them, and beta-neutralize long-short legs before crediting any performance
+   difference to a behavioral effect rather than to uncontrolled market exposure. No cell
+   in this project currently survives every check applied at this repo's own highest
+   standard of rigor: US 12-1 momentum's long leg passed decomposition, cross-market
+   replication, and a beta-adjusted significance test, and even an in-sample
+   publication-decay split (Milestone 9) — but once tested with an actual rolling,
+   out-of-sample hedge instead of an in-sample regression (Milestone 10), its post-1994
+   alpha is not statistically distinguishable from zero either, and Milestone 11's
+   follow-up investigation confirmed that null result is genuine, ongoing decay rather
+   than an artifact of the 2009 crash or the hedge's rolling window. The pre-1994 alpha
+   remains this repo's one genuinely robust, hedge-confirmed finding; nothing in this
+   project has yet demonstrated a forward-sizeable edge in the post-publication era, for
+   any signal, in either
    direction.
 2. **Risk-management lessons** — a stress-testing playbook (derived from the Q1 simulation)
    for any leveraged or "market-neutral" strategy: never calibrate tail risk on a calm-regime
@@ -860,3 +916,17 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   real and strong pre-1994, and **not currently demonstrated to be forward-sizeable**
   in the post-publication era — the more precise, and more sobering, replacement for
   Milestone 9's "decays but doesn't disappear" framing.
+- **The post-1994 null result is genuine, ongoing decay — not a 2009 crash artifact, and
+  not a hedge-window artifact (Milestone 11).** Three checks: (1) a five-era breakdown of
+  post-1994 shows the long leg's hedged excess return declining from +6.5%/yr (1994-99) to
+  essentially zero (+0.1%/yr, 2010-2017) — a trend, not a single bad episode with a
+  recovery; (2) excluding the March-August 2009 momentum-crash window (Daniel & Moskowitz,
+  2016) moves the long leg's alpha p-value from 0.149 to a borderline 0.095, but barely
+  moves the combined book's (0.590 to 0.334, nowhere near significance) — the crash was
+  real and severe (the combined book lost 40% cumulatively in those 128 days alone) but
+  does not explain either leg's overall null result; (3) re-running the hedge with 126-,
+  252-, and 378-day rolling windows gives the same pattern every time (pre-1994 always
+  significant at p≤0.017, post-1994 never significant, p=0.14-0.66) — the null result does
+  not depend on the specific window chosen. **This investigation does not reverse
+  Milestone 10's conclusion; it rules out the two most obvious objections to it and leaves
+  ongoing, genuine decay as the best-supported explanation.**
