@@ -206,6 +206,59 @@ losses cluster in high-realized-volatility regimes specifically). **Reproduce th
 `requirements.txt`; takes a few minutes because the orthogonalization loops over every
 trading date in both datasets).
 
+## Testing momentum-crash risk directly (Milestone 4)
+
+Milestone 3 left one candidate explanation for the 52-week-high signal's losses
+untested: generic momentum-crash risk (Daniel & Moskowitz, 2016) — a documented property
+of "long recent winners, short recent losers" strategies, where the *short* leg (recent
+losers, typically higher-beta) can rebound sharply during a market recovery, hurting the
+strategy specifically when realized volatility is high and the market has recently been
+down. This was tested directly (`investigations/momentum_crash_risk.py`): two regime
+indicators were built from the same price data (no external index available) — a
+realized-volatility tercile (21-day rolling, annualized) and a trailing-12-month
+bull/bear market state, both lagged one day to avoid look-ahead — and the backtest engine
+was extended (`backtest/engine.py`, `BacktestResult.daily_returns_long` /
+`daily_returns_short`) to report the long leg and short leg's P&L contributions
+separately, not just their combined total, so the mechanism (not just the timing) could be
+checked.
+
+**Result: strongly consistent with momentum-crash risk, on four independent pieces of
+evidence, in both markets.**
+
+| Evidence | NSE (India) | US (Kaggle mirror) |
+|---|---|---|
+| Sharpe monotonically worsens with realized vol (Low→Mid→High) | −0.22 → −0.41 → −0.78 | −0.11 → −0.27 → −0.43 |
+| Sharpe, bull vs. bear trailing-12m state | −0.27 vs. **−1.06** | −0.15 vs. **−1.10** |
+| Worst bucket: bear + high-vol ("crash-rebound" setup) | **−1.07 Sharpe, −38% ann.** | **−1.26 Sharpe, −61% ann.** |
+| Whole-sample return skewness, combined long-short | −0.66 (left-skewed) | −1.32 (left-skewed) |
+
+**The leg decomposition confirms the mechanism, not just the timing:** in both markets,
+the **long leg (buying stocks near their 52-week high) is a genuinely positive,
+standalone strategy** — Sharpe 0.45–1.03 across every regime in NSE, 0.65–1.20 in the US
+outside bear markets — consistent with the anchoring/underreaction thesis actually working
+on the long side. The **short leg (shorting stocks far from their high) is the entire
+problem**: uniformly negative (Sharpe −0.6 to −1.1) in every single regime bucket in both
+markets, and it's *this* leg's loss that swells in the bear+high-vol bucket (NSE: −19% →
+−49% annualized from calmest to worst regime; US: −13% → −62%). The short leg's own return
+distribution is right-skewed in NSE (skew +0.13 to +0.40) — the fingerprint of a short
+position that loses steadily most of the time and occasionally gets hit by a sharp squeeze
+against it, exactly the mechanism the hypothesis describes.
+
+**How hard to lean on this**: this is pattern-matching against a well-documented
+mechanism using real data, not a formal significance test (no t-stats on the regime
+differences were computed) and the volatility-tercile cutoffs were set using the full
+sample's distribution, which a live version would need to compute on a rolling/expanding
+basis instead to avoid look-ahead in the regime *definition* itself (the regime *label*
+assigned to each day is still lagged and look-ahead-free; the *thresholds* that define
+"high vol" are not). With that caveat, four independent, mutually consistent signatures
+(volatility monotonicity, bear-state conditioning, the specific worst-bucket match, and
+the short-leg concentration) across two unrelated markets is about as strong a case as this
+kind of historical analysis can make. **Practical implication, folded into
+`FRAMEWORK.md`**: the 52-week-high signal should not be discarded outright — its long leg
+works — but it should never be shorted as designed; a long-only or long-tilted version of
+this signal is the version worth keeping. **Reproduce this**:
+`python investigations/momentum_crash_risk.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -361,6 +414,9 @@ print(result.summary())
 # Investigation — is the 52-week-high result a value/growth confound? (rejected; see above)
 python investigations/52w_high_value_confound.py
 
+# Investigation — is the 52-week-high result momentum-crash risk? (strongly supported; see above)
+python investigations/momentum_crash_risk.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -398,13 +454,15 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   that were low/moderate in normal times moving toward 1 in the crisis), not fit to LTCM's
   actual undisclosed book. Treat the multiple as "this is the order of magnitude of the
   effect," not a precise historical reconstruction.
-- **The 52-week-high signal's cause is narrowed but not fully confirmed.** Three checks
-  have now ruled things *out* (not purely the 2008/2020 crash windows; not a value/growth
-  confound, in either market), and the signal's persistence across two very different
-  markets and eras argues for a structural explanation over a market-specific one — but
-  the leading remaining candidate, generic momentum-crash risk, has not itself been
-  directly tested (e.g. by checking whether losses cluster in high-realized-volatility
-  regimes). Absence of two wrong explanations is not confirmation of a third.
+- **The 52-week-high signal's cause: two explanations ruled out, momentum-crash risk
+  strongly (not formally) supported.** Not purely the 2008/2020 crash windows (Milestone 2);
+  not a value/growth confound, in either market (Milestone 3); and directly consistent with
+  momentum-crash risk on four independent signatures — volatility monotonicity, bear-state
+  conditioning, the specific worst-regime match, and short-leg concentration — in both
+  markets (Milestone 4, "Testing momentum-crash risk directly"). That's pattern-matching
+  against a known mechanism with real data, not a formal significance test (no t-stats on
+  the regime splits, and the volatility-tercile thresholds use the full sample rather than
+  a rolling/expanding window) — strong evidence, not proof.
 - **Momentum and reversal did not replicate consistently across the two markets tested**
   (see "Replication on a second market") — treat any single-market anomaly finding in this
   repo as provisional until it's been checked on at least one more, independent universe.

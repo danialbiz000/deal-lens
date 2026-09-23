@@ -57,6 +57,18 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   loss is real and not an artifact of an unrelated factor — which makes it more, not less,
   important to keep this specific signal excluded from the composite until its true cause
   is understood.
+- **Update, now that the cause is understood: the fix is long-only, not exclusion.**
+  `README.md`, "Testing momentum-crash risk directly," decomposed the 52-week-high
+  signal's long and short legs separately and found the long leg (buying stocks near
+  their 52-week high) is a genuinely positive, standalone strategy in both markets
+  (Sharpe 0.45–1.20 outside bear-market regimes) — the entire loss comes from the short
+  leg (shorting stocks far from their high), which is negative in every regime tested and
+  gets dramatically worse specifically when realized volatility is high and the market is
+  in a trailing downturn, the textbook momentum-crash signature. **Rule: don't discard a
+  component signal wholesale because its long-short backtest lost money — decompose the
+  legs first. A signal that only works long is still a usable signal, folded into the
+  composite as a long-only tilt (e.g., a positive-only floor on the 52-week-high z-score)
+  rather than a symmetric long-short bet.**
 
 ## 2. Risk-management lessons
 
@@ -95,6 +107,16 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
    liquidity crunches, crowded-factor unwinds) — which is really the
    project's whole thesis applied to your own tooling, not just to the
    market you're modeling.
+6. **The Q1 mechanism and the Q2 empirical finding are the same lesson, closing the
+   loop.** `risk_simulation/fat_tails_vs_normal.py` showed, in a stylized simulation,
+   that a strategy's tail risk compounds specifically when volatility and correlation
+   rise together. `README.md`'s momentum-crash-risk investigation then found the exact
+   same signature in a real, executed backtest: the 52-week-high short leg's losses
+   compound specifically in high-realized-volatility, trailing-bear-market regimes — not
+   a simulated illustration this time, a real strategy on real prices. **Any short
+   position built on a behavioral signal should be regime-tested the same way before
+   being sized**, not assumed safe because its unconditional backtest Sharpe looks
+   acceptable.
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

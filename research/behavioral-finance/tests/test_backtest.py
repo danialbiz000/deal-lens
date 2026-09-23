@@ -43,3 +43,30 @@ def test_insufficient_universe_produces_no_trades(random_walk_prices):
 
     assert result.turnover_by_month.empty
     assert (result.daily_returns_gross.fillna(0) == 0).all()
+
+
+def test_long_and_short_legs_sum_to_the_combined_return(signal_predicts_return_prices):
+    """Used by investigations/momentum_crash_risk.py to decompose which leg
+    drives a strategy's losses -- so it matters that long + short really does
+    reconstruct the same combined series the engine reports separately, not
+    just approximately."""
+    prices, scores = signal_predicts_return_prices
+    result = run_decile_backtest(prices, scores, n_deciles=10, cost_bps=0.0)
+
+    reconstructed = result.daily_returns_long + result.daily_returns_short
+    assert (reconstructed - result.daily_returns_gross).abs().max() < 1e-12
+
+
+def test_both_legs_are_positive_when_signal_perfectly_predicts_returns(signal_predicts_return_prices):
+    """On the fixture where the score perfectly ranks forward returns, the top
+    decile (long) rises and the bottom decile (short) falls -- so BOTH legs'
+    P&L contributions should be positive: the long leg from the top decile
+    rising, and the short leg from the bottom decile falling (a short
+    position profits when its underlying declines, which is what
+    `daily_returns_short` reports: weight * return, with weight already
+    negative for a short)."""
+    prices, scores = signal_predicts_return_prices
+    result = run_decile_backtest(prices, scores, n_deciles=10, cost_bps=0.0)
+
+    assert annualized_return(result.daily_returns_long) > 0
+    assert annualized_return(result.daily_returns_short) > 0

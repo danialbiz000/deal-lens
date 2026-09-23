@@ -21,6 +21,8 @@ from .metrics import annualized_return, annualized_vol, max_drawdown, sharpe_rat
 class BacktestResult:
     daily_returns_gross: pd.Series
     daily_returns_net: pd.Series
+    daily_returns_long: pd.Series
+    daily_returns_short: pd.Series
     turnover_by_month: pd.Series
     cost_bps: float
     n_deciles: int
@@ -67,6 +69,8 @@ def run_decile_backtest(
 
     prev_weights = pd.Series(dtype=float)
     portfolio_daily = pd.Series(0.0, index=prices.index)
+    long_leg_daily = pd.Series(0.0, index=prices.index)
+    short_leg_daily = pd.Series(0.0, index=prices.index)
     turnover_records = {}
 
     for i, reb_date in enumerate(rebalance_dates[:-1]):
@@ -96,6 +100,8 @@ def run_decile_backtest(
 
         period_returns = daily_returns.loc[period_mask, weights.index].fillna(0.0)
         portfolio_daily.loc[period_mask] = period_returns.mul(weights, axis=1).sum(axis=1)
+        long_leg_daily.loc[period_mask] = period_returns.mul(weights.clip(lower=0.0), axis=1).sum(axis=1)
+        short_leg_daily.loc[period_mask] = period_returns.mul(weights.clip(upper=0.0), axis=1).sum(axis=1)
 
         prev_weights = weights
 
@@ -110,6 +116,8 @@ def run_decile_backtest(
     return BacktestResult(
         daily_returns_gross=portfolio_daily,
         daily_returns_net=net_returns,
+        daily_returns_long=long_leg_daily,
+        daily_returns_short=short_leg_daily,
         turnover_by_month=turnover_series,
         cost_bps=cost_bps,
         n_deciles=n_deciles,

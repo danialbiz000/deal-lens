@@ -1012,6 +1012,64 @@ box(
     kind="fact", title="WHAT THIS DOES AND DOESN'T PROVE"
 )
 
+h1("5.5  Milestone 4 &mdash; Testing momentum-crash risk directly")
+p("The one remaining candidate explanation from milestone 3 &mdash; generic "
+  "momentum-crash risk (Daniel &amp; Moskowitz, &quot;Momentum Crashes,&quot; "
+  "2016; see Part II.4 and Part IV.1) &mdash; was tested directly at the "
+  "user's request. The theory's specific prediction: a &quot;long recent "
+  "winners, short recent losers&quot; strategy is exposed to severe losses "
+  "when realized market volatility is elevated and the market has recently "
+  "been in a downturn, because the <i>short</i> leg (recent losers, "
+  "typically higher-beta) can rebound sharply in a recovery &mdash; and the "
+  "damage should concentrate specifically in that short leg, not be spread "
+  "evenly across both sides of the trade.")
+p("Two things were built to test this properly rather than just plausibly: "
+  "two regime indicators from the same price data (a realized-volatility "
+  "tercile and a trailing-12-month bull/bear flag, both lagged one day to "
+  "avoid look-ahead), and an extension to the backtest engine itself so it "
+  "reports the long leg's and short leg's profit-and-loss contributions "
+  "<i>separately</i>, not just their combined total &mdash; needed to check "
+  "the mechanism, not only the timing.")
+data_table(
+    ["Evidence", "NSE (India)", "US (Kaggle mirror)"],
+    [
+        ["Sharpe vs. realized-vol tercile (Low/Mid/High)", "-0.22 / -0.41 / -0.78", "-0.11 / -0.27 / -0.43"],
+        ["Sharpe, bull vs. bear trailing-12m state", "-0.27 vs. -1.06", "-0.15 vs. -1.10"],
+        ["Worst bucket: bear + high-vol", "-1.07 Sharpe, -38% ann.", "-1.26 Sharpe, -61% ann."],
+        ["Return skewness, combined long-short", "-0.66", "-1.32"],
+    ],
+    col_widths=[2.9*inch, 1.9*inch, 1.9*inch],
+    small=True,
+)
+p("All four signatures point the same way, in both markets. The leg "
+  "decomposition confirms the mechanism, not just correlated timing: the "
+  "<b>long leg (buying stocks near their 52-week high) is a genuinely "
+  "positive, standalone strategy</b> in both markets (Sharpe 0.45-1.03 in "
+  "every regime tested on NSE; 0.65-1.20 outside bear markets in the US) "
+  "&mdash; the anchoring/underreaction thesis actually works on the long "
+  "side. <b>The short leg is the entire problem</b>: negative in every "
+  "single regime bucket in both markets, and its losses are specifically "
+  "what swells in the bear-plus-high-volatility bucket (NSE: -19% to -49% "
+  "annualized from calmest to worst regime; US: -13% to -62%).")
+box(
+    "This is pattern-matching against a well-documented mechanism using real "
+    "data across two independent markets, not a formal significance test "
+    "&mdash; no statistical t-tests were run on the regime differences, and "
+    "the volatility-tercile cutoffs were computed over each dataset's full "
+    "history rather than a rolling window a live system would need. With "
+    "that caveat stated plainly: four independent, mutually consistent "
+    "signatures (volatility monotonicity, bear-state conditioning, the "
+    "specific worst-bucket match, and short-leg concentration), replicated "
+    "across two unrelated markets, is about as strong a case as this kind "
+    "of historical analysis can make without moving to a formal statistical "
+    "test. <b>The practical conclusion changed as a result</b>: the "
+    "52-week-high signal should not be discarded &mdash; its long leg "
+    "works &mdash; but it should never be shorted as originally designed. "
+    "Part VI.1 updates the investment framework accordingly: a long-only "
+    "tilt, not a symmetric long-short bet.",
+    kind="fact", title="HOW HARD TO LEAN ON THIS"
+)
+
 # MARKER_END_PART5
 
 # ============================================================ PART VI
@@ -1039,6 +1097,15 @@ box(
     "should be reported and validated component-by-component before a blended "
     "version of it is trusted for a decision.",
 )
+p("<b>Updated after Part V.5:</b> once the 52-week-high signal's cause was "
+  "understood &mdash; a short leg exposed to momentum-crash risk, not a "
+  "broken thesis &mdash; the right fix turned out to be more specific than "
+  "&quot;exclude it.&quot; The long leg (buying stocks near their 52-week "
+  "high) is a genuinely positive, standalone strategy on its own. <b>Rule: "
+  "don't discard a component signal wholesale because its long-short "
+  "backtest lost money &mdash; decompose the legs first.</b> A signal that "
+  "only works long is still worth including, as a long-only tilt rather "
+  "than a symmetric long-short bet.")
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
 bullets([
@@ -1070,6 +1137,16 @@ bullets([
     "defaults, liquidity crunches, crowded-factor unwinds). This is the "
     "project's central thesis applied reflexively to its own tooling, not just "
     "to the markets it studies.",
+    "<b>The Q1 mechanism and the Q2 empirical finding are the same lesson, "
+    "closing the loop.</b> Part III's simulation showed, stylized, that tail "
+    "risk compounds when volatility and correlation rise together. Part V.5 "
+    "then found the identical signature in a real, executed backtest: a "
+    "short position's losses compounding specifically in high-volatility, "
+    "trailing-bear-market regimes &mdash; not a simulated illustration this "
+    "time, a real strategy on real prices. Any short position built on a "
+    "behavioral signal should be regime-tested the same way before being "
+    "sized, not assumed safe because its unconditional Sharpe looks "
+    "acceptable.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -1138,12 +1215,15 @@ bullets([
     "two markets tested (Part V.4) &mdash; treat either result, in isolation, "
     "as provisional rather than a confirmed anomaly. Only the 52-week-high "
     "signal's loss held up in both.",
-    "<b>The 52-week-high result's cause is narrowed, not confirmed.</b> Two "
-    "candidate explanations (crash-window concentration; a value/growth "
-    "confound) have been directly tested and rejected (Part V.3-V.4). The "
-    "remaining candidate, generic momentum-crash risk, is the "
-    "best-supported explanation left, but has not itself been directly "
-    "tested.",
+    "<b>The 52-week-high result's cause: strongly supported, not formally "
+    "proven.</b> Two candidate explanations (crash-window concentration; a "
+    "value/growth confound) were directly tested and rejected (Part V.3-V.4). "
+    "Momentum-crash risk was then tested directly and found consistent on "
+    "four independent signatures in both markets (Part V.5) &mdash; but this "
+    "is pattern-matching against a known mechanism with real data, not a "
+    "formal statistical significance test (no t-stats on the regime splits; "
+    "volatility-tercile thresholds use the full sample rather than a "
+    "rolling window). Strong evidence, stated as such, not proof.",
     "<b>Transaction costs are a simple linear model</b>, not a real "
     "market-impact model; a strategy sized for real capital would need a "
     "proper implementation-shortfall estimate.",
@@ -1194,14 +1274,21 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestone 3 then ran the India finding through the same "
+  "needed. Milestones 3 and 4 then ran the India finding through the same "
   "skepticism the project applies to everything else, and it did not survive "
   "unchanged: momentum and reversal turned out to be universe-dependent, not "
   "general truths, while the 52-week-high signal's damage held up across two "
-  "very different markets and eras, and survived a direct test against its "
-  "most plausible alternative explanation. That is the project working as "
-  "intended &mdash; not every finding needs to be confirmed to be useful; "
-  "knowing which findings don't generalize is itself the deliverable.")
+  "very different markets and eras, survived a direct test against its most "
+  "plausible alternative explanation (a value/growth confound), and was then "
+  "traced to a specific, well-documented mechanism (momentum-crash risk "
+  "concentrated in its short leg) with real evidence, not just a process of "
+  "elimination. The fix that fell out of that chase was more useful than "
+  "either &quot;keep it&quot; or &quot;discard it&quot; would have been: the "
+  "signal's long leg works fine on its own, so the answer was neither "
+  "&mdash; trade it long-only. That is the project working as intended: not "
+  "every finding needs to be confirmed to be useful, and chasing a wrong "
+  "signal down to its actual mechanism produced a better answer than "
+  "stopping at the first plausible-sounding explanation would have.")
 
 # ============================================================ GLOSSARY
 story.append(PageBreak())
@@ -1239,6 +1326,10 @@ glossary = [
      "experiences at any point in a backtest."),
     ("Momentum", "The tendency of a security's recent trend to continue, "
      "typically attributed to underreaction."),
+    ("Momentum crash risk", "The tendency of a \"long recent winners, short "
+     "recent losers\" strategy to suffer severe losses when the short leg's "
+     "high-beta losers rebound sharply, typically during high-volatility, "
+     "post-downturn market recoveries."),
     ("Overconfidence", "Overestimating the reliability of one's own "
      "judgment or model, often reinforced by a recent string of favorable "
      "outcomes."),
