@@ -57,26 +57,44 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   loss is real and not an artifact of an unrelated factor — which makes it more, not less,
   important to keep this specific signal excluded from the composite until its true cause
   is understood.
-- **The fix is long-only, not exclusion — and this part is solid even though the "why"
-  isn't.** `README.md`, "Testing momentum-crash risk directly," decomposed the
-  52-week-high signal's long and short legs separately and found the long leg (buying
-  stocks near their 52-week high) is a genuinely positive, standalone strategy in both
-  markets — the entire loss comes from the short leg. That decomposition is statistically
-  robust (Milestone 5: significant in every specification tested, both markets, both
-  frequencies). **Rule: don't discard a component signal wholesale because its
-  long-short backtest lost money — decompose the legs first. A signal that only works
-  long is still a usable signal, folded into the composite as a long-only tilt (e.g., a
-  positive-only floor on the 52-week-high z-score) rather than a symmetric long-short
-  bet.**
-- **But don't claim to know *why* the short leg fails — that part did not survive formal
-  testing.** The descriptive regime comparison in Milestone 4 looked like strong evidence
-  for momentum-crash risk (a documented, named mechanism). Milestone 5 turned that into
-  HAC-regression significance tests, at daily and monthly frequency, in both markets — and
-  the short leg (where the mechanism specifically predicts the damage should concentrate)
-  showed no statistically significant regime-conditioning anywhere. **Rule: a compelling
-  descriptive pattern is a hypothesis, not a finding, until it's been tested formally — and
-  "formally tested, not confirmed" is a genuinely different, weaker claim than "strongly
-  supported," even when the same numbers motivated both. Report the weaker claim.**
+- **Decompose the legs before discarding a signal — still correct, but the fix isn't
+  "long-only" after all.** `README.md`, "Testing momentum-crash risk directly," decomposed
+  the 52-week-high signal's long and short legs and found the long leg's raw average
+  return significantly positive, the short leg's significantly negative, in every
+  specification (Milestone 5). **Rule: don't discard a component signal wholesale because
+  its long-short backtest lost money — decompose the legs first.** That rule still holds;
+  what it was used to conclude did not (next bullet).
+- **The actual cause, found last, was the most basic check: an uncontrolled beta
+  mismatch.** Milestone 4's crash-risk story looked compelling descriptively; Milestone 5
+  formally rejected it (no significant regime-conditioning in the short leg, either
+  market). Milestone 6 then ran the check that should have come *first* — a CAPM regression
+  of each leg against the market — and found it: the long leg carries ≈+0.8 market beta,
+  the short leg ≈−1.2 to −1.4, leaving the combined book significantly net short-beta
+  (−0.32 to −0.70, every cut) in markets that returned ~20%/year over the sample. Once beta
+  is controlled for, **alpha is insignificant in all 12 regressions run — both legs, both
+  markets, both frequencies.** There is no demonstrated stock-selection skill in this
+  signal, long or short, once its uncontrolled market exposure is accounted for. **Rule,
+  corrected from the "long-only" conclusion above: this signal is not currently a
+  demonstrated source of alpha in either direction. Before it can be used as a behavioral
+  tilt, both legs need to be beta-neutralized (sized to target zero net beta, not equal
+  notional) and re-tested for alpha on the hedged residual — not done in this repo yet.**
+- **Check for a beta mismatch between the legs before reaching for a behavioral
+  explanation — not after three milestones of chasing more exotic ones.** This project
+  tested crash-window concentration, a value/growth confound, and formal momentum-crash
+  regime-conditioning — all before checking whether the two legs were even beta-matched.
+  They weren't, and that single, mechanical omission fully explains what the other three
+  hypotheses were built to explain. **Rule: for any long-short backtest, run the CAPM
+  regression on each leg first. It is cheaper than any of the alternatives and, in this
+  project's own case, was the one that actually had the answer.**
+- **A compelling descriptive pattern is a hypothesis, not a finding, until it's been
+  tested formally.** The Milestone 4 → 5 → 6 sequence is a worked example of exactly this,
+  twice over: a regime-bucket comparison that looked like strong evidence collapsed under
+  formal significance testing, and the formally-tested-but-still-uncontrolled decomposition
+  itself collapsed once a basic beta check was added. **"Formally tested, not confirmed" and
+  "explained by something more basic" are both genuinely weaker claims than "strongly
+  supported," even when the same underlying numbers motivated all three. Report the
+  weakest claim that's actually been earned, and keep checking simpler explanations even
+  after a more sophisticated one has passed one round of testing.**
 
 ## 2. Risk-management lessons
 
@@ -136,6 +154,17 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
    position, write a risk limit, or make a claim in a report based on a descriptive
    regime split alone — run the regression with proper standard errors first, and expect
    a real chance that the compelling-looking pattern won't survive it.**
+8. **The cheapest test is the one to run first, and this project ran it last.** Three
+   escalating hypotheses (crash-window concentration, a value/growth confound, formal
+   momentum-crash regime-conditioning) were tested across Milestones 2, 3, and 5 before
+   Milestone 6 finally ran a plain CAPM beta regression — the single cheapest, most
+   standard check for any long-short book — and found the entire answer in it: an
+   uncontrolled beta mismatch between the legs, fully explaining every prior milestone's
+   numbers, with no behavioral story needed. **Rule: order your hypothesis tests from
+   cheapest/most-mechanical to most-exotic, not the reverse. A beta regression takes
+   minutes and rules out (or in) the most common cause of "surprising" long-short
+   performance; save the behavioral and regime-conditioning hypotheses for after it comes
+   back clean.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
@@ -157,6 +186,10 @@ per-universe validation, not another black-box score.**
   one), reported as separate, individually-backtested components — never
   pre-blended — with the decile backtest and cost-adjusted Sharpe shown for
   each, on their actual investable names, not a vendor's benchmark universe.
+  Every reported number ships with its own beta-regression alpha/beta
+  breakdown (Milestone 6) so a client can see whether a signal's performance
+  is genuine stock-selection skill or just uncontrolled market exposure — a
+  check most factor-data vendors don't surface at all.
 - **Risk side**: the regime-switching stress-VaR methodology from
   `risk_simulation/fat_tails_vs_normal.py`, run against a client's actual
   position correlations and leverage, reporting calm-regime vs. stress-regime

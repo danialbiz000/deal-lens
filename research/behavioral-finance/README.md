@@ -316,7 +316,7 @@ tested across both frequencies and markets, seeing 2-4 marginally significant re
 the 5-10% level is within what pure chance would produce — not meaningfully more than a
 false-positive rate under a true null.
 
-**Practical implication, corrected in `FRAMEWORK.md`**: the long-only recommendation
+**Practical implication, as understood at this point**: the long-only recommendation
 stands — it rests on the robust decomposition, not on the crash-risk story. But the
 project should **not** claim to know *why* the short leg fails. That remains an open
 question. This is the project's own "don't trust the reassuring pattern" thesis applied to
@@ -324,7 +324,73 @@ its most recent finding about itself, at the point where it mattered most: the p
 that looked like the best-supported explanation in the whole investigation turned out not
 to survive the one test that actually tests it. **Reproduce this**:
 `python investigations/momentum_crash_significance.py` (needs `statsmodels`, added to
-`requirements.txt`).
+`requirements.txt`). — **Update (Milestone 6): the next, more basic check found the actual
+answer, and it changes the "long-only" recommendation too. Keep reading.**
+
+## Is it just beta? (Milestone 6)
+
+Milestone 5 left the decomposition itself — long leg positive, short leg negative — as the
+one statistically solid finding, with no confirmed explanation for *why*. There was one
+more basic check that should have come before the exotic behavioral hypotheses, not after
+them: **do the two legs simply have different, uncontrolled exposure to the market itself?**
+An equal-weighted decile long-short book makes no attempt to match the long and short
+baskets' market sensitivity — if "losers" (far from the 52-week high) happen to be
+higher-beta stocks than "winners" (near the high), the strategy carries unintended net
+market exposure, and in a market with a strongly positive average return over the sample
+(both NSE and the US mirror returned ~19–21% annualized over their respective windows),
+that alone would produce exactly the pattern observed, with no anchoring or crash story
+required.
+
+This was tested directly (`investigations/short_leg_beta.py`): a standard CAPM-style
+regression — leg return = alpha + beta × market return — using the same equal-weighted
+market proxy as Milestone 5, with the same Newey-West (HAC) correction, at daily and
+monthly frequency.
+
+| | NSE daily | NSE monthly | US daily | US monthly |
+|---|---|---|---|---|
+| Long leg beta (p-value) | +0.84 (p<0.0001) | +0.80 (p<0.0001) | +0.82 (p<0.0001) | +0.75 (p<0.0001) |
+| Short leg beta (p-value) | −1.16 (p<0.0001) | −1.19 (p<0.0001) | −1.39 (p<0.0001) | −1.40 (p<0.0001) |
+| Combined net beta (p-value) | **−0.32 (p<0.0001)** | **−0.40 (p=0.0007)** | **−0.57 (p<0.0001)** | **−0.70 (p<0.0001)** |
+| Long leg alpha (p-value) | p=0.60 | p=0.61 | p=0.76 | p=0.35 |
+| Short leg alpha (p-value) | p=0.15 | p=0.65 | p=0.72 | p=0.95 |
+| Combined alpha (p-value) | p=0.25 | p=0.42 | p=0.69 | p=0.41 |
+
+**This is the answer.** Every single beta coefficient — 12 of them, both legs plus the
+combined book, both markets, both frequencies — is highly significant (p<0.001, all but
+one below p=0.0001). Every single alpha — the same 12 cells — is statistically
+indistinguishable from zero (p ranges from 0.15 to 0.95). The "losers" basket (short leg)
+consistently has a *larger-magnitude* beta than the "winners" basket (long leg) — high
+recent losers are higher-beta stocks than recent winners, consistent with the momentum
+literature's own description of loser-leg stocks, but the consequence here is purely
+mechanical, not behavioral: **the combined long-short book is not market-neutral. It carries
+an unintended, statistically significant net short-beta position (−0.32 to −0.70 depending
+on market/frequency) — and being structurally short a market that returned ~20% a year is a
+completely sufficient explanation for the losses documented in every milestone above,
+with no anchoring bias, no crash risk, and no value confound required.**
+
+**This changes the practical recommendation from Milestone 4/5, not just adds a footnote to
+it.** "Trade the signal long-only" was based on the long leg's raw average return being
+significantly positive (Milestone 5). That's still true — but this test shows that positive
+return is consistent with the long leg simply being an 0.75–0.84-beta long position in a
+rising market, with **no significant standalone alpha** once that exposure is controlled
+for. There is currently **no evidence, anywhere in this project, of genuine stock-selection
+skill in the 52-week-high signal, in either direction**, once market beta is properly
+accounted for. The corrected, honest recommendation: the signal's long leg is a reasonable
+lower-beta way to stay long the market, not a demonstrated source of alpha; anyone wanting
+to test for real, beta-independent skill in this signal would need to explicitly
+beta-neutralize both legs (e.g., size each leg to target zero net beta, not equal notional)
+and re-run this same regression on the beta-hedged residual — a natural next step this
+project has not yet taken.
+
+**The real methodological lesson, stated plainly**: this project spent three milestones
+(2, 3, 5) chasing increasingly sophisticated behavioral and statistical explanations —
+crash windows, a value/growth confound, formal regime-conditioning significance tests —
+before checking the single most basic hygiene check for any long-short equity backtest:
+whether the two legs are beta-matched. They weren't, and that omission alone explains
+everything the more exotic hypotheses were built to explain. **Rule, now stated in
+`FRAMEWORK.md`: check for a beta mismatch between the legs before reaching for a
+behavioral explanation, not after.** **Reproduce this**:
+`python investigations/short_leg_beta.py`.
 
 ## Data provenance: the NSE GitHub mirror
 
@@ -489,6 +555,10 @@ python investigations/momentum_crash_risk.py
 # (result: NOT statistically confirmed — see "Formally testing momentum-crash risk" above)
 python investigations/momentum_crash_significance.py
 
+# Investigation — is it just uncontrolled market-beta exposure? (yes — see "Is it just
+# beta?" above; this is the actual explanation)
+python investigations/short_leg_beta.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -498,9 +568,11 @@ pytest tests/ -v
 This research is designed to feed three deliverables (full detail in `../FRAMEWORK.md`):
 
 1. **An investment framework** — a composite behavioral mispricing score usable as a
-   screening/tilt signal alongside fundamental analysis, now with a real empirical caveat
-   attached (see "Empirical results" above): don't trust it blind on a large-cap-only
-   universe, and check which sub-signal is actually carrying any edge before combining them.
+   screening/tilt signal alongside fundamental analysis, now with real empirical caveats
+   attached (see "Empirical results" and "Is it just beta?" above): don't trust it blind on
+   a large-cap-only universe, check which sub-signal is actually carrying any edge before
+   combining them, and beta-neutralize long-short legs before crediting any performance
+   difference to a behavioral effect rather than to uncontrolled market exposure.
 2. **Risk-management lessons** — a stress-testing playbook (derived from the Q1 simulation)
    for any leveraged or "market-neutral" strategy: never calibrate tail risk on a calm-regime
    correlation matrix alone.
@@ -526,18 +598,19 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   that were low/moderate in normal times moving toward 1 in the crisis), not fit to LTCM's
   actual undisclosed book. Treat the multiple as "this is the order of magnitude of the
   effect," not a precise historical reconstruction.
-- **The 52-week-high signal's cause remains genuinely open.** Two explanations were ruled
-  out by direct test: not purely the 2008/2020 crash windows (Milestone 2), not a
-  value/growth confound in either market (Milestone 3). A third — generic momentum-crash
-  risk — looked strongly supported under a descriptive, regime-bucket comparison (Milestone
-  4), but **did not survive formal HAC-regression significance testing at daily or monthly
-  frequency, in either market** (Milestone 5, "Formally testing momentum-crash risk"): the
-  short leg, where the mechanism specifically predicts the damage should concentrate, shows
-  no significant regime-conditioning anywhere it was tested. What *is* statistically robust,
-  every specification, both markets: the long leg's average return is significantly
-  positive and the short leg's significantly negative — the decomposition itself, not the
-  proposed explanation for it. Treat "why the short leg fails" as unresolved, not as
-  momentum-crash risk confirmed, in anything built on this repo.
+- **The 52-week-high signal's cause: resolved, and it's the boring answer.** Two
+  behavioral/statistical explanations were ruled out by direct test — not purely the
+  2008/2020 crash windows (Milestone 2), not a value/growth confound (Milestone 3), not
+  formally-tested momentum-crash risk (Milestone 5, which walked back Milestone 4's
+  descriptive-looking confirmation). The actual explanation (Milestone 6, "Is it just
+  beta?") is a construction flaw, not a market phenomenon: the long and short legs have
+  significantly different, uncontrolled market-beta exposure (long ≈ +0.8, short ≈ −1.2 to
+  −1.4), leaving the combined book net short-beta (−0.32 to −0.70, p<0.001 every cut) in
+  markets that returned ~20%/year over the sample. Once beta is controlled for, **alpha is
+  insignificant in every leg, every market, every frequency (12 of 12 regressions)** — there
+  is no demonstrated stock-selection skill in this signal, in either direction, in this
+  repo as it stands. Anything built on this repo should beta-neutralize the legs before
+  claiming a behavioral edge from this signal.
 - **Momentum and reversal did not replicate consistently across the two markets tested**
   (see "Replication on a second market") — treat any single-market anomaly finding in this
   repo as provisional until it's been checked on at least one more, independent universe.

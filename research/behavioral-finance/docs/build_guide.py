@@ -215,7 +215,10 @@ p("The honest headline result from that empirical run: a blended "
   "dramatically; another (short-term reversal) had a real, positive, cost-adjusted "
   "edge. The project's central methodological lesson &mdash; never trust a blended "
   "score without checking what is inside it &mdash; came directly out of this finding, "
-  "not from a textbook.")
+  "not from a textbook. (Chasing <i>why</i> the losing component lost money turned "
+  "into the project's longest, most instructive thread &mdash; Part V walks through "
+  "three rounds of increasingly rigorous testing, ending in a resolution simpler, and "
+  "more humbling, than any of the behavioral explanations first considered.)")
 p("The guide that follows explains every concept used (behavioral and quantitative) "
   "in plain language with real examples, walks through all five case studies in "
   "detail, narrates the project's milestones and the reasoning behind each decision, "
@@ -1121,17 +1124,87 @@ box(
     "it. With roughly 24 regime-effect coefficients tested across both "
     "frequencies and markets, seeing 2-4 marginally significant results at "
     "the 5-10% level is within what pure chance produces under a true "
-    "null &mdash; not meaningfully more than a false-positive rate. "
-    "<b>Corrected conclusion:</b> the long-only recommendation stands "
-    "(Part VI.1) &mdash; it rests on the robust decomposition, not on the "
-    "crash-risk story. But the project cannot claim to know <i>why</i> the "
-    "short leg fails. That remains genuinely open. This is the project's "
-    "own central thesis &mdash; don't trust a reassuring pattern until "
-    "it's tested &mdash; applied to its own most recent finding, at the "
-    "exact point it mattered most: the explanation that looked "
-    "best-supported in the whole investigation turned out not to survive "
-    "the one test that actually tests it.",
-    title="WHAT SURVIVES AND WHAT DOESN'T"
+    "null &mdash; not meaningfully more than a false-positive rate. As "
+    "understood at this point, the long-only recommendation still stood "
+    "&mdash; but the project cannot claim to know <i>why</i> the short leg "
+    "fails. That remained genuinely open, and Section 5.7 is where it "
+    "actually gets resolved, one more check further.",
+    title="WHAT SURVIVES AND WHAT DOESN'T, AS UNDERSTOOD AT THIS POINT"
+)
+
+h1("5.7  Milestone 6 &mdash; Is it just beta?")
+p("Milestone 5 left one basic check untried: does the long leg and the "
+  "short leg simply have different, uncontrolled exposure to the market "
+  "itself? An equal-weighted decile long-short book makes no attempt to "
+  "match the two baskets' market sensitivity. If &quot;losers&quot; (far "
+  "from the 52-week high) happen to be higher-beta stocks than "
+  "&quot;winners&quot; (near the high), the strategy carries unintended "
+  "net market exposure &mdash; and in a market with a strongly positive "
+  "average return over the sample (both NSE and the US mirror returned "
+  "roughly 19-21% annualized over their windows), that alone would "
+  "produce exactly the pattern seen, with no anchoring or crash story "
+  "required.")
+p("A standard CAPM-style regression was run "
+  "(<i>investigations/short_leg_beta.py</i>): leg return = alpha + beta "
+  "&times; market return, using the same equal-weighted market proxy and "
+  "the same Newey-West correction as Section 5.6, at daily and monthly "
+  "frequency, for the long leg, the short leg, and the combined book.")
+data_table(
+    ["", "NSE daily", "NSE monthly", "US daily", "US monthly"],
+    [
+        ["Long leg beta (p)", "+0.84 (p<.0001)", "+0.80 (p<.0001)", "+0.82 (p<.0001)", "+0.75 (p<.0001)"],
+        ["Short leg beta (p)", "-1.16 (p<.0001)", "-1.19 (p<.0001)", "-1.39 (p<.0001)", "-1.40 (p<.0001)"],
+        ["Combined net beta (p)", "-0.32 (p<.0001)", "-0.40 (p=.0007)", "-0.57 (p<.0001)", "-0.70 (p<.0001)"],
+        ["Long leg alpha (p)", "p=0.60", "p=0.61", "p=0.76", "p=0.35"],
+        ["Short leg alpha (p)", "p=0.15", "p=0.65", "p=0.72", "p=0.95"],
+        ["Combined alpha (p)", "p=0.25", "p=0.42", "p=0.69", "p=0.41"],
+    ],
+    col_widths=[1.7*inch, 1.15*inch, 1.15*inch, 1.15*inch, 1.15*inch],
+    small=True,
+)
+p("<b>This is the answer.</b> All 12 beta coefficients (both legs plus the "
+  "combined book, both markets, both frequencies) are highly significant "
+  "(p&lt;0.001, all but one below p=0.0001). All 12 alphas are "
+  "statistically indistinguishable from zero (p from 0.15 to 0.95). The "
+  "&quot;losers&quot; basket consistently carries a larger-magnitude beta "
+  "than the &quot;winners&quot; basket &mdash; consistent with the "
+  "momentum literature's own description of loser-leg stocks as "
+  "higher-beta &mdash; but the consequence here is purely mechanical: "
+  "<b>the combined book is not market-neutral. It carries a significant, "
+  "unintended net short-beta position (-0.32 to -0.70), and being "
+  "structurally short a market that returned ~20% a year is a completely "
+  "sufficient explanation for the losses documented in every milestone "
+  "above &mdash; no anchoring bias, no crash risk, no value confound "
+  "required.</b>")
+box(
+    "This changes the practical recommendation from Sections 5.5-5.6, not "
+    "just adds a footnote. &quot;Trade the signal long-only&quot; rested "
+    "on the long leg's raw average return being significantly positive. "
+    "That return is real, but this test shows it's consistent with simply "
+    "holding an 0.75-0.84-beta long position in a rising market, with "
+    "<b>no significant standalone alpha</b> once that exposure is "
+    "controlled for. There is currently no evidence, anywhere in this "
+    "project, of genuine stock-selection skill in the 52-week-high "
+    "signal, in either direction, once market beta is properly accounted "
+    "for. The honest recommendation: this signal's long leg is a "
+    "reasonable lower-beta way to stay invested, not a demonstrated "
+    "behavioral edge. Testing for real, beta-independent skill would "
+    "require explicitly beta-neutralizing both legs and re-running this "
+    "same regression on the hedged residual &mdash; a natural next step "
+    "this project has not yet taken.",
+    title="WHAT THIS CHANGES"
+)
+box(
+    "The real methodological lesson: three milestones (2, 3, 5) chased "
+    "increasingly sophisticated behavioral and statistical explanations "
+    "&mdash; crash windows, a value/growth confound, formal "
+    "regime-conditioning significance tests &mdash; before checking the "
+    "single most basic hygiene check for any long-short equity backtest: "
+    "whether the two legs are beta-matched. They weren't, and that "
+    "omission alone explains everything the more exotic hypotheses were "
+    "built to explain. Order hypothesis tests from cheapest and most "
+    "mechanical to most exotic, not the reverse.",
+    kind="fact", title="THE LESSON, AGAIN"
 )
 
 # MARKER_END_PART5
@@ -1161,20 +1234,24 @@ box(
     "should be reported and validated component-by-component before a blended "
     "version of it is trusted for a decision.",
 )
-p("<b>The fix is long-only, not exclusion &mdash; and this part is solid "
-  "even though the &quot;why&quot; isn't (Part V.5-V.6).</b> The long leg "
-  "(buying stocks near their 52-week high) is a genuinely positive, "
-  "standalone strategy on its own, and that finding is statistically "
-  "robust in every specification tested. <b>Rule: don't discard a "
-  "component signal wholesale because its long-short backtest lost money "
-  "&mdash; decompose the legs first.</b> A signal that only works long is "
-  "still worth including, as a long-only tilt rather than a symmetric "
-  "long-short bet. <b>But don't claim to know why the short leg fails</b> "
-  "&mdash; the specific momentum-crash mechanism looked compelling under a "
-  "descriptive regime split (Part V.5) but did not survive formal "
-  "HAC-regression significance testing (Part V.6). A compelling "
-  "descriptive pattern is a hypothesis, not a finding, until it's tested "
-  "formally.")
+p("<b>Decompose the legs before discarding a signal &mdash; still correct, "
+  "but the fix isn't &quot;long-only&quot; after all.</b> The long leg's "
+  "raw average return is significantly positive, the short leg's "
+  "significantly negative, in every specification tested (Part V.6). That "
+  "decomposition rule stands. What it was used to conclude did not: Part "
+  "V.7 found both legs' significant raw returns are fully explained by "
+  "uncontrolled market-beta exposure (long &asymp;+0.8 beta, short "
+  "&asymp;-1.2 to -1.4 beta) in markets that rose ~20%/year over the "
+  "sample &mdash; once beta is controlled for, <b>alpha is insignificant "
+  "in all 12 regressions tested, both legs, both markets, both "
+  "frequencies.</b> There is currently no demonstrated stock-selection "
+  "skill in this signal, in either direction. <b>Corrected rule:</b> this "
+  "signal is not a demonstrated source of alpha as currently built; using "
+  "it as a behavioral tilt requires beta-neutralizing both legs first and "
+  "re-testing the hedged residual for alpha &mdash; a step this project "
+  "has not yet taken. And more generally: check for a beta mismatch "
+  "between a long-short book's legs before reaching for a behavioral "
+  "explanation, not after three rounds of increasingly exotic ones.")
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
 bullets([
@@ -1231,6 +1308,18 @@ bullets([
     "regime split alone &mdash; run the regression with proper standard "
     "errors first, and expect a real chance the compelling-looking pattern "
     "won't survive it.",
+    "<b>The cheapest test is the one to run first, and this project ran it "
+    "last.</b> Three escalating hypotheses (crash-window concentration, a "
+    "value/growth confound, formal momentum-crash regime-conditioning) "
+    "were tested across three milestones before Part V.7 finally ran a "
+    "plain CAPM beta regression &mdash; the single cheapest, most standard "
+    "check for any long-short book &mdash; and found the entire answer in "
+    "it: an uncontrolled beta mismatch between the legs, fully explaining "
+    "every prior milestone's numbers, no behavioral story needed. Order "
+    "hypothesis tests from cheapest and most mechanical to most exotic, "
+    "not the reverse; a beta regression takes minutes and rules out the "
+    "most common cause of surprising long-short performance before any "
+    "more elaborate explanation is worth reaching for.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -1254,10 +1343,14 @@ box(
 p("<b>The product:</b> a subscription analytics service with two parts &mdash; "
   "a <b>signal side</b> (the momentum / 52-week-high / reversal library, run "
   "per client against <i>their</i> universe, reported as separate, "
-  "individually-backtested components, never pre-blended) and a "
-  "<b>risk side</b> (the regime-switching stress-VaR methodology from Part III, "
-  "run against a client's actual position correlations and leverage, reporting "
-  "calm-regime vs. stress-regime tail loss side by side).")
+  "individually-backtested components, never pre-blended, each with its own "
+  "beta-regression alpha/beta breakdown so a client can see whether "
+  "performance is genuine stock-selection skill or just uncontrolled market "
+  "exposure &mdash; Part V.7's finding made this check a required feature, "
+  "not an optional one) and a <b>risk side</b> (the regime-switching "
+  "stress-VaR methodology from Part III, run against a client's actual "
+  "position correlations and leverage, reporting calm-regime vs. "
+  "stress-regime tail loss side by side).")
 p("<b>Target customer:</b> small-to-mid systematic equity funds, family "
   "offices, and independent RIAs priced out of institutional factor-data tiers "
   "but sophisticated enough to want decomposed, re-validated signals rather "
@@ -1299,20 +1392,20 @@ bullets([
     "two markets tested (Part V.4) &mdash; treat either result, in isolation, "
     "as provisional rather than a confirmed anomaly. Only the 52-week-high "
     "signal's loss held up in both.",
-    "<b>The 52-week-high result's cause remains genuinely open.</b> Two "
-    "candidate explanations were ruled out by direct test: crash-window "
-    "concentration and a value/growth confound, in either market "
-    "(Part V.3-V.4). A third, momentum-crash risk, looked strongly "
-    "supported under a descriptive regime-bucket comparison (Part V.5) but "
-    "did NOT survive formal HAC-regression significance testing at daily or "
-    "monthly frequency, in either market (Part V.6): the short leg, where "
-    "the mechanism specifically predicts the damage should concentrate, "
-    "shows no significant regime-conditioning anywhere it was tested. What "
-    "IS statistically robust, every specification: the long leg's average "
-    "return is significantly positive and the short leg's significantly "
-    "negative &mdash; the decomposition itself, not the proposed "
-    "explanation for it. Treat &quot;why the short leg fails&quot; as "
-    "unresolved.",
+    "<b>The 52-week-high result's cause: resolved, and it's the boring "
+    "answer.</b> Two behavioral/statistical explanations were ruled out by "
+    "direct test: crash-window concentration (Part V.4) and a value/growth "
+    "confound (Part V.5), neither surviving in either market; formally-"
+    "tested momentum-crash risk (Part V.6) then walked back Part V.5's "
+    "descriptive-looking confirmation too. The actual explanation (Part "
+    "V.7) is a construction flaw, not a market phenomenon: the legs have "
+    "significantly different, uncontrolled market-beta exposure (long "
+    "&asymp;+0.8, short &asymp;-1.2 to -1.4), leaving the book net "
+    "short-beta (-0.32 to -0.70, p&lt;0.001 every cut) in markets that "
+    "returned ~20%/year. Once beta is controlled for, alpha is "
+    "insignificant in all 12 regressions tested. There is no demonstrated "
+    "stock-selection skill in this signal, in either direction, as "
+    "currently built.",
     "<b>Transaction costs are a simple linear model</b>, not a real "
     "market-impact model; a strategy sized for real capital would need a "
     "proper implementation-shortfall estimate.",
@@ -1327,10 +1420,12 @@ bullets([
     "LTCM's actual, never fully disclosed book. Its reported multiple should "
     "be read as an order of magnitude, not a precise historical "
     "reconstruction.",
-    "<b>The 52-week-high result's cause is not yet confirmed.</b> Momentum-"
-    "crash risk and a value/growth confound are both plausible, "
-    "neither is proven; Part V.4's in-progress investigation exists "
-    "specifically to test the second explanation.",
+    "<b>No beta-neutral version of the 52-week-high signal has been "
+    "tested.</b> Part V.7 explains the raw long-short book's losses via "
+    "uncontrolled beta, but does not itself construct or test a "
+    "beta-hedged version to check whether real, beta-independent alpha "
+    "exists once that exposure is removed -- a natural next step this "
+    "project has not taken.",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -1363,37 +1458,52 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 5 then ran the India finding through the "
-  "same skepticism the project applies to everything else, and it did not "
-  "survive unchanged: momentum and reversal turned out to be universe-"
-  "dependent, not general truths; the 52-week-high signal's damage held up "
-  "across two very different markets and eras and survived a direct test "
-  "against its most plausible alternative explanation (a value/growth "
-  "confound); and the specific mechanism proposed for <i>why</i> it fails "
-  "(momentum-crash risk) looked compelling under a descriptive pass but did "
-  "not survive formal, autocorrelation-corrected significance testing, in "
-  "either market, at either frequency. Each step used a stronger method "
-  "than the one before it, and each stronger method found something the "
-  "weaker one had missed or overclaimed.")
-p("The fix that survived all of that scrutiny was more useful than either "
-  "&quot;keep it&quot; or &quot;discard it&quot; would have been: the "
-  "signal's long leg works, robustly, on its own, so the answer is neither "
-  "&mdash; trade it long-only &mdash; and that answer does not depend on "
-  "knowing why the short leg fails, which the project now states honestly "
-  "as unresolved rather than as a named, confirmed mechanism. That is the "
-  "project working as intended, including on itself: not every finding "
-  "needs to be confirmed to be useful, a compelling descriptive pattern is "
-  "a hypothesis and not a finding until it survives formal testing, and the "
-  "single most important correction in this entire guide is one the "
-  "project made about its own most recent, best-supported-looking result.")
+  "needed. Milestones 3 through 6 then ran the India finding through "
+  "increasingly rigorous versions of the same skepticism the project "
+  "applies to everything else, and at every step a stronger method found "
+  "something the weaker one had missed or overclaimed: momentum and "
+  "reversal turned out to be universe-dependent, not general truths; a "
+  "value/growth confound was tested and rejected; a formally-compelling-"
+  "looking momentum-crash mechanism was tested and rejected too, once "
+  "proper statistical significance testing replaced descriptive pattern-"
+  "matching; and the actual explanation, when it finally arrived, was the "
+  "most basic and least glamorous of all the candidates tested &mdash; an "
+  "uncontrolled beta mismatch between the strategy's two legs, checked "
+  "last instead of first.")
+p("The fix that survived all of that scrutiny is more modest than any of "
+  "the earlier drafts of this conclusion claimed: there is no demonstrated, "
+  "beta-independent stock-selection skill anywhere in the 52-week-high "
+  "signal as currently built, in either direction. The long leg is a "
+  "reasonable lower-beta way to stay invested, not a proven behavioral "
+  "edge; using this signal as a genuine tilt would require beta-"
+  "neutralizing both legs and re-testing the hedged residual, which this "
+  "project has not yet done. That more modest, more honest conclusion is "
+  "the project working as intended, including on itself: not every "
+  "finding needs to be confirmed to be useful, a compelling pattern is a "
+  "hypothesis until it survives testing at every level of rigor available "
+  "&mdash; descriptive, then formally statistical, then mechanically basic "
+  "&mdash; and the single most important thread running through this "
+  "entire guide is a project that kept correcting its own most recent, "
+  "best-supported-looking result, three times in a row, right up to the "
+  "final one.")
 
 # ============================================================ GLOSSARY
 story.append(PageBreak())
 toc_entry("Glossary", 0, "gloss")
 part("Glossary")
 glossary = [
+    ("Alpha", "The part of a strategy's average return left over after "
+     "accounting for its market exposure (beta) -- the piece that would "
+     "represent genuine stock-selection skill, if it's significantly "
+     "different from zero. This guide's Part V.7 finds none in the "
+     "52-week-high signal, either leg, once beta is controlled for."),
     ("Anchoring", "Relying too heavily on an initial reference point (e.g. a "
      "52-week high, an opening price) when making subsequent judgments."),
+    ("Beta", "How much a position tends to move for a given move in the "
+     "overall market -- a beta of 1 means it moves with the market on "
+     "average, above 1 means it amplifies market moves, negative means it "
+     "moves opposite the market. A long-short book with unequal long and "
+     "short beta carries unintended net market exposure."),
     ("Composite score", "A single number blending several individual signals "
      "into one rank; this project's central finding is that a composite can "
      "hide a component that is actively harmful."),
