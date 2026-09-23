@@ -631,6 +631,58 @@ one bad shock the strategy simply hasn't yet recovered from.
 
 **Reproduce this**: `python investigations/momentum_decay_regime_analysis.py`.
 
+## Is "real pre-1994, decayed since" specific to momentum, or market-wide? (Milestone 12)
+
+Milestones 9-11 built a specific toolkit — a rolling, out-of-sample beta hedge split at
+1994-01-01 — and applied it only to momentum, because momentum was the one signal with
+significant full-sample alpha worth investigating. But the 52-week-high and short-term
+reversal signals were both declared dead using a *full-sample* beta-adjusted regression
+(Milestones 6-8), which would hide the exact same pattern found for momentum: real,
+significant alpha in an early era, averaged down to statistical noise by a later decayed
+era. This had never been checked, because there was no reason to look for a decay pattern in
+signals that already looked dead on average. This milestone
+(`investigations/all_signals_decay_analysis.py`) applies the identical pre/post-1994
+out-of-sample hedge to **all three** US signals — not to re-answer an already-settled
+question (NSE momentum's full-sample null was already established in Milestone 8, so
+re-running the hedge there would add nothing), but to ask a genuinely new one: is the decay
+pattern unique to momentum, or a broader feature of the US market?
+
+| Signal | Leg | Pre-1994 ann. ret / p | Post-1994 ann. ret / p |
+|---|---|---|---|
+| 12-1 momentum | long leg | +9.62%/yr, **p=0.001** | +3.29%/yr, p=0.149 |
+| 12-1 momentum | combined | +7.93%/yr, **p=0.024** | -0.31%/yr, p=0.590 |
+| 52-week-high | long leg | -0.21%/yr, p=0.704 | -2.06%/yr, p=0.468 |
+| 52-week-high | combined | -8.46%/yr, p=0.776 | -6.68%/yr, p=0.401 |
+| Short-term reversal | long leg | +5.31%/yr, **p=0.046** | +0.25%/yr, p=0.629 |
+| Short-term reversal | combined | -0.41%/yr, p=0.293 | -0.57%/yr, p=0.576 |
+
+**Two genuinely different stories, not one.** The 52-week-high signal shows **no significant
+alpha in either era, in any leg** — confirming Milestones 6-7's conclusion that this signal
+never had genuine stock-selection skill in either direction; its full-sample "loss" was
+uncontrolled beta from the start, not a decayed edge. **Short-term reversal's long leg tells
+a different story: it shows the identical decay pattern as momentum** — a real, statistically
+significant pre-1994 alpha (+5.31%/yr, p=0.046) that decays completely to noise post-1994
+(+0.25%/yr, p=0.629). This was invisible in Milestone 8's full-sample regression, which
+averaged the genuine early effect with the decayed later one and correctly found no
+full-sample significance — but "no full-sample significance" is not the same claim as "never
+had a genuine edge," and this milestone shows reversal's long leg did.
+
+**Updated conclusion, correcting Milestone 8's framing for reversal specifically**: Milestone
+8's headline claim — "this project's one previously-reported positive finding [reversal] did
+not survive the same scrutiny applied to the negative one" — is accurate for the full-sample
+regression it ran, but incomplete: reversal's long leg was never *pure noise*, it was a real,
+decayed effect exactly analogous to momentum's, just never tested with the era-split
+methodology that only existed starting at Milestone 9. **The "real pre-1994, decayed since"
+pattern is not a momentum-specific quirk — it appears in two of this project's three signals'
+long legs (momentum and reversal) and is absent from the third (52-week-high, which never had
+genuine alpha at all)**, consistent with a market-wide explanation — the same 1990s-2000s
+scaling-up of quantitative, cross-sectional equity strategies that this project's own case
+studies (LTCM, the 2007 Quant Quake) already document as having transformed US equity
+markets' microstructure over exactly this period — rather than an idiosyncratic property of
+momentum alone.
+
+**Reproduce this**: `python investigations/all_signals_decay_analysis.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -821,6 +873,11 @@ python investigations/momentum_hedged_decay_backtest.py
 # a crash artifact, a hedge artifact, or genuine decay?" above)
 python investigations/momentum_decay_regime_analysis.py
 
+# Investigation — is "real pre-1994, decayed since" specific to momentum, or market-wide?
+# (market-wide — reversal's long leg shows the same pattern; see "Is 'real pre-1994, decayed
+# since' specific to momentum, or market-wide?" above)
+python investigations/all_signals_decay_analysis.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -831,22 +888,24 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
 
 1. **An investment framework** — a composite behavioral mispricing score usable as a
    screening/tilt signal alongside fundamental analysis, now with real empirical caveats
-   attached (see "Empirical results" through "Is the post-1994 null result a crash
-   artifact, a hedge artifact, or genuine decay?" above): don't trust it blind on a
-   large-cap-only universe, check which sub-signal is actually carrying any edge before
-   combining them, and beta-neutralize long-short legs before crediting any performance
-   difference to a behavioral effect rather than to uncontrolled market exposure. No cell
-   in this project currently survives every check applied at this repo's own highest
-   standard of rigor: US 12-1 momentum's long leg passed decomposition, cross-market
-   replication, and a beta-adjusted significance test, and even an in-sample
-   publication-decay split (Milestone 9) — but once tested with an actual rolling,
-   out-of-sample hedge instead of an in-sample regression (Milestone 10), its post-1994
-   alpha is not statistically distinguishable from zero either, and Milestone 11's
-   follow-up investigation confirmed that null result is genuine, ongoing decay rather
-   than an artifact of the 2009 crash or the hedge's rolling window. The pre-1994 alpha
-   remains this repo's one genuinely robust, hedge-confirmed finding; nothing in this
-   project has yet demonstrated a forward-sizeable edge in the post-publication era, for
-   any signal, in either
+   attached (see "Empirical results" through "Is 'real pre-1994, decayed since' specific
+   to momentum, or market-wide?" above): don't trust it blind on a large-cap-only
+   universe, check which sub-signal is actually carrying any edge before combining them,
+   and beta-neutralize long-short legs before crediting any performance difference to a
+   behavioral effect rather than to uncontrolled market exposure. No cell in this project
+   currently survives every check applied at this repo's own highest standard of rigor:
+   US 12-1 momentum's long leg passed decomposition, cross-market replication, and a
+   beta-adjusted significance test, and even an in-sample publication-decay split
+   (Milestone 9) — but once tested with an actual rolling, out-of-sample hedge instead of
+   an in-sample regression (Milestone 10), its post-1994 alpha is not statistically
+   distinguishable from zero either, and Milestone 11's follow-up investigation confirmed
+   that null result is genuine, ongoing decay rather than an artifact of the 2009 crash or
+   the hedge's rolling window. Milestone 12 then showed this same "real pre-1994, decayed
+   since" pattern also appears in short-term reversal's long leg — so it is a market-wide
+   phenomenon, not a momentum-specific quirk — while 52-week-high never had genuine alpha
+   in either era. The pre-1994 alpha remains this repo's one genuinely robust,
+   hedge-confirmed finding; nothing in this project has yet demonstrated a
+   forward-sizeable edge in the post-publication era, for any signal, in either
    direction.
 2. **Risk-management lessons** — a stress-testing playbook (derived from the Q1 simulation)
    for any leveraged or "market-neutral" strategy: never calibrate tail risk on a calm-regime
@@ -894,11 +953,15 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
 - **Momentum and reversal did not replicate consistently across the two markets tested**
   (see "Replication on a second market") — treat any single-market anomaly finding in this
   repo as provisional until it's been checked on at least one more, independent universe.
-- **Short-term reversal's "positive" empirical result is retracted, not just
-  non-replicating.** Milestone 8 ran the same CAPM beta check that debunked the
-  52-week-high signal against reversal too: none of its 12 alpha tests (2 markets × 3 legs
-  × 2 frequencies) are significant. This project's one previously-reported positive finding
-  did not survive the same scrutiny applied to the negative one.
+- **Short-term reversal's "positive" empirical result is retracted at full-sample level
+  (Milestone 8) — but its long leg specifically turns out to be a decayed, not a never-real,
+  effect (Milestone 12).** Milestone 8 ran the same CAPM beta check that debunked the
+  52-week-high signal against reversal too: none of its 12 full-sample alpha tests (2
+  markets × 3 legs × 2 frequencies) are significant. That full-sample verdict is accurate but
+  incomplete: Milestone 12 later found reversal's long leg carries a real, significant
+  pre-1994 alpha (+5.31%/yr, p=0.046) that decays fully to noise post-1994 (+0.25%/yr,
+  p=0.629) — the identical pattern found for momentum, invisible in a single full-sample
+  average. Reversal's short leg and combined book remain non-significant in every era tested.
 - **US 12-1 momentum's alpha decays after publication, as expected (Milestone 9) — and
   does not survive an actual out-of-sample hedge post-1994 (Milestone 10, superseding
   Milestone 9's framing).** Milestone 9's in-sample per-era regression found the long
@@ -930,3 +993,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   not depend on the specific window chosen. **This investigation does not reverse
   Milestone 10's conclusion; it rules out the two most obvious objections to it and leaves
   ongoing, genuine decay as the best-supported explanation.**
+- **"Real pre-1994, decayed since" is not momentum-specific — it also appears in
+  short-term reversal's long leg, and is absent from 52-week-high entirely (Milestone
+  12).** Applying the same pre/post-1994 out-of-sample hedge to all three US signals found
+  two distinct stories: 52-week-high shows no significant alpha in either era, in any leg
+  (it never had genuine stock-selection skill, consistent with Milestones 6-7); reversal's
+  long leg shows the identical decay signature as momentum's — real, significant pre-1994
+  alpha (p=0.046) fully decayed to noise post-1994 (p=0.629) — which Milestone 8's
+  full-sample regression correctly found non-significant overall but could not distinguish
+  from "never real." Treat Milestone 8's reversal retraction as accurate at the full-sample
+  level but incomplete: the long leg was a genuine, decayed effect, not pure noise.

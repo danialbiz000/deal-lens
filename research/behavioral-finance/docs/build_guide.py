@@ -1501,6 +1501,78 @@ box(
     "to explain it away deserves more confidence, not less.",
     title="THE DEEPER, STILL-STANDING ANSWER"
 )
+box(
+    "Section 5.13 asks whether this whole pattern is unique to momentum, "
+    "by applying the same toolkit to the other two US signals. The "
+    "answer splits: one signal never had genuine alpha at all; the "
+    "other shows the identical decay signature as momentum.",
+    kind="fact", title="UPDATE FROM SECTION 5.13"
+)
+
+h1("5.13  Milestone 12 &mdash; Is &quot;real pre-1994, decayed since&quot; specific to momentum, or market-wide?")
+p("Sections 5.10-5.12 built a specific toolkit &mdash; a rolling, "
+  "out-of-sample beta hedge split at 1994-01-01 &mdash; and applied it "
+  "only to momentum, because momentum was the one signal with "
+  "significant full-sample alpha worth investigating. But the "
+  "52-week-high and short-term reversal signals were both declared dead "
+  "using a <i>full-sample</i> beta-adjusted regression (Sections "
+  "5.7-5.9), which would hide the exact same pattern found for momentum: "
+  "real, significant alpha in an early era, averaged down to statistical "
+  "noise by a decayed later era. This milestone "
+  "(<i>investigations/all_signals_decay_analysis.py</i>) applies the "
+  "identical pre/post-1994 hedge to <b>all three</b> US signals &mdash; "
+  "not to re-answer an already-settled question (NSE momentum's "
+  "full-sample null was already established in Section 5.9, so "
+  "re-running the hedge there would add nothing), but to ask a genuinely "
+  "new one: is the decay pattern unique to momentum, or a broader "
+  "feature of the US market?")
+data_table(
+    ["Signal / leg", "Pre-1994 ann. ret / p", "Post-1994 ann. ret / p"],
+    [
+        ["12-1 momentum, long leg", "+9.62%/yr, p=.001", "+3.29%/yr, p=.149"],
+        ["12-1 momentum, combined", "+7.93%/yr, p=.024", "-0.31%/yr, p=.590"],
+        ["52-week-high, long leg", "-0.21%/yr, p=.704", "-2.06%/yr, p=.468"],
+        ["52-week-high, combined", "-8.46%/yr, p=.776", "-6.68%/yr, p=.401"],
+        ["Reversal, long leg", "+5.31%/yr, p=.046", "+0.25%/yr, p=.629"],
+        ["Reversal, combined", "-0.41%/yr, p=.293", "-0.57%/yr, p=.576"],
+    ],
+    col_widths=[2.3*inch, 2.4*inch, 2.4*inch],
+    small=True,
+)
+p("<b>Two genuinely different stories, not one.</b> The 52-week-high "
+  "signal shows <b>no significant alpha in either era, in any leg</b> "
+  "&mdash; confirming Sections 5.7-5.8's conclusion that this signal "
+  "never had genuine stock-selection skill in either direction; its "
+  "full-sample &quot;loss&quot; was uncontrolled beta from the start, "
+  "not a decayed edge. <b>Short-term reversal's long leg tells a "
+  "different story: it shows the identical decay pattern as "
+  "momentum</b> &mdash; a real, statistically significant pre-1994 "
+  "alpha (+5.31%/yr, p=0.046) that decays completely to noise post-1994 "
+  "(+0.25%/yr, p=0.629). This was invisible in Section 5.9's full-sample "
+  "regression, which averaged the genuine early effect with the decayed "
+  "later one and correctly found no full-sample significance &mdash; "
+  "but &quot;no full-sample significance&quot; is not the same claim as "
+  "&quot;never had a genuine edge,&quot; and this milestone shows "
+  "reversal's long leg did.")
+box(
+    "Section 5.9's headline claim &mdash; that reversal's &quot;edge&quot; "
+    "did not survive the same scrutiny applied to the negative one "
+    "&mdash; is accurate for the full-sample regression it ran, but "
+    "incomplete: reversal's long leg was never pure noise, it was a "
+    "real, decayed effect exactly analogous to momentum's, just never "
+    "tested with the era-split methodology that only existed starting "
+    "at Section 5.10. <b>The &quot;real pre-1994, decayed since&quot; "
+    "pattern is not a momentum-specific quirk &mdash; it appears in two "
+    "of this project's three signals' long legs (momentum and reversal) "
+    "and is absent from the third (52-week-high, which never had genuine "
+    "alpha at all)</b>, consistent with a market-wide explanation "
+    "&mdash; the same 1990s-2000s scaling-up of quantitative, "
+    "cross-sectional equity strategies this project's own case studies "
+    "(LTCM, the 2007 Quant Quake) already document as having transformed "
+    "US equity markets over exactly this period &mdash; rather than an "
+    "idiosyncratic property of momentum alone.",
+    title="TWO SIGNALS, ONE SHARED STORY"
+)
 
 # MARKER_END_PART5
 
@@ -1596,11 +1668,24 @@ box(
     "stopping here: is it really just the 2009 momentum crash, or the "
     "hedge's rolling window? Neither explained it &mdash; a five-era "
     "breakdown showed ongoing decay through 2017, well after 2009, and "
-    "the result held across three different hedge windows. <b>This is "
-    "the current, most rigorous answer: genuine, strong pre-1994 alpha, "
-    "and genuine, ongoing decay since &mdash; not a temporary shock the "
-    "strategy is due to recover from.</b>",
+    "the result held across three different hedge windows. This is the "
+    "most rigorous read of momentum specifically: genuine, strong "
+    "pre-1994 alpha, and genuine, ongoing decay since &mdash; not a "
+    "temporary shock the strategy is due to recover from.",
     kind="fact", title="UPDATE FROM PART V.12"
+)
+box(
+    "Part V.13 then asked whether this whole pattern is unique to "
+    "momentum. It isn't: short-term reversal's long leg shows the "
+    "identical &quot;real pre-1994, decayed since&quot; signature "
+    "(p=0.046 pre-1994, p=0.629 post), invisible inside Part V.9's "
+    "full-sample null. 52-week-high, by contrast, shows no significant "
+    "alpha in either era &mdash; it never had genuine skill at all. "
+    "<b>The decay pattern is market-wide, appearing in two of three "
+    "signals' long legs, not a momentum idiosyncrasy &mdash; and "
+    "Part V.9's reversal retraction should be read as accurate at the "
+    "full-sample level but incomplete.</b>",
+    kind="fact", title="UPDATE FROM PART V.13"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -1710,6 +1795,21 @@ bullets([
     "away; running that check honestly, and reporting it even when it "
     "doesn't help, is what separates a stress-test from a fishing "
     "expedition.",
+    "<b>A full-sample &quot;no significant alpha&quot; verdict does not "
+    "mean a signal was never real &mdash; check whether it's actually "
+    "two eras averaging to zero before writing it off entirely.</b> Part "
+    "V.9 declared short-term reversal fully retracted based on a "
+    "full-sample regression, the technically correct read of that "
+    "specific test. Part V.13 applied the era-split toolkit built for "
+    "momentum and found reversal's long leg had been genuinely, "
+    "significantly positive pre-1994 and decayed to noise since &mdash; "
+    "the same pattern as momentum, hidden inside a full-sample average "
+    "that happened to net out near zero. Retest every full-sample null "
+    "result from before your era-split toolkit existed with that "
+    "toolkit, not just your full-sample findings &mdash; a &quot;no "
+    "effect on average&quot; verdict can quietly contain a real, "
+    "decayed effect that a single-number summary cannot distinguish "
+    "from a signal that was simply never real.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -1790,12 +1890,17 @@ bullets([
     "two markets tested (Part V.4) &mdash; treat either result, in isolation, "
     "as provisional rather than a confirmed anomaly. Only the 52-week-high "
     "signal's loss held up in both.",
-    "<b>Short-term reversal's positive result is retracted, not just "
-    "non-replicating (Part V.9).</b> The same CAPM beta check that debunked "
-    "the 52-week-high signal, applied to reversal for the first time: none "
-    "of its 12 alpha tests are significant. This project's one previously-"
-    "reported positive finding did not survive the same scrutiny applied to "
-    "the negative one.",
+    "<b>Short-term reversal's positive result is retracted at the "
+    "full-sample level (Part V.9) &mdash; but its long leg specifically "
+    "is a decayed, not a never-real, effect (Part V.13).</b> The same "
+    "CAPM beta check that debunked the 52-week-high signal, applied to "
+    "reversal for the first time, found none of its 12 full-sample "
+    "alpha tests significant. That verdict is accurate but incomplete: "
+    "Part V.13 later found reversal's long leg carries real, significant "
+    "pre-1994 alpha (p=0.046) that decays fully to noise post-1994 "
+    "(p=0.629) &mdash; the identical pattern found for momentum, "
+    "invisible in a single full-sample average. Its short leg and "
+    "combined book remain non-significant in every era tested.",
     "<b>US 12-1 momentum's post-1994 alpha does not survive an actual "
     "out-of-sample hedge, and the deeper investigation confirms genuine "
     "decay rather than a crash or methodology artifact (Parts V.10-12, "
@@ -1814,6 +1919,14 @@ bullets([
     "under every test. This project's momentum finding should be read "
     "as strong and genuine before 1994, and as genuine, ongoing decay "
     "&mdash; not a temporary shock &mdash; since.",
+    "<b>&quot;Real pre-1994, decayed since&quot; is not momentum-specific "
+    "(Part V.13).</b> Applying the identical pre/post-1994 out-of-sample "
+    "hedge to all three US signals found two distinct stories: "
+    "52-week-high shows no significant alpha in either era, in any leg "
+    "(it never had genuine stock-selection skill); reversal's long leg "
+    "shows the identical decay signature as momentum's. The pattern "
+    "appears in two of three signals' long legs, not one, consistent "
+    "with a market-wide explanation rather than a momentum idiosyncrasy.",
     "<b>The 52-week-high result's cause: resolved, and it's the boring "
     "answer.</b> Two behavioral/statistical explanations were ruled out by "
     "direct test: crash-window concentration (Part V.4) and a value/growth "
@@ -1895,13 +2008,19 @@ p("The project's real empirical result (Part V.3) delivered a finding more "
   "sharper tool and finding the result shrink again, it tried directly to "
   "explain the shrinkage away &mdash; as a single crash episode, or as an "
   "artifact of one modeling choice &mdash; and failed on both counts. The "
-  "result held.")
+  "result held. Part V.13 then went back to the signal Part V.9 had "
+  "seemed to retract outright &mdash; short-term reversal &mdash; and "
+  "applied the same era-split toolkit rather than trusting the earlier "
+  "full-sample verdict, and found reversal's long leg had been telling "
+  "the truth about being &quot;a real, cost-adjusted edge&quot; all "
+  "along, just not for the era that mattered by the time anyone checked: "
+  "genuine pre-1994, decayed since, the same shape as momentum's story.")
 p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "investment framework that explicitly forbids trusting a blend without "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 11 then ran the India findings through "
+  "needed. Milestones 3 through 12 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -1920,23 +2039,28 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "finally looked properly &mdash; alpha that Part V.10 then showed had "
   "partially decayed since its 1993 publication, that Part V.11 then "
   "showed does not clear this project's own bar for a forward-sizeable "
-  "edge once tested with an actual out-of-sample hedge, and that Part "
-  "V.12 then confirmed is genuine, ongoing decay rather than an artifact "
-  "of the 2009 crash or the hedge's own design, in the era since "
-  "publication.")
+  "edge once tested with an actual out-of-sample hedge, that Part V.12 "
+  "then confirmed is genuine, ongoing decay rather than an artifact of "
+  "the 2009 crash or the hedge's own design, and that Part V.13 then "
+  "showed is not even unique to momentum &mdash; the identical shape "
+  "turned up in a signal this project had already, separately, declared "
+  "dead.")
 p("The fix that survived all of that scrutiny is more modest, and the "
-  "project's one real positive finding is different, than any earlier "
-  "draft of this conclusion claimed: there is no demonstrated, "
-  "beta-independent stock-selection skill in the 52-week-high signal or "
-  "in short-term reversal, in either direction, as currently built, and "
-  "the one signal that does show a robust, largely beta-independent edge "
-  "&mdash; 12-1 momentum, on the US mirror specifically &mdash; has only "
-  "been demonstrated to hold in the era before its own publication. Every "
-  "one of those findings was reached not by anyone's original hypothesis "
-  "about which signal should work, but by finally applying the project's "
-  "own hard-won standard of rigor evenly, to a winner as well as a loser, "
-  "and to a signal's own more recent, more comfortable-looking result as "
-  "well as its oldest one. That is the project working as intended, "
+  "project's real positive finding is broader and more precisely dated "
+  "than any earlier draft of this conclusion claimed: there is no "
+  "demonstrated, beta-independent stock-selection skill in the "
+  "52-week-high signal, in either direction, as currently built, at any "
+  "point in the sample. Momentum's long leg and short-term reversal's "
+  "long leg, by contrast, both show robust, largely beta-independent "
+  "edges &mdash; on the US mirror specifically, and only demonstrated to "
+  "hold in the era before roughly the mid-1990s. Every one of those "
+  "findings was reached not by anyone's original hypothesis about which "
+  "signal should work, but by finally applying the project's own "
+  "hard-won standard of rigor evenly: to a winner as well as a loser, to "
+  "a signal's own more recent, more comfortable-looking result as well "
+  "as its oldest one, and &mdash; last of all &mdash; to a signal "
+  "already written off, instead of assuming a full-sample null closed "
+  "the question for good. That is the project working as intended, "
   "including on itself: not every finding needs to be confirmed to be "
   "useful, a compelling pattern &mdash; positive or negative &mdash; is a "
   "hypothesis until it survives testing at every level of rigor "
@@ -1945,15 +2069,19 @@ p("The fix that survived all of that scrutiny is more modest, and the "
   "best-supported-looking result, seven times in a row &mdash; six "
   "outright retractions or downward revisions, and one nuanced check "
   "(Part V.10) that briefly looked like a stopping point before Part "
-  "V.11 showed it wasn't &mdash; and then, for the first time, ran an "
-  "eighth check (Part V.12) built specifically to try to explain the "
-  "seventh correction away, and couldn't. Not finding an escape hatch is "
-  "itself a finding: the project never found a result durable enough to "
-  "stop re-checking, and has now shown its most-checked result is "
-  "durable enough to survive someone trying to make it go away, leaving "
-  "one narrow, well-tested claim (pre-1994 momentum) to currently trust "
-  "and one honest, thoroughly-stress-tested absence (post-1994) to size "
-  "nothing against.")
+  "V.11 showed it wasn't &mdash; then ran an eighth check (Part V.12) "
+  "built specifically to try to explain the seventh correction away, and "
+  "couldn't, and a ninth (Part V.13) that went looking for the same "
+  "pattern somewhere the project had stopped looking, and found it. Not "
+  "finding an escape hatch, and finding the same shape twice in "
+  "independent places, are both findings: the project never found a "
+  "result durable enough to stop re-checking, and has now shown its "
+  "central pattern &mdash; genuine edge before the mid-1990s, genuine "
+  "decay since &mdash; is more general than any single milestone first "
+  "suggested, leaving two narrow, well-tested claims (pre-1994 momentum "
+  "and pre-1994 reversal, both long-leg-only) to currently trust, and one "
+  "honest, thoroughly-stress-tested absence (the post-publication era, "
+  "across signals) to size nothing against.")
 
 # ============================================================ GLOSSARY
 story.append(PageBreak())

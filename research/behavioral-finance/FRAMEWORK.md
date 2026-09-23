@@ -181,6 +181,23 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   looking for an out.** This project's most rigorous read of its own headline finding is
   now: genuine, strong pre-1994 alpha, and genuine, ongoing decay since — not a temporary
   shock the strategy is due to recover from.
+- **Milestone 12 asked whether that whole pattern is a momentum-specific quirk or a
+  market-wide phenomenon, by applying the identical toolkit to the other two US
+  signals — and found genuinely different answers for each.** 52-week-high shows no
+  significant alpha in either era, in any leg: it never had genuine stock-selection skill,
+  consistent with Milestones 6-7's beta-only explanation. Short-term reversal's long leg,
+  by contrast, shows the exact same signature as momentum's: real, significant pre-1994
+  alpha (+5.31%/yr, p=0.046) that decays completely to noise post-1994 (+0.25%/yr,
+  p=0.629) — a pattern invisible in Milestone 8's full-sample regression, which correctly
+  found no full-sample significance but could not distinguish "never real" from "real,
+  then decayed." **Rule: a full-sample null result answers "is there significant alpha on
+  average," not "was there ever genuine alpha" — those are different questions, and this
+  project's own reversal signal shows they can have different answers.** The "real
+  pre-1994, decayed since" pattern is therefore not a momentum idiosyncrasy: it appears in
+  two of three signals' long legs, consistent with a market-wide explanation (the same
+  1990s-2000s scaling-up of quantitative, cross-sectional strategies this project's own
+  case studies on LTCM and the 2007 Quant Quake already document as reshaping US equity
+  markets over exactly this period) rather than a fluke specific to one anomaly.
 
 ## 2. Risk-management lessons
 
@@ -285,6 +302,17 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     the temptation after an unwelcome result is to look for the one adjustment that makes
     it go away; running that check honestly, and reporting it even when it doesn't help,
     is what separates a stress-test from a fishing expedition.**
+12. **A full-sample "no significant alpha" verdict does not mean a signal was never real —
+    check whether it's actually two eras averaging to zero before writing it off entirely.**
+    Milestone 8 declared short-term reversal fully retracted based on a full-sample
+    regression, which was the technically correct read of that specific test. Milestone 12
+    applied the era-split toolkit built for momentum and found reversal's long leg had been
+    genuinely, significantly positive pre-1994 and decayed to noise since — the same
+    pattern as momentum, hidden inside a full-sample average that happened to net out near
+    zero. **Rule: retest every full-sample null result from before your era-split toolkit
+    existed with that toolkit, not just your full-sample findings — a "no effect on
+    average" verdict can quietly contain a real, decayed effect that a single-number
+    summary cannot distinguish from a signal that was simply never real.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
