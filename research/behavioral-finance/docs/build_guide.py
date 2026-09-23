@@ -923,39 +923,93 @@ box(
     "platform, per that explicit feedback.",
 )
 
-h1("5.4  Milestone 3 &mdash; Replication and an open investigation (in progress)")
-p("The milestone-2 recap's questions produced three directions to pursue next: "
-  "search for a second, independent market's data to check whether the "
-  "NSE findings replicate elsewhere; investigate <i>why</i> the 52-week-high "
-  "signal lost money, specifically testing whether it was confounded with a "
-  "value/growth effect (India's sample spans a two-decade secular bull market, "
-  "so a signal that is effectively short &quot;cheap, beaten-down&quot; names "
-  "could be fighting a value effect rather than purely testing anchoring); and "
-  "continue expanding the codebase and case-study library rather than "
-  "wrapping up.")
-p("As of this document, a second, independent dataset has been located and "
-  "verified reachable: a GitHub-hosted mirror of the well-known Kaggle "
-  "&quot;Huge Stock Market Dataset,&quot; one file per US-listed ticker, with "
-  "price history for many large-cap names (Apple, Microsoft, Amazon, and "
-  "others confirmed individually) extending back to the 1980s. This gives a "
-  "second market to test the NSE findings against &mdash; a different country, "
-  "different market structure, different time period overlap &mdash; before "
-  "generalizing any conclusion beyond &quot;true for this one Indian large-cap "
-  "sample.&quot; <b>This second backtest, and the value/growth confound test "
-  "for the 52-week-high result, were in progress at the time this guide was "
-  "written and are not yet reflected in the numbers above</b> &mdash; this "
-  "guide will be updated once they complete, and the project's code "
-  "repository is the definitive source for whichever of those two documents "
-  "is more current.")
+h1("5.4  Milestone 3 &mdash; Replication, and a rejected hypothesis")
+p("The milestone-2 recap's questions produced three directions: search for a "
+  "second, independent market's data to check whether the NSE findings "
+  "replicate elsewhere; investigate <i>why</i> the 52-week-high signal lost "
+  "money, specifically testing whether it was confounded with a value/growth "
+  "effect; and continue expanding the codebase rather than wrapping up. "
+  "Producing this guide itself was folded into the same milestone, at the "
+  "user's explicit request to run it in parallel with the quantitative work "
+  "rather than after it &mdash; which is why an earlier draft of this section "
+  "reported milestone 3 as in-progress; both investigations below have since "
+  "completed.")
+h2("Finding a second market")
+p("A GitHub-hosted mirror of the well-known Kaggle &quot;Huge Stock Market "
+  "Dataset&quot; (one CSV per US-listed ticker) was located and verified: 30 "
+  "US large-cap names, the same tickers as the project's original default "
+  "universe, each starting at its own listing date and running through "
+  "2017-11-10 (the dataset's last snapshot; this is a historical replication "
+  "check, not a live feed).")
+data_table(
+    ["Signal", "Split", "Gross annual return", "Gross Sharpe", "Net Sharpe", "Max drawdown"],
+    [
+        ["Composite (all 3)", "quintiles", "+2.99%", "0.25", "0.21", "-79.6%"],
+        ["12-1 momentum only", "quintiles", "+5.72%", "0.34", "0.32", "-88.4%"],
+        ["52-week-high only", "quintiles", "-13.98%", "-0.29", "-0.32", "-99.9%"],
+        ["Short-term reversal only", "quintiles", "-0.68%", "0.13", "0.07", "-83.0%"],
+    ],
+    col_widths=[1.5*inch, 0.75*inch, 1.2*inch, 0.85*inch, 0.8*inch, 0.9*inch],
+    small=True,
+)
+p("The result was not a clean confirmation of the NSE finding &mdash; it was "
+  "more informative than that. <b>Momentum and reversal flipped which one "
+  "looked real</b>: reversal was NSE's edge and the US market's near-zero "
+  "result; momentum was NSE's near-zero result and the US market's real, "
+  "positive, cost-adjusted edge (Sharpe 0.32 net). Only one thing held up "
+  "unchanged across both very different markets and eras: <b>the 52-week-high "
+  "signal lost money in both.</b>")
 box(
-    "This guide itself &mdash; a parallel, plain-language deliverable "
-    "explaining the whole project for a reader without a quant-finance "
-    "background &mdash; was requested mid-stream, specifically to run "
-    "alongside the ongoing quantitative work rather than after it. Producing "
-    "it required pausing new quantitative analysis briefly to write it, which "
-    "is why milestone 3's two open questions (replication, the value/growth "
-    "confound) are reported here as in-progress rather than resolved.",
-    kind="fact", title="WHY THIS GUIDE EXISTS"
+    "A single-market backtest result is provisional by default. Had this "
+    "project stopped after milestone 2 (NSE only), it would have reported "
+    "&quot;momentum is dead here, reversal is the real edge&quot; &mdash; the "
+    "opposite of what the US data alone would have suggested. Neither market "
+    "alone is the right answer; the honest finding is that anomaly presence "
+    "is universe-dependent for momentum and reversal, while the "
+    "52-week-high signal's damage is not.",
+)
+h2("Testing the value/growth confound &mdash; and rejecting it")
+p("The leading candidate explanation for the 52-week-high signal's losses, "
+  "carried over from milestone 2, was that India's two-decade secular bull "
+  "market could make &quot;short the names far from their 52-week high&quot; "
+  "equivalent to &quot;short cheap, beaten-down names&quot; that then "
+  "mean-revert upward &mdash; a value effect masquerading as an anchoring "
+  "effect. This was tested directly: a simple price-only value proxy (current "
+  "price divided by its own trailing ~3-year average) was built, its "
+  "cross-sectional correlation with the raw 52-week-high score was measured, "
+  "and the 52-week-high signal was then <b>orthogonalized</b> against it "
+  "&mdash; a date-by-date cross-sectional regression that mathematically "
+  "removes the shared value component, leaving only the part of the signal "
+  "that isn't explained by it.")
+data_table(
+    ["Market", "Correlation (signal, value proxy)", "Raw signal net Sharpe", "Orthogonalized net Sharpe"],
+    [
+        ["NSE (India)", "0.63", "-0.54", "-0.73"],
+        ["US (Kaggle mirror)", "0.44", "-0.32", "-0.49"],
+    ],
+    col_widths=[1.6*inch, 2.1*inch, 1.5*inch, 1.7*inch],
+)
+p("The two signals genuinely are correlated (0.44-0.63) &mdash; a stock near "
+  "its 52-week high does tend to look &quot;expensive&quot; on this proxy. "
+  "But removing that shared component made performance <b>worse</b>, not "
+  "better, in both markets. If the value/growth confound had been the real "
+  "explanation, the &quot;purified&quot; signal should have looked neutral "
+  "or better once the confounding value component was stripped out; instead "
+  "it got more negative. <b>The value/growth confound hypothesis is "
+  "rejected.</b>")
+box(
+    "This is a negative result, and it was reported as one rather than "
+    "quietly dropped or reframed as a success. Combined with the milestone-2 "
+    "finding that the loss isn't concentrated in the 2008/2020 crash windows "
+    "either, two of the three candidate explanations for the 52-week-high "
+    "result are now ruled out by direct test, not just by argument. The "
+    "remaining candidate &mdash; generic momentum-crash risk, a documented "
+    "property of &quot;long recent winners&quot; strategies in general "
+    "&mdash; is the best-supported explanation left standing, but it has not "
+    "itself been directly tested (that would mean checking whether the "
+    "losses cluster specifically in high-volatility periods). The project "
+    "states this as narrowed, not solved.",
+    kind="fact", title="WHAT THIS DOES AND DOESN'T PROVE"
 )
 
 # MARKER_END_PART5
@@ -1075,15 +1129,21 @@ bullets([
     "milestone 3 use a present-day-chosen company list, not point-in-time "
     "index membership. A rigorous version needs a survivorship-bias-free "
     "universe (e.g., CRSP, or a maintained point-in-time constituents file).",
-    "<b>Data provenance.</b> The NSE dataset is a personal, community-uploaded "
-    "GitHub repository, not an official exchange or licensed vendor feed. "
-    "Results from it are a genuine methodology demonstration on real prices, "
-    "not investment-grade research, until cross-checked against an official "
-    "source.",
-    "<b>India-specific findings, not yet shown to generalize.</b> The one "
-    "empirical result set so far (Part V.3) is one market, one large-cap-only "
-    "universe, one 21-year window. Milestone 3's US-market replication "
-    "(Part V.4) exists specifically to test whether it generalizes.",
+    "<b>Data provenance.</b> Both the NSE and US mirrors are personal, "
+    "community-uploaded GitHub repositories, not official exchange or "
+    "licensed vendor feeds. Results from them are a genuine methodology "
+    "demonstration on real prices, not investment-grade research, until "
+    "cross-checked against an official source.",
+    "<b>Momentum and reversal did not replicate consistently</b> across the "
+    "two markets tested (Part V.4) &mdash; treat either result, in isolation, "
+    "as provisional rather than a confirmed anomaly. Only the 52-week-high "
+    "signal's loss held up in both.",
+    "<b>The 52-week-high result's cause is narrowed, not confirmed.</b> Two "
+    "candidate explanations (crash-window concentration; a value/growth "
+    "confound) have been directly tested and rejected (Part V.3-V.4). The "
+    "remaining candidate, generic momentum-crash risk, is the "
+    "best-supported explanation left, but has not itself been directly "
+    "tested.",
     "<b>Transaction costs are a simple linear model</b>, not a real "
     "market-impact model; a strategy sized for real capital would need a "
     "proper implementation-shortfall estimate.",
@@ -1134,10 +1194,14 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestone 3, in progress as of this writing, exists to find out "
-  "whether the India finding is a real, general pattern or an artifact of one "
-  "market and one time period &mdash; the next test of the same standard the "
-  "rest of this project has tried to hold itself to throughout.")
+  "needed. Milestone 3 then ran the India finding through the same "
+  "skepticism the project applies to everything else, and it did not survive "
+  "unchanged: momentum and reversal turned out to be universe-dependent, not "
+  "general truths, while the 52-week-high signal's damage held up across two "
+  "very different markets and eras, and survived a direct test against its "
+  "most plausible alternative explanation. That is the project working as "
+  "intended &mdash; not every finding needs to be confirmed to be useful; "
+  "knowing which findings don't generalize is itself the deliverable.")
 
 # ============================================================ GLOSSARY
 story.append(PageBreak())

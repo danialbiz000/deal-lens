@@ -6,6 +6,7 @@ import pandas as pd
 from signals.composite import composite_score
 from signals.momentum import high_52w_proximity, momentum_12_1
 from signals.reversal import short_term_reversal
+from signals.value_proxy import price_to_long_run_average
 
 
 def test_momentum_12_1_matches_manual_calculation():
@@ -55,3 +56,24 @@ def test_composite_score_is_cross_sectionally_zero_mean(random_walk_prices):
     assert len(last_row) == random_walk_prices.shape[1]
     # cross-sectional z-scored components summed -> mean should be ~0 across tickers
     assert abs(last_row.mean()) < 1e-6
+
+
+def test_price_to_long_run_average_is_one_for_a_flat_series():
+    dates = pd.bdate_range("2020-01-01", periods=800)
+    prices = pd.Series(100.0, index=dates).to_frame("A")
+
+    proxy = price_to_long_run_average(prices, window=750)
+    valid = proxy["A"].dropna()
+    assert np.allclose(valid, 1.0)
+
+
+def test_price_to_long_run_average_below_one_after_a_decline():
+    dates = pd.bdate_range("2020-01-01", periods=800)
+    prices = pd.Series(100.0, index=dates)
+    prices.iloc[780:] = 50.0  # sharp recent decline, near the end of the window
+    df = prices.to_frame("A")
+
+    proxy = price_to_long_run_average(df, window=750)
+    # current price (50) is now well below its trailing ~3yr average (still
+    # mostly 100s) -> ratio should be comfortably below 1
+    assert proxy["A"].iloc[-1] < 0.9

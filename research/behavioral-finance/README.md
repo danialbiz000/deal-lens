@@ -123,23 +123,88 @@ the more defensible bin size for this universe:
   crash (Feb–Jun 2020) windows entirely, the strategy's Sharpe outside those windows is
   still −0.46 (cumulative return −90% ex-crash vs. −53% return realized *during* the crash
   windows alone) — so this is not simply "it got run over twice by tail events," it lost
-  money persistently. Two candidate explanations, both plausible, neither confirmed: (a)
-  momentum-crash risk generally documented in the literature (Daniel & Moskowitz,
-  "Momentum Crashes," 2016) — a strategy long recent winners is short volatility risk that
-  can blow up in any drawdown, and (b) this sample spans a two-decade secular Indian
-  equity bull market, so systematically shorting "far from 52-week-high" names may have
-  meant systematically shorting cheap/beaten-down names that then mean-reverted upward —
-  the anchoring thesis fighting a strong value/growth undertow specific to this market and
-  period. Distinguishing these needs more work (e.g. controlling for a value factor), not
-  claimed here.
+  money persistently. See "Replication on a second market" and "Investigating the
+  52-week-high result" below for how far this was chased down.
 - **Short-term reversal is the one signal that actually worked, gross and net of costs.**
   Consistent with reversal being one of the more robust anomalies in the academic
   literature, plausibly because it's closer to a liquidity-provision premium than a pure
   behavioral bet, so it survives in large, liquid names better than underreaction-based
-  momentum does.
+  momentum does — though see the US replication below, where this result does **not** hold up.
 
 **Reproduce this**: `python -m data.loaders` downloads and caches the dataset (parquet,
 gitignored), then the "How to run" snippet below runs the same backtests.
+
+## Replication on a second market (US, Kaggle mirror)
+
+Same pipeline, same 30-name large-cap universe as the original `DEFAULT_UNIVERSE`
+(`load_us_kaggle_mirror()`), a different GitHub-hosted mirror (see "Data provenance: the
+US Kaggle mirror" below), 1970–2017 depending on each company's listing date:
+
+| Signal | Split | Gross annual return | Gross Sharpe | Net Sharpe | Max drawdown |
+|---|---|---|---|---|---|
+| Composite (all 3) | deciles | +0.55% | 0.16 | 0.13 | −91.7% |
+| Composite (all 3) | quintiles | +2.99% | 0.25 | 0.21 | −79.6% |
+| 12-1 momentum only | quintiles | **+5.72%** | **0.34** | **0.32** | −88.4% |
+| 52-week-high only | quintiles | **−13.98%** | **−0.29** | −0.32 | **−99.9%** |
+| Short-term reversal only | quintiles | −0.68% | 0.13 | 0.07 | −83.0% |
+
+**What replicates and what doesn't, comparing to NSE:**
+
+- **The 52-week-high (anchoring) signal loses money in both markets.** This is the one
+  result that held up unchanged: actively harmful, large drawdown, in a 48-name Indian
+  large-cap sample *and* a 30-name US large-cap sample spanning a completely different
+  macro history (multiple US recessions, the 1970s stagflation era for the oldest names,
+  the dot-com crash, 2008 — not just one secular bull market). That cross-market, cross-era
+  consistency is exactly what "Investigating the 52-week-high result" below tests directly.
+- **Momentum does *not* replicate the same way — it flips sign.** Roughly flat/slightly
+  negative on NSE, a real positive net-of-cost edge (Sharpe 0.32) on the US mirror. This is
+  actually closer to the mainstream academic finding (momentum is one of the more robust,
+  widely-replicated anomalies in US equities specifically), which raises the opposite
+  concern from before: the NSE result for momentum may be the one that doesn't generalize,
+  not the US one.
+- **Short-term reversal does *not* replicate either — it's much weaker here** (Sharpe 0.07
+  net vs. 0.22 net on NSE). So of the three individual signals, *none* of them showed a
+  consistent, cross-market edge in the same direction except the negative one (52-week-high).
+  That is itself a finding: a signal-selection process that only looked at one market (NSE)
+  would have wrongly concluded reversal was the reliable edge and momentum was dead — the
+  opposite of what a US-only study would have concluded. **Universe/market choice changes
+  which anomaly looks real; decomposition (Part V.3 in the PDF guide) is necessary but not
+  sufficient — cross-market replication matters too.**
+
+## Investigating the 52-week-high result: is it a value/growth confound?
+
+Milestone 2 flagged two candidate explanations for why the anchoring signal loses money:
+generic momentum-crash risk, or a value/growth confound specific to a secular bull market
+(shorting "far from the 52-week high" names might just mean shorting cheap, beaten-down
+names that then mean-revert upward, fighting the anchoring thesis with an unrelated value
+effect). This was tested directly (`investigations/52w_high_value_confound.py`): build a
+simple price-only value proxy (`signals/value_proxy.py`, current price ÷ trailing ~3-year
+average price), measure its cross-sectional correlation with the raw 52-week-high score,
+then **orthogonalize** the signal against it (date-by-date cross-sectional OLS, regress out
+the value component, backtest the residual).
+
+| Market | Corr(52w-high, value proxy) | Raw signal net Sharpe | Value-orthogonalized net Sharpe |
+|---|---|---|---|
+| NSE (India) | 0.63 | −0.54 | **−0.73** |
+| US (Kaggle mirror) | 0.44 | −0.32 | **−0.49** |
+
+**The value/growth confound hypothesis is rejected, in both markets.** The two signals
+*are* meaningfully correlated (0.44–0.63), confirming a stock near its 52-week high also
+tends to look "expensive" on this simple value proxy — but removing that shared component
+made the signal's performance **worse**, not better, in both markets. If the confound
+hypothesis had been right, orthogonalizing away the value component should have made the
+"pure anchoring" signal look neutral-to-positive; instead it got more negative. Combined
+with the cross-market replication above (the loss persists across two very different macro
+histories, not just one secular bull run) and the earlier crash-window check (Milestone 2:
+the loss isn't concentrated in 2008/2020 either), the remaining, still-untested candidate
+explanation — generic momentum-crash risk (Daniel & Moskowitz, "Momentum Crashes," 2016), a
+property of "long recent winners" strategies generally, not specific to any one market or
+value effect — is now the best-supported explanation of the three, though it has not
+itself been directly tested here (that would need, e.g., checking whether the signal's
+losses cluster in high-realized-volatility regimes specifically). **Reproduce this**:
+`python investigations/52w_high_value_confound.py` (no extra setup beyond the main
+`requirements.txt`; takes a few minutes because the orthogonalization loops over every
+trading date in both datasets).
 
 ## Data provenance: the NSE GitHub mirror
 
@@ -163,10 +228,28 @@ source (NSE/BSE archives, a paid vendor, or Yahoo/Stooq once reachable). Specifi
   place (looks like large/mid-cap NSE names) — it is not a point-in-time index
   reconstruction, so it over-represents "companies that stayed large and relevant," the
   same limitation flagged generically below, now concrete for this specific dataset.
-- **India-specific, not the US large-cap universe the code originally scoped for.** A real
-  paper built on this should either validate the same pipeline on a US or other-market
-  universe (once reachable) to check the results aren't India-specific, or explicitly scope
-  the claims to NSE large-caps.
+- **No longer India-only**: see "Replication on a second market" above — a US large-cap
+  mirror was located and run through the same pipeline, and it changed which findings
+  looked robust (momentum and reversal did **not** replicate consistently; the
+  52-week-high signal's losses did).
+
+## Data provenance: the US Kaggle mirror
+
+`load_us_kaggle_mirror()` pulls per-ticker CSVs from
+`raw.githubusercontent.com/scienclick/stocks/master/data/Stocks/<ticker>.us.txt` — a
+GitHub mirror of the well-known Kaggle "Huge Stock Market Dataset" (Boris Marjanovic),
+itself compiled from historical price data, **not an official exchange or licensed
+data-vendor feed**, same caveat as the NSE mirror above. Specifics:
+
+- **Coverage ends 2017-11-10** — this is a historical replication check, not a live
+  feed. Each company's series starts at its own listing/IPO date (e.g. Visa's starts
+  2008-03-18) and runs through that end date.
+- **`META` is served under its pre-2021 ticker, `FB`** (Facebook, Inc., before the
+  corporate rename to Meta Platforms) — the dataset predates the rename. Documented in
+  `data/loaders.py`, `US_MIRROR_UNIVERSE`, not silently substituted.
+- **Same survivorship caveat as the NSE mirror**: this is `DEFAULT_UNIVERSE`, a
+  present-day-chosen large-cap list, not a point-in-time constituents file for any given
+  historical date.
 
 ## Methodology
 
@@ -220,13 +303,15 @@ Reports how many multiples the Gaussian model underestimates the true tail loss 
 ## Data sources
 
 - **NSE GitHub mirror** (`load_nse_github_mirror`) — 48 India-listed companies,
-  2000–2021, reachable from any environment whose network policy allowlists GitHub. This
-  is the source actually exercised in this repo; see "Data provenance" above for its
-  caveats.
+  2000–2021, reachable from any environment whose network policy allowlists GitHub.
+  See "Data provenance: the NSE GitHub mirror" above for its caveats.
+- **US Kaggle GitHub mirror** (`load_us_kaggle_mirror`) — 30 US large-caps, listing date
+  through 2017-11-10, also reachable via the GitHub allowlist. See "Data provenance: the
+  US Kaggle mirror" above. Both mirrors are the sources actually exercised in this repo.
 - **Yahoo Finance / Stooq** (`load_price_history` / `load_single`) — the original
-  US-large-cap default path. Needs general internet access this sandbox didn't have;
-  unexercised here. Universe is a hard-coded liquid large-cap list, not a point-in-time
-  index membership file — see "Explicit limitations."
+  US-large-cap, live-data default path. Needs general internet access this sandbox didn't
+  have; still unexercised here. Universe is a hard-coded liquid large-cap list, not a
+  point-in-time index membership file — see "Explicit limitations."
 
 ## How to run
 
@@ -237,7 +322,7 @@ pip install -r requirements.txt
 # Q1 — runs now, no internet needed, no dependency on the rest of the repo
 python risk_simulation/fat_tails_vs_normal.py
 
-# Q2 — the path actually validated in this repo (NSE mirror via GitHub)
+# Q2 — path 1, validated in this repo (NSE mirror via GitHub)
 python -c "
 from data.loaders import load_nse_github_mirror
 from signals.composite import composite_score
@@ -249,7 +334,19 @@ result = run_decile_backtest(prices, scores, n_deciles=5)  # quintiles: 48 names
 print(result.summary())
 "
 
-# Q2 — the original US-universe path; needs a reachable Yahoo/Stooq, unvalidated here
+# Q2 — path 2, validated in this repo (US Kaggle mirror via GitHub)
+python -c "
+from data.loaders import load_us_kaggle_mirror
+from signals.composite import composite_score
+from backtest.engine import run_decile_backtest
+
+prices = load_us_kaggle_mirror()
+scores = composite_score(prices)
+result = run_decile_backtest(prices, scores, n_deciles=5)
+print(result.summary())
+"
+
+# Q2 — the original live-data US-universe path; needs a reachable Yahoo/Stooq, unvalidated here
 python -c "
 from data.loaders import load_price_history
 from signals.composite import composite_score
@@ -260,6 +357,9 @@ scores = composite_score(prices)
 result = run_decile_backtest(prices, scores)
 print(result.summary())
 "
+
+# Investigation — is the 52-week-high result a value/growth confound? (rejected; see above)
+python investigations/52w_high_value_confound.py
 
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
@@ -298,3 +398,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   that were low/moderate in normal times moving toward 1 in the crisis), not fit to LTCM's
   actual undisclosed book. Treat the multiple as "this is the order of magnitude of the
   effect," not a precise historical reconstruction.
+- **The 52-week-high signal's cause is narrowed but not fully confirmed.** Three checks
+  have now ruled things *out* (not purely the 2008/2020 crash windows; not a value/growth
+  confound, in either market), and the signal's persistence across two very different
+  markets and eras argues for a structural explanation over a market-specific one — but
+  the leading remaining candidate, generic momentum-crash risk, has not itself been
+  directly tested (e.g. by checking whether losses cluster in high-realized-volatility
+  regimes). Absence of two wrong explanations is not confirmation of a third.
+- **Momentum and reversal did not replicate consistently across the two markets tested**
+  (see "Replication on a second market") — treat any single-market anomaly finding in this
+  repo as provisional until it's been checked on at least one more, independent universe.

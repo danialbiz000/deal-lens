@@ -190,8 +190,71 @@ def load_nse_github_mirror(use_cache: bool = True, min_history_days: int = 1000)
     return wide
 
 
+# --- second alternative source: a GitHub mirror of the well-known Kaggle "Huge
+# Stock Market Dataset" (Boris Marjanovic), one CSV per US ticker, used here as
+# an independent-market replication check for the NSE result above. See
+# ../README.md "Data provenance: the US Kaggle mirror" for what this is and
+# is not a substitute for.
+
+_US_MIRROR_BASE = "https://raw.githubusercontent.com/scienclick/stocks/master/data/Stocks/"
+
+# The same 30-ticker universe as DEFAULT_UNIVERSE above, so the two markets are
+# as comparable as possible. This dataset's last snapshot is 2017-11-10, and it
+# predates Facebook's 2021 rename to Meta, so "fb" stands in for "meta" here --
+# documented, not silently substituted.
+US_MIRROR_UNIVERSE = [t.lower() if t != "META" else "fb" for t in DEFAULT_UNIVERSE]
+
+
+def _fetch_us_mirror_ticker(ticker: str) -> pd.Series | None:
+    url = f"{_US_MIRROR_BASE}{ticker.lower()}.us.txt"
+    try:
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+        df = pd.read_csv(io.StringIO(resp.text), parse_dates=["Date"], index_col="Date")
+        if df.empty or "Close" not in df.columns:
+            return None
+        return df["Close"].rename(ticker.upper() if ticker != "fb" else "META")
+    except Exception:
+        return None
+
+
+def load_us_kaggle_mirror(
+    tickers: list[str] | None = None, use_cache: bool = True
+) -> pd.DataFrame:
+    """Load the US Kaggle-mirror daily-close history for `tickers` (default:
+    US_MIRROR_UNIVERSE) and pivot to a wide date x company DataFrame. Data
+    runs from each company's IPO/listing date (or dataset start) through
+    2017-11-10 -- this is a historical replication check, not a live feed.
+    """
+    cache_file = CACHE_DIR / "us_kaggle_mirror.parquet"
+    if use_cache and cache_file.exists():
+        return pd.read_parquet(cache_file)
+
+    tickers = tickers or US_MIRROR_UNIVERSE
+    closes = {}
+    for t in tickers:
+        series = _fetch_us_mirror_ticker(t)
+        if series is None:
+            print(f"[loaders] skipping {t}: not found in US Kaggle mirror")
+            continue
+        closes[series.name] = series
+    if not closes:
+        raise RuntimeError("No tickers could be loaded from the US Kaggle mirror.")
+
+    wide = pd.DataFrame(closes).sort_index()
+    if use_cache:
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        wide.to_parquet(cache_file)
+    return wide
+
+
 if __name__ == "__main__":
     prices = load_nse_github_mirror()
     print(prices.tail())
-    print(f"Loaded {prices.shape[1]} companies, {prices.shape[0]} trading days "
+    print(f"NSE mirror: {prices.shape[1]} companies, {prices.shape[0]} trading days "
           f"({prices.index.min().date()} to {prices.index.max().date()}).")
+
+    us_prices = load_us_kaggle_mirror()
+    print(us_prices.tail())
+    print(f"US mirror: {us_prices.shape[1]} companies, {us_prices.shape[0]} trading days "
+          f"({us_prices.index.min().date()} to {us_prices.index.max().date()}).")

@@ -40,12 +40,23 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   **Rule: always report and validate each component signal separately before
   trusting a blended score, and re-weight or drop components that don't
   independently earn their place.**
-- **Re-validate on each new universe before trusting it there.** The NSE
-  result is real, but it's one market (India), one large-cap-only universe,
-  and one 21-year window. Don't assume it transfers to a different market,
-  cap segment, or period without re-running the same decomposition — see
-  "How to run" in `README.md` for the US-universe path that still needs
-  this treatment.
+- **Re-validate on each new universe before trusting it there — now confirmed necessary,
+  not just prudent.** A second market (US large-caps, 1970–2017) was run through the same
+  pipeline (`README.md`, "Replication on a second market"), and momentum and reversal
+  **flipped which one looked real**: reversal was NSE's edge and the US's near-zero result;
+  momentum was NSE's near-zero result and the US's real edge. Only the 52-week-high
+  signal's *loss* was consistent both times. **Rule: a single-market backtest result is
+  provisional by default — run it on at least one independent market before including it
+  in a live framework, and expect roughly a coin-flip's chance that a specific component
+  signal's sign won't hold.**
+- **A component that survives decomposition should still survive a "why" check before
+  being trusted as a real edge or discarded as a real problem.** The 52-week-high signal's
+  loss looked at first like it might be a value/growth confound specific to India's bull
+  market; a direct test (orthogonalizing against a value proxy, `README.md`
+  "Investigating the 52-week-high result") rejected that explanation in both markets. The
+  loss is real and not an artifact of an unrelated factor — which makes it more, not less,
+  important to keep this specific signal excluded from the composite until its true cause
+  is understood.
 
 ## 2. Risk-management lessons
 
