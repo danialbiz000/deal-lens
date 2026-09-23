@@ -125,11 +125,14 @@ the more defensible bin size for this universe:
   windows alone) — so this is not simply "it got run over twice by tail events," it lost
   money persistently. See "Replication on a second market" and "Investigating the
   52-week-high result" below for how far this was chased down.
-- **Short-term reversal is the one signal that actually worked, gross and net of costs.**
-  Consistent with reversal being one of the more robust anomalies in the academic
-  literature, plausibly because it's closer to a liquidity-provision premium than a pure
-  behavioral bet, so it survives in large, liquid names better than underreaction-based
-  momentum does — though see the US replication below, where this result does **not** hold up.
+- **Short-term reversal is the one signal that actually worked, gross and net of costs —
+  as understood at this point in the project.** Consistent with reversal being one of the
+  more robust anomalies in the academic literature, plausibly because it's closer to a
+  liquidity-provision premium than a pure behavioral bet. **Update (Milestone 8): this does
+  not survive a beta check either.** See "Does the reversal edge survive a beta check too?"
+  below — like the 52-week-high signal, this positive-looking Sharpe turns out to be mostly
+  market-beta exposure and noise, not a demonstrated edge, once tested the same way the
+  52-week-high signal's *losses* were.
 
 **Reproduce this**: `python -m data.loaders` downloads and caches the dataset (parquet,
 gitignored), then the "How to run" snippet below runs the same backtests.
@@ -161,13 +164,17 @@ US Kaggle mirror" below), 1970–2017 depending on each company's listing date:
   actually closer to the mainstream academic finding (momentum is one of the more robust,
   widely-replicated anomalies in US equities specifically), which raises the opposite
   concern from before: the NSE result for momentum may be the one that doesn't generalize,
-  not the US one.
+  not the US one. **Update (Milestone 8): this US momentum result held up, and then some** —
+  it's the only signal in this entire project whose edge survives a full beta-adjusted
+  significance test (see "Does the reversal edge survive a beta check too?" below).
 - **Short-term reversal does *not* replicate either — it's much weaker here** (Sharpe 0.07
   net vs. 0.22 net on NSE). So of the three individual signals, *none* of them showed a
   consistent, cross-market edge in the same direction except the negative one (52-week-high).
   That is itself a finding: a signal-selection process that only looked at one market (NSE)
   would have wrongly concluded reversal was the reliable edge and momentum was dead — the
-  opposite of what a US-only study would have concluded. **Universe/market choice changes
+  opposite of what a US-only study would have concluded. **Update (Milestone 8): reversal's
+  NSE "edge" didn't survive a beta check either — it's now retracted, not just
+  non-replicating.** **Universe/market choice changes
   which anomaly looks real; decomposition (Part V.3 in the PDF guide) is necessary but not
   sufficient — cross-market replication matters too.**
 
@@ -440,6 +447,54 @@ exact beta recovery on a zero-noise series.
 
 **Reproduce this**: `python investigations/beta_hedged_backtest.py`.
 
+## Does the reversal edge survive a beta check too? (Milestone 8)
+
+Every beta check so far was run on the 52-week-high signal only. But short-term reversal
+was this project's *one* positive empirical finding (Milestone 2: "the only signal that
+actually worked, gross and net of costs," Sharpe 0.22 net on NSE) — and it was never
+re-examined for the exact same uncontrolled-beta artifact that turned out to fully explain
+the 52-week-high signal's losses. This milestone applies the identical CAPM-style test
+(`investigations/momentum_reversal_beta.py`) to **both** remaining signals — 12-1 momentum
+and short-term reversal — long leg, short leg, and combined book, both markets, both
+frequencies: 24 alpha tests in total.
+
+**Short-term reversal's "edge" does not survive.** Not one of its 12 alpha tests (2 markets
+× 3 legs × 2 frequencies) is significant at conventional levels (all p > 0.10, most p > 0.2).
+The positive Sharpe reported in Milestone 2 was — like the 52-week-high signal's loss — a
+mix of market-beta exposure and noise, not a demonstrated stock-selection edge. **This
+project's one previously "positive" empirical result is retracted along with the negative
+one.**
+
+**12-1 momentum tells a genuinely different, more interesting story.** On NSE, momentum
+shows essentially no significant alpha either (one marginal hit at the 10% level, long leg
+monthly). But on the **US mirror, momentum's long leg and combined book show real,
+statistically robust, largely beta-independent alpha**:
+
+| | US long leg | US combined book |
+|---|---|---|
+| Daily alpha (annualized) | +8.1%/yr, **p<0.0001** | +12.1%/yr, **p=0.004** |
+| Monthly alpha (annualized) | +9.2%/yr, **p<0.0001** | +15.3%/yr, **p<0.0001** |
+| Beta | ≈+1.0 to +1.1 (long leg) | ≈−0.05 to −0.24, mostly *not* significant |
+
+The combined long-short book's beta is close to zero and, at daily frequency, not
+statistically different from zero (p=0.38) — this book is close to genuinely market-neutral
+**and** has a large, highly significant positive average return. Unlike the marginal,
+scattered hits dismissed as noise in Milestone 5's multiple-testing discussion, this is a
+**coherent cluster**: the same signal, the same market, the same direction, significant at
+the 1% level or better across both frequencies and both the long leg and the combined book
+— a qualitatively different, much less noise-like pattern than an isolated p≈0.03 hit.
+
+**How hard to lean on this.** This is the strongest, most credible finding in the entire
+project — but it is one market (the US Kaggle mirror, snapshot ending 2017-11-10), it does
+not replicate on NSE, and it has not been checked for the specific decay risk flagged in
+this README's own "Explicit limitations" since the project's first commit: momentum was
+published by Jegadeesh & Titman in 1993, and momentum's premium is well documented in the
+literature to have weakened somewhat post-publication. Whether this specific alpha holds up
+in a pre-1994 vs. post-1994 sub-sample split has **not yet been tested** — the natural next
+milestone, not yet done here.
+
+**Reproduce this**: `python investigations/momentum_reversal_beta.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -611,6 +666,11 @@ python investigations/short_leg_beta.py
 # (no — see "Does real alpha survive an actual beta hedge?" above)
 python investigations/beta_hedged_backtest.py
 
+# Investigation — does the same beta check apply to momentum and reversal? (reversal's
+# edge is retracted; US momentum's is the strongest finding in this project — see
+# "Does the reversal edge survive a beta check too?" above)
+python investigations/momentum_reversal_beta.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -621,10 +681,15 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
 
 1. **An investment framework** — a composite behavioral mispricing score usable as a
    screening/tilt signal alongside fundamental analysis, now with real empirical caveats
-   attached (see "Empirical results" and "Is it just beta?" above): don't trust it blind on
-   a large-cap-only universe, check which sub-signal is actually carrying any edge before
-   combining them, and beta-neutralize long-short legs before crediting any performance
-   difference to a behavioral effect rather than to uncontrolled market exposure.
+   attached (see "Empirical results" through "Does the reversal edge survive a beta check
+   too?" above): don't trust it blind on a large-cap-only universe, check which sub-signal
+   is actually carrying any edge before combining them, and beta-neutralize long-short legs
+   before crediting any performance difference to a behavioral effect rather than to
+   uncontrolled market exposure. As of Milestone 8, exactly one cell in this entire project
+   — US 12-1 momentum's long leg and combined book — has survived every check applied:
+   decomposition, cross-market replication, and a beta-adjusted significance test. That is
+   this repo's one credible candidate for a genuine, demonstrated edge; everything else
+   (including the project's own earlier "positive" reversal finding) did not hold up.
 2. **Risk-management lessons** — a stress-testing playbook (derived from the Q1 simulation)
    for any leveraged or "market-neutral" strategy: never calibrate tail risk on a calm-regime
    correlation matrix alone.
@@ -671,3 +736,15 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
 - **Momentum and reversal did not replicate consistently across the two markets tested**
   (see "Replication on a second market") — treat any single-market anomaly finding in this
   repo as provisional until it's been checked on at least one more, independent universe.
+- **Short-term reversal's "positive" empirical result is retracted, not just
+  non-replicating.** Milestone 8 ran the same CAPM beta check that debunked the
+  52-week-high signal against reversal too: none of its 12 alpha tests (2 markets × 3 legs
+  × 2 frequencies) are significant. This project's one previously-reported positive finding
+  did not survive the same scrutiny applied to the negative one.
+- **US 12-1 momentum's alpha (long leg and combined book, Milestone 8) has not been checked
+  for publication-decay.** It is this project's strongest surviving finding — significant
+  at p<0.01 or better across both frequencies, in a signal whose beta is close to zero for
+  the combined book — but momentum was published by Jegadeesh & Titman in 1993, and
+  momentum premia are well documented to weaken post-publication. A pre-1994 vs.
+  post-1994 sub-sample split has not been run. Treat this finding as promising, not
+  confirmed, until that check is done.

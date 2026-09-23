@@ -34,12 +34,14 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   score looked like a mediocre, roughly break-even signal (Sharpe ≈ 0), and
   stopping there would have been a reasonable-looking but wrong conclusion.
   Decomposing it showed the composite was averaging together one signal that
-  actively lost money and had a −97% max drawdown (52-week-high) with one
-  that had a real, positive edge net of costs (short-term reversal,
-  Sharpe 0.22 net) — the blend was hiding both the danger and the edge.
-  **Rule: always report and validate each component signal separately before
-  trusting a blended score, and re-weight or drop components that don't
-  independently earn their place.**
+  actively lost money (52-week-high) with one that *looked* like a real,
+  positive edge net of costs (short-term reversal, Sharpe 0.22 net) — a
+  conclusion Milestone 8 later retracted (next section). **Rule: always
+  report and validate each component signal separately before trusting a
+  blended score, and re-weight or drop components that don't independently
+  earn their place** — and note that "looks like an edge in the initial
+  decomposition" is still not the same as "is a demonstrated edge" (see
+  below).
 - **Re-validate on each new universe before trusting it there — now confirmed necessary,
   not just prudent.** A second market (US large-caps, 1970–2017) was run through the same
   pipeline (`README.md`, "Replication on a second market"), and momentum and reversal
@@ -48,7 +50,8 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   signal's *loss* was consistent both times. **Rule: a single-market backtest result is
   provisional by default — run it on at least one independent market before including it
   in a live framework, and expect roughly a coin-flip's chance that a specific component
-  signal's sign won't hold.**
+  signal's sign won't hold.** (Milestone 8 later showed the US momentum side of this flip
+  was the real one — see below.)
 - **A component that survives decomposition should still survive a "why" check before
   being trusted as a real edge or discarded as a real problem.** The 52-week-high signal's
   loss looked at first like it might be a value/growth confound specific to India's bull
@@ -108,6 +111,31 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   supported," even when the same underlying numbers motivated all three. Report the
   weakest claim that's actually been earned, and keep checking simpler explanations even
   after a more sophisticated one has passed one round of testing.**
+- **Apply the same scrutiny to a positive finding as to a negative one — this project had
+  been letting its one "success" coast on an old conclusion.** Every beta check through
+  Milestone 7 was run on the 52-week-high signal, the one that *lost* money. Short-term
+  reversal — this repo's original, and only, reported positive edge — was never re-examined
+  the same way. Milestone 8 finally did, and it didn't survive: none of reversal's 12 alpha
+  tests (2 markets × 3 legs × 2 frequencies) are significant. **Rule: a positive finding
+  earns no exemption from the checks a negative one gets. If a signal was "confirmed"
+  before the project's own standards of rigor caught up with it, re-run it under the
+  current standard before continuing to cite it.**
+- **When the same rigor finally turns up a real positive, that's worth saying plainly, not
+  hedging into meaninglessness.** Milestone 8 also tested 12-1 momentum the same way, and
+  found something the earlier milestones hadn't: on the US mirror, momentum's long leg and
+  combined book show large, highly significant alpha (annualized ≈+8-15%/yr, p<0.01 in
+  every cut) with a combined-book beta close to zero. Unlike the isolated marginal p≈0.03
+  hits Milestone 5 correctly dismissed as consistent with pure chance, this is a **coherent
+  cluster** — same signal, same market, same direction, significant across both legs and
+  both frequencies — a qualitatively different and much less noise-like pattern. **Rule: a
+  cluster of consistent, high-significance results across related cuts of the same
+  hypothesis is stronger evidence than an isolated hit, even before running a formal
+  multiple-testing correction; don't apply the same "probably noise" discount to a coherent
+  finding that's appropriate for a scattered one.** This is currently this project's single
+  most credible candidate for a genuine, demonstrated edge — with the caveat that it is one
+  market, unreplicated on NSE, and not yet checked for the publication-decay risk this
+  project's own README has flagged since its first commit (momentum was published in 1993;
+  a pre/post-1994 sub-sample split has not been run). Promising, not confirmed.
 
 ## 2. Risk-management lessons
 
@@ -178,6 +206,15 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
    minutes and rules out (or in) the most common cause of "surprising" long-short
    performance; save the behavioral and regime-conditioning hypotheses for after it comes
    back clean.**
+9. **A risk process that only re-tests its losers eventually trusts a winner it never
+   should have.** Every rigor upgrade in this project (Milestones 4-7) was applied to the
+   signal that was losing money. The one signal reported as a genuine edge (reversal) rode
+   on its original, less rigorous validation for six milestones before anyone checked it
+   the same way. Milestone 8 found it didn't hold up. **Rule: schedule periodic re-validation
+   of every "confirmed" edge under your *current* standard of rigor, not just your
+   standard at the time it was confirmed — a standard that improves over the life of a
+   book (as this project's did) should apply retroactively, especially to the positions
+   still being sized on the old conclusion.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
@@ -188,9 +225,14 @@ with seven-figure budgets. Smaller systematic funds, family offices, RIAs,
 and independent research desks either can't afford that tier or can't see
 *inside* the composite to know which component is actually carrying the
 edge on their specific universe — exactly the failure mode this project hit
-firsthand on the NSE data (section 1, above). The product is built directly
-around fixing that: **decomposed, auditable behavioral signals plus honest,
-per-universe validation, not another black-box score.**
+firsthand on the NSE data (section 1, above), and hit *again* when its own
+first-reported positive finding (reversal) turned out not to survive a
+beta check the project hadn't yet thought to run (Milestone 8). The product
+is built directly around fixing that: **decomposed, auditable behavioral
+signals plus honest, per-universe, beta-adjusted validation, not another
+black-box score** — the same standard that, when finally applied evenly,
+is what surfaced this project's one genuine finding (US momentum) instead
+of its retracted one (reversal).
 
 **What it is.** A subscription analytics service with two parts:
 

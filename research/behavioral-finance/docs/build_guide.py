@@ -212,13 +212,15 @@ p("The honest headline result from that empirical run: a blended "
   "&quot;behavioral score&quot; combining three signals looked like a roughly "
   "break-even strategy &mdash; and that blend was hiding two very different stories. "
   "One component signal (anchoring to the 52-week high) lost money persistently and "
-  "dramatically; another (short-term reversal) had a real, positive, cost-adjusted "
-  "edge. The project's central methodological lesson &mdash; never trust a blended "
-  "score without checking what is inside it &mdash; came directly out of this finding, "
-  "not from a textbook. (Chasing <i>why</i> the losing component lost money turned "
-  "into the project's longest, most instructive thread &mdash; Part V walks through "
-  "three rounds of increasingly rigorous testing, ending in a resolution simpler, and "
-  "more humbling, than any of the behavioral explanations first considered.)")
+  "dramatically; another (short-term reversal) at first looked like a real, positive, "
+  "cost-adjusted edge. The project's central methodological lesson &mdash; never trust a "
+  "blended score without checking what is inside it &mdash; came directly out of this "
+  "finding, not from a textbook. (Chasing <i>why</i> the losing component lost money "
+  "turned into the project's longest, most instructive thread &mdash; Part V walks "
+  "through five rounds of increasingly rigorous testing. The losing signal's cause "
+  "turned out simpler, and more humbling, than any of the behavioral explanations first "
+  "considered &mdash; and the same rigor, once finally pointed at the &quot;winning&quot; "
+  "signal too, retracted it and surfaced a different, genuine finding instead.)")
 p("The guide that follows explains every concept used (behavioral and quantitative) "
   "in plain language with real examples, walks through all five case studies in "
   "detail, narrates the project's milestones and the reasoning behind each decision, "
@@ -897,11 +899,13 @@ data_table(
 )
 p("The composite score alone would have supported a bland, roughly-correct-"
   "sounding conclusion: &quot;no real edge here.&quot; Decomposing it into its "
-  "three parts told a much more informative and more dangerous story: the "
-  "52-week-high (anchoring) signal was actively destructive, losing money "
-  "persistently and suffering a 97% drawdown, while the short-term reversal "
-  "(overreaction) signal had a genuine, positive, cost-adjusted edge. Averaging "
-  "them together hid both facts.")
+  "three parts told a much more informative and, in one case, misleading "
+  "story: the 52-week-high (anchoring) signal was actively destructive, "
+  "losing money persistently and suffering a 97% drawdown, while the "
+  "short-term reversal (overreaction) signal <i>looked</i> like a genuine, "
+  "positive, cost-adjusted edge. Averaging them together hid both facts "
+  "&mdash; and Part V.9 (Milestone 8) later found the reversal side of "
+  "that story didn't survive the same scrutiny the losing side got.")
 p("A follow-up check tested whether the anchoring signal's damage was simply an "
   "artifact of the 2008 and 2020 crashes (both periods where a "
   "&quot;buy recent winners&quot; strategy is known from the academic "
@@ -961,7 +965,9 @@ p("The result was not a clean confirmation of the NSE finding &mdash; it was "
   "result; momentum was NSE's near-zero result and the US market's real, "
   "positive, cost-adjusted edge (Sharpe 0.32 net). Only one thing held up "
   "unchanged across both very different markets and eras: <b>the 52-week-high "
-  "signal lost money in both.</b>")
+  "signal lost money in both.</b> (Part V.9, Milestone 8, later put both "
+  "sides of this flip through a beta-adjusted significance test: the US "
+  "momentum side held up and then some; the NSE reversal side did not.)")
 box(
     "A single-market backtest result is provisional by default. Had this "
     "project stopped after milestone 2 (NSE only), it would have reported "
@@ -1264,6 +1270,64 @@ box(
     kind="fact", title="TWO HONEST CAVEATS"
 )
 
+h1("5.9  Milestone 8 &mdash; Does the reversal edge survive a beta check too?")
+p("Every beta check so far (Sections 5.7-5.8) was run on the 52-week-high "
+  "signal &mdash; the one that <i>lost</i> money. Short-term reversal was "
+  "this project's one positive empirical finding (Section 5.3: &quot;the "
+  "only signal that actually worked, gross and net of costs,&quot; "
+  "Sharpe 0.22 net on NSE), and it was never re-examined for the exact "
+  "same uncontrolled-beta artifact that turned out to fully explain the "
+  "52-week-high signal's losses. This milestone applies the identical "
+  "CAPM-style test (<i>investigations/momentum_reversal_beta.py</i>) to "
+  "<b>both</b> remaining signals &mdash; 12-1 momentum and short-term "
+  "reversal &mdash; long leg, short leg, and combined book, both markets, "
+  "both frequencies: 24 alpha tests in total.")
+p("<b>Short-term reversal's &quot;edge&quot; does not survive.</b> Not "
+  "one of its 12 alpha tests is significant at conventional levels (all "
+  "p&gt;0.10, most p&gt;0.2). The positive Sharpe reported all the way "
+  "back in Section 5.3 was &mdash; like the 52-week-high signal's loss "
+  "&mdash; a mix of market-beta exposure and noise, not a demonstrated "
+  "stock-selection edge. <b>This project's one previously &quot;positive&quot; "
+  "empirical result is retracted along with the negative one.</b>")
+p("<b>12-1 momentum tells a genuinely different story.</b> On NSE, "
+  "momentum shows essentially no significant alpha either (one marginal "
+  "hit at the 10% level). But on the <b>US mirror, momentum's long leg "
+  "and combined book show real, statistically robust, largely "
+  "beta-independent alpha</b>:")
+data_table(
+    ["", "US long leg", "US combined book"],
+    [
+        ["Daily alpha (annualized)", "+8.1%/yr, p<.0001", "+12.1%/yr, p=.004"],
+        ["Monthly alpha (annualized)", "+9.2%/yr, p<.0001", "+15.3%/yr, p<.0001"],
+        ["Beta", "~+1.0 to +1.1", "~-0.05 to -0.24, mostly not significant"],
+    ],
+    col_widths=[2.3*inch, 2.3*inch, 2.3*inch],
+    small=True,
+)
+p("The combined long-short book's beta is close to zero and, at daily "
+  "frequency, not statistically different from zero (p=0.38) &mdash; this "
+  "book is close to genuinely market-neutral <b>and</b> has a large, "
+  "highly significant positive average return. Unlike the marginal, "
+  "scattered hits dismissed as noise in Section 5.6's multiple-testing "
+  "discussion, this is a <b>coherent cluster</b>: the same signal, the "
+  "same market, the same direction, significant at the 1% level or "
+  "better across both frequencies and both the long leg and the combined "
+  "book &mdash; a qualitatively different, much less noise-like pattern "
+  "than an isolated p&asymp;0.03 hit.")
+box(
+    "This is the strongest, most credible finding in the entire project "
+    "&mdash; but it is one market (the US Kaggle mirror, snapshot ending "
+    "2017-11-10), it does not replicate on NSE, and it has not been "
+    "checked for the specific decay risk this guide's own limitations "
+    "list has flagged since Part III: momentum was published by "
+    "Jegadeesh &amp; Titman in 1993, and momentum's premium is well "
+    "documented in the literature to have weakened somewhat "
+    "post-publication. Whether this specific alpha holds up in a "
+    "pre-1994 vs. post-1994 sub-sample split has <b>not yet been "
+    "tested</b> &mdash; the natural next milestone, not yet done here.",
+    title="HOW HARD TO LEAN ON THIS"
+)
+
 # MARKER_END_PART5
 
 # ============================================================ PART VI
@@ -1286,9 +1350,10 @@ box(
     "best practice borrowed from a textbook: <b>never trust a blended score "
     "without checking what each of its components does on its own.</b> The "
     "composite here looked mediocre; decomposing it found one component "
-    "actively losing money with a 97% drawdown and another with a genuine, "
-    "positive, cost-adjusted edge. Any score this project's code produces "
-    "should be reported and validated component-by-component before a blended "
+    "actively losing money with a 97% drawdown and another that at first "
+    "looked like a genuine, positive, cost-adjusted edge (a claim Part V.9 "
+    "later retracted). Any score this project's code produces should be "
+    "reported and validated component-by-component before a blended "
     "version of it is trusted for a decision.",
 )
 p("<b>Decompose the legs before discarding a signal &mdash; still correct, "
@@ -1311,6 +1376,26 @@ p("<b>Decompose the legs before discarding a signal &mdash; still correct, "
   "coefficient. And more generally: check for a beta mismatch "
   "between a long-short book's legs before reaching for a behavioral "
   "explanation, not after three rounds of increasingly exotic ones.")
+box(
+    "Part V.9 applied the same beta check to the other two signals, and "
+    "found something important in both directions. Short-term reversal "
+    "&mdash; this project's one previously-reported positive finding "
+    "&mdash; failed every one of its 12 alpha tests once beta was "
+    "controlled for. It had never been re-checked with the standard of "
+    "rigor developed for the losing signal; once it finally was, it "
+    "didn't hold up either. <b>Rule: a positive finding earns no "
+    "exemption from the checks a negative one gets.</b> But 12-1 momentum, "
+    "tested the same way, showed something new: on the US mirror, its "
+    "long leg and combined book carry large, highly significant alpha "
+    "(annualized roughly +8-15%/yr, p&lt;0.01 in every cut), with the "
+    "combined book's beta close to zero. This is currently the project's "
+    "single most credible candidate for a genuine, demonstrated edge "
+    "&mdash; not yet checked for post-1993-publication decay, and not "
+    "replicated on NSE, but a coherent, high-significance cluster rather "
+    "than the isolated marginal hits this project has learned to "
+    "distrust.",
+    kind="fact", title="UPDATE FROM PART V.9"
+)
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
 bullets([
@@ -1379,6 +1464,17 @@ bullets([
     "not the reverse; a beta regression takes minutes and rules out the "
     "most common cause of surprising long-short performance before any "
     "more elaborate explanation is worth reaching for.",
+    "<b>A risk process that only re-tests its losers eventually trusts a "
+    "winner it never should have.</b> Every rigor upgrade through Part "
+    "V.8 was applied to the signal that was losing money. The one signal "
+    "reported as a genuine edge (reversal) rode on its original, less "
+    "rigorous validation for six milestones before anyone checked it the "
+    "same way. Part V.9 finally did, and it didn't hold up. Schedule "
+    "periodic re-validation of every &quot;confirmed&quot; edge under "
+    "your <i>current</i> standard of rigor, not just the standard at the "
+    "time it was confirmed &mdash; a standard that improves over a "
+    "book's life should apply retroactively, especially to positions "
+    "still being sized on the old conclusion.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -1388,7 +1484,11 @@ p("Off-the-shelf factor data (momentum, value, quality) is typically sold by "
   "RIAs, and research desks either cannot afford that tier, or cannot see "
   "<i>inside</i> the composite to know which component is actually carrying "
   "the edge on their specific universe &mdash; exactly the failure mode this "
-  "project hit directly on the NSE data (Part V.3).")
+  "project hit directly on the NSE data (Part V.3), and hit again when its "
+  "own first-reported positive finding (reversal) failed a beta check the "
+  "project hadn't yet thought to run (Part V.9). Decomposed, beta-adjusted "
+  "validation is what surfaced the project's one genuine finding (US "
+  "momentum) instead of its retracted one.")
 box(
     "This idea was originally framed as an extension of the specific software "
     "platform this research happened to be built alongside. That framing was "
@@ -1451,6 +1551,18 @@ bullets([
     "two markets tested (Part V.4) &mdash; treat either result, in isolation, "
     "as provisional rather than a confirmed anomaly. Only the 52-week-high "
     "signal's loss held up in both.",
+    "<b>Short-term reversal's positive result is retracted, not just "
+    "non-replicating (Part V.9).</b> The same CAPM beta check that debunked "
+    "the 52-week-high signal, applied to reversal for the first time: none "
+    "of its 12 alpha tests are significant. This project's one previously-"
+    "reported positive finding did not survive the same scrutiny applied to "
+    "the negative one.",
+    "<b>US 12-1 momentum's alpha (Part V.9) has not been checked for "
+    "publication-decay.</b> It is this project's strongest surviving "
+    "finding (p&lt;0.01 or better, multiple cuts, beta near zero for the "
+    "combined book) but momentum was published in 1993 and is documented "
+    "to weaken post-publication; a pre/post-1994 split has not been run. "
+    "Promising, not confirmed.",
     "<b>The 52-week-high result's cause: resolved, and it's the boring "
     "answer.</b> Two behavioral/statistical explanations were ruled out by "
     "direct test: crash-window concentration (Part V.4) and a value/growth "
@@ -1511,16 +1623,19 @@ p("The project's real empirical result (Part V.3) delivered a finding more "
   "&quot;the anomalies are all arbitraged away, don't bother.&quot; Instead: "
   "one specific, named bias (anchoring, via the 52-week-high signal) actively "
   "lost money on this universe, while a different one (overreaction, via "
-  "short-term reversal) had a real, cost-adjusted edge &mdash; and the two "
-  "were invisible from inside a single blended composite. That is, in "
-  "miniature, the entire project's argument: rigor means checking the "
-  "specific mechanism, not trusting the reassuring-looking aggregate.")
+  "short-term reversal) at first looked like a real, cost-adjusted edge "
+  "&mdash; and the two were invisible from inside a single blended "
+  "composite. That is, in miniature, the entire project's argument: rigor "
+  "means checking the specific mechanism, not trusting the "
+  "reassuring-looking aggregate. It took until Part V.9 for the project to "
+  "apply that same rigor to its own positive-looking half of the story, "
+  "and when it did, the &quot;edge&quot; didn't survive either.")
 p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "investment framework that explicitly forbids trusting a blend without "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 7 then ran the India finding through "
+  "needed. Milestones 3 through 8 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -1528,28 +1643,33 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "value/growth confound was tested and rejected; a formally-compelling-"
   "looking momentum-crash mechanism was tested and rejected too, once "
   "proper statistical significance testing replaced descriptive pattern-"
-  "matching; the actual explanation, when it finally arrived, was the "
-  "most basic and least glamorous of all the candidates tested &mdash; an "
-  "uncontrolled beta mismatch between the strategy's two legs, checked "
-  "last instead of first; and even that finding wasn't taken on faith from "
-  "a single regression coefficient &mdash; a real, out-of-sample hedged "
-  "version was built and tested, and it agreed.")
-p("The fix that survived all of that scrutiny, twice confirmed by "
-  "independent methods, is more modest than any of the earlier drafts of "
-  "this conclusion claimed: there is no demonstrated, beta-independent "
-  "stock-selection skill anywhere in the 52-week-high signal as currently "
-  "built, in either direction. The long leg is a reasonable lower-beta "
-  "way to stay invested, not a proven behavioral edge. That more modest, "
-  "more honest conclusion is the project working as intended, including "
-  "on itself: not every finding needs to be confirmed to be useful, a "
-  "compelling pattern is a hypothesis until it survives testing at every "
-  "level of rigor available &mdash; descriptive, then formally "
-  "statistical, then mechanically basic, then an actual out-of-sample "
-  "implementation of the fix &mdash; and the single most important thread "
-  "running through this entire guide is a project that kept correcting "
-  "its own most recent, best-supported-looking result, four times in a "
-  "row, and then checked its own correction one more time before calling "
-  "it done.")
+  "matching; the actual explanation for the losing signal, when it finally "
+  "arrived, was the most basic and least glamorous of all the candidates "
+  "tested &mdash; an uncontrolled beta mismatch, checked last instead of "
+  "first, then confirmed a second way with an actual hedged strategy; and "
+  "then, applying that same beta check to the signal the project had been "
+  "treating as a validated success, the success turned out not to be one "
+  "&mdash; while a signal nobody had flagged as special (US momentum) "
+  "turned out to hold real, statistically robust alpha once someone "
+  "finally looked properly.")
+p("The fix that survived all of that scrutiny is more modest, and the "
+  "project's one real positive finding is different, than any earlier "
+  "draft of this conclusion claimed: there is no demonstrated, "
+  "beta-independent stock-selection skill in the 52-week-high signal or "
+  "in short-term reversal, in either direction, as currently built. The "
+  "one signal that does show a robust, largely beta-independent edge "
+  "&mdash; 12-1 momentum, on the US mirror specifically &mdash; was found "
+  "not by anyone's original hypothesis about which signal should work, "
+  "but by finally applying the project's own hard-won standard of rigor "
+  "evenly, to a winner as well as a loser. That is the project working as "
+  "intended, including on itself: not every finding needs to be confirmed "
+  "to be useful, a compelling pattern &mdash; positive or negative "
+  "&mdash; is a hypothesis until it survives testing at every level of "
+  "rigor available, and the single most important thread running through "
+  "this entire guide is a project that kept correcting its own most "
+  "recent, best-supported-looking result, five times in a row, and found "
+  "its one durable finding only after it stopped exempting its own "
+  "successes from the same scrutiny.")
 
 # ============================================================ GLOSSARY
 story.append(PageBreak())
