@@ -683,6 +683,67 @@ momentum alone.
 
 **Reproduce this**: `python investigations/all_signals_decay_analysis.py`.
 
+## Quantifying the decay: a continuous rate, not a binary 1994 cut (Milestone 13)
+
+Every decay test so far (Milestones 9-12) used a single, somewhat arbitrary binary split —
+1994-01-01, chosen as "~1 year after Jegadeesh & Titman's 1993 publication." That answers
+"was there a difference before vs. after this one date," not "how fast did the edge erode,
+or when did it actually run out." This milestone
+(`investigations/decay_rate_estimation.py`) quantifies the decay directly: for each
+signal's out-of-sample-hedged long leg, over the *full* sample (no pre/post split), it
+regresses `hedged_return_t = alpha + slope × (years since hedge coverage began) + e_t`
+with HAC standard errors — `slope` is a direct, continuously-estimated annual decay rate
+with its own p-value, and (alpha, slope) together imply a zero-crossing date: this
+project's best point estimate of when the edge actually ran out.
+
+| Signal | alpha (start, ann.) | slope (change/yr) | Implied zero-crossing |
+|---|---|---|---|
+| 12-1 momentum, long leg | +12.65%/yr, p=0.008 | -0.23%/yr, **p=0.152 (n.s.)** | ill-conditioned (not reliable) |
+| Short-term reversal, long leg | +13.46%/yr, p=0.014 | -0.41%/yr, **p=0.026** | 2004-11-22 |
+
+**Momentum's decay is not a smooth line — it does not even pass as one.** The full-sample
+linear-trend slope for momentum's long leg is *not* statistically significant (p=0.15
+daily, p=0.25 monthly): a single straight line drawn across the whole 1972-2017 hedged
+return series is a poor fit, not because the effect didn't decay, but because it didn't
+decay *smoothly*. A 5-year rolling-window trajectory shows why: annualized hedged returns
+stay consistently strong (roughly +4% to +22%/yr, noisy but never close to zero) all the
+way from the 1970s through the window ending January 2008 — including every year of the
+supposed "post-1994 decay" period the earlier milestones flagged — and only then drop
+sharply, turning negative for every rolling window from 2009 onward. **Splitting explicitly
+at September 2008 instead of January 1994 gives a far cleaner separation**: pre-Sept-2008
+long-leg alpha is +8.02%/yr, p=0.0005 (n=8,983 days) vs. post-Sept-2008 alpha of -0.56%/yr,
+p=0.998 (n=2,309 days, utterly indistinguishable from zero) — a starker divide than the
+1994 split produced (p=0.001 pre-94 vs. p=0.149 post-94). **This refines, rather than
+contradicts, Milestones 9-11's momentum finding**: the direction (weak/absent in the more
+recent era) was right, but describing it as gradual, publication-driven decay since 1994
+is not well supported by the data's actual shape. A sudden regime shift around the 2008-09
+financial crisis (plausibly the same 2009 momentum crash examined directly in Milestone 11,
+or the post-crisis scaling-up of quantitative strategies) is a better-supported story for
+*when and how* momentum's edge disappeared than slow 1990s crowding.
+
+**Reversal's decay is closer to the smooth story the publication-decay literature
+predicts.** Its full-sample linear trend *is* statistically significant (slope -0.41%/yr
+daily, p=0.026; -0.39%/yr monthly, p=0.027), with an implied zero-crossing around
+November 2004. The rolling trajectory confirms a genuine decline, though a real one, not a
+perfectly straight line: annualized returns fall from a very strong +27%/yr in the late
+1970s to negative territory by the mid-1980s, stay negative through the 1990s, then show
+an unexplained recovery bump (+6% to +14%/yr) from 2000-2004 before declining again through
+the 2010s. The overall downward trend is real and significant, but "smooth, monotonic
+decay" oversimplifies a pattern that includes a multi-year partial recovery in the middle.
+
+**Updated conclusion**: quantifying the decay rate, rather than assuming a fixed cutoff,
+shows the two signals' declines have genuinely different shapes. Reversal's long leg
+decays roughly the way the publication-decay literature describes — a real, continuous,
+statistically significant downward trend, crossing zero around 2004. Momentum's long leg
+does not: it held essentially flat and strong for 35+ years and then broke sharply around
+the 2008-09 financial crisis, a pattern a continuous linear-decay model fits poorly and a
+structural-break framing fits well. Treat momentum's weakness as "broke around 2008-09,"
+not "has been gradually decaying since 1994" — the earlier milestones' binary split
+happened to land on the right side of the qualitative story without correctly identifying
+its shape or timing.
+
+**Reproduce this**: `python investigations/decay_rate_estimation.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -878,6 +939,11 @@ python investigations/momentum_decay_regime_analysis.py
 # since' specific to momentum, or market-wide?" above)
 python investigations/all_signals_decay_analysis.py
 
+# Investigation — quantify the decay rate directly instead of a binary 1994 cut (momentum:
+# not a smooth trend, breaks sharply around 2008-09; reversal: genuinely smooth decline,
+# zero-crossing ~2004; see "Quantifying the decay" above)
+python investigations/decay_rate_estimation.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -888,8 +954,8 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
 
 1. **An investment framework** — a composite behavioral mispricing score usable as a
    screening/tilt signal alongside fundamental analysis, now with real empirical caveats
-   attached (see "Empirical results" through "Is 'real pre-1994, decayed since' specific
-   to momentum, or market-wide?" above): don't trust it blind on a large-cap-only
+   attached (see "Empirical results" through "Quantifying the decay" above): don't trust
+   it blind on a large-cap-only
    universe, check which sub-signal is actually carrying any edge before combining them,
    and beta-neutralize long-short legs before crediting any performance difference to a
    behavioral effect rather than to uncontrolled market exposure. No cell in this project
@@ -903,10 +969,14 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    the hedge's rolling window. Milestone 12 then showed this same "real pre-1994, decayed
    since" pattern also appears in short-term reversal's long leg — so it is a market-wide
    phenomenon, not a momentum-specific quirk — while 52-week-high never had genuine alpha
-   in either era. The pre-1994 alpha remains this repo's one genuinely robust,
-   hedge-confirmed finding; nothing in this project has yet demonstrated a
-   forward-sizeable edge in the post-publication era, for any signal, in either
-   direction.
+   in either era. Milestone 13 then quantified the decay directly instead of assuming the
+   1994 cutoff: reversal's decline is well-described by a smooth, statistically significant
+   linear trend (zero-crossing ~2004), but momentum's is not — a rolling trajectory shows
+   momentum's alpha held flat and strong through 2008 and then broke sharply, a pattern
+   better described as a 2008-09 regime shift than gradual publication-driven decay. The
+   pre-2009 (momentum) / pre-2005ish (reversal) alpha remains this repo's one genuinely
+   robust, hedge-confirmed finding; nothing in this project has yet demonstrated a
+   forward-sizeable edge in the most recent decade, for any signal, in either direction.
 2. **Risk-management lessons** — a stress-testing playbook (derived from the Q1 simulation)
    for any leveraged or "market-neutral" strategy: never calibrate tail risk on a calm-regime
    correlation matrix alone.
@@ -1003,3 +1073,16 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   full-sample regression correctly found non-significant overall but could not distinguish
   from "never real." Treat Milestone 8's reversal retraction as accurate at the full-sample
   level but incomplete: the long leg was a genuine, decayed effect, not pure noise.
+- **The 1994 cutoff, while directionally right for momentum, misdescribes its shape and
+  timing (Milestone 13).** Quantifying the decay as a continuous linear trend rather than a
+  binary split finds momentum's slope is *not* statistically significant (p=0.15) — the
+  effect did not decay smoothly. A rolling 5-year trajectory shows momentum's hedged alpha
+  stayed consistently strong (+4% to +22%/yr) from the 1970s all the way through the window
+  ending January 2008, then broke sharply negative from 2009 on. Splitting at September
+  2008 instead of 1994 gives a far cleaner divide (pre: +8.02%/yr, p=0.0005; post: -0.56%/yr,
+  p=0.998) than the 1994 split ever did. Momentum's weakness is better described as a sudden
+  regime shift around the 2008-09 crisis (plausibly tied to the 2009 momentum crash examined
+  in Milestone 11) than gradual, 1994-onward publication decay. Reversal's decay, by
+  contrast, *is* well-described by a smooth linear trend (slope -0.41%/yr, p=0.026, implied
+  zero-crossing ~November 2004) — the two signals' declines have genuinely different shapes,
+  and neither should be assumed to generalize to the other.

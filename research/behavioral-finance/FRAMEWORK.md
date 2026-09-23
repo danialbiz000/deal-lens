@@ -198,6 +198,23 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   1990s-2000s scaling-up of quantitative, cross-sectional strategies this project's own
   case studies on LTCM and the 2007 Quant Quake already document as reshaping US equity
   markets over exactly this period) rather than a fluke specific to one anomaly.
+- **Milestone 13 quantified the decay directly instead of relying on a fixed 1994 cutoff,
+  and found the two surviving long legs decay in genuinely different shapes.** A
+  continuous linear-trend regression on momentum's long leg gives a slope that is not
+  statistically significant (p=0.15) — the effect did not decay smoothly. A rolling
+  5-year trajectory explains why: momentum's hedged alpha stayed consistently strong
+  (+4% to +22%/yr) from the 1970s through the window ending January 2008, then broke
+  sharply negative from 2009 on. Splitting explicitly at September 2008 gives a far
+  cleaner divide (pre: +8.02%/yr, p=0.0005; post: -0.56%/yr, p=0.998) than the 1994 split
+  ever produced. Reversal's long leg, in contrast, shows a real, statistically significant
+  linear decay (slope -0.41%/yr, p=0.026) with an implied zero-crossing around November
+  2004. **Rule: a binary split at a theoretically-motivated date (here, a publication
+  year) can be directionally correct while still misdescribing the actual shape and
+  timing of an effect — quantify the trend continuously, and sanity-check it against a
+  non-parametric rolling trajectory, before writing up "gradual decay" as the mechanism.**
+  Momentum's weakness is better attributed to a 2008-09 regime shift (plausibly the same
+  2009 momentum crash examined directly in Milestone 11) than to slow, 1990s
+  publication-driven crowding.
 
 ## 2. Risk-management lessons
 
@@ -313,6 +330,17 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     existed with that toolkit, not just your full-sample findings — a "no effect on
     average" verdict can quietly contain a real, decayed effect that a single-number
     summary cannot distinguish from a signal that was simply never real.**
+13. **A binary before/after split can get the direction right while getting the mechanism
+    wrong — quantify the trend continuously before naming a cause.** Milestone 13 fit a
+    continuous linear decay rate to momentum's and reversal's hedged long legs instead of
+    trusting the 1994 publication-date cutoff. Reversal's decay turned out to be genuinely
+    smooth and statistically significant, consistent with the publication-decay story.
+    Momentum's did not: its linear trend was not significant, because the real pattern is a
+    sharp break around the 2008-09 financial crisis, not a gradual erosion starting in
+    1994. **Rule: once a binary split finds a real effect, don't stop there — fit a
+    continuous trend and inspect a rolling, non-parametric trajectory to check whether the
+    story you're about to tell (e.g., "publication-driven crowding") actually matches the
+    shape of the data, or just happens to fall on the correct side of an arbitrary cutoff.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
