@@ -744,6 +744,70 @@ its shape or timing.
 
 **Reproduce this**: `python investigations/decay_rate_estimation.py`.
 
+## A formal structural-break test, not a descriptive comparison (Milestone 14)
+
+Milestone 13's "split at September 2008 instead of 1994" comparison was descriptive: the
+break date was chosen *after* looking at momentum's rolling-window trajectory, and testing
+"the best of many candidate split dates" is expected to look impressive even under a null
+of no true break — a comparison, not a test. This milestone
+(`investigations/structural_break_test.py`) runs two properly specified tests instead.
+
+**Method A — a literature-motivated Chow-style test at a single, pre-specified date**
+(2008-09-01, motivated externally by Daniel & Moskowitz's (2016) documented 2009
+momentum-crash episode, not by inspecting this project's own plot). A single pre-specified
+date needs no multiple-testing correction.
+
+**Method B — a Quandt-Andrews-style sup-Wald test that does *not* assume a break date.**
+It searches every candidate date in the central 70% of the sample (15% trimmed from each
+end, standard Andrews (1993) practice), computes the HAC-robust level-shift statistic at
+each one, and takes the maximum — both its value and which date it occurs at. Because
+searching many candidates inflates the false-positive rate of a naive comparison, this
+project's sandboxed environment (which cannot fetch Andrews' published critical-value
+tables) instead builds its own empirical null: fit a no-break model to the real data,
+block-bootstrap its residuals (400 draws, 12-month blocks, preserving autocorrelation),
+rerun the full candidate search on each synthetic no-break series, and compare the real
+maximum statistic to that simulated null distribution.
+
+| | Momentum | Reversal |
+|---|---|---|
+| Method A: level shift at 2008-09, daily | coef=-9.31%/yr ann., **p=0.026** | coef=-4.02%/yr ann., p=0.337 |
+| Method A: level shift at 2008-09, monthly | coef=-9.10%/yr ann., p=0.052 | coef=-3.90%/yr ann., p=0.316 |
+| Method B: data-driven best break date | 2010-12-31 | **1980-08-29** |
+| Method B: sup\|t\| (bootstrap p-value) | 2.771 (p=0.138, n.s.) | 3.369 (**p=0.048**) |
+
+**Momentum: the specific 2008 hypothesis holds; an unconstrained search does not decisively
+confirm it as *the* dominant break.** Method A confirms a real, statistically significant
+level shift specifically at the literature-motivated date (p=0.026 daily). But Method B's
+unconstrained search finds its single best-fitting break at **December 2010, not September
+2008** — 27 months later — and that best-fit statistic is *not* significant once corrected
+for having searched ~375 candidate dates (bootstrap p=0.138). **This nuances Milestone 13's
+framing**: there is good evidence of weakening tied specifically to the 2008-09 crisis
+window, but the data does not decisively pin down one single, dominant structural break —
+a specific, externally-motivated hypothesis survives; an unconstrained "find the best break
+anywhere" search does not clearly beat noise.
+
+**Reversal: no evidence for an 2008-tied break — but a genuine, significant break turns up
+much earlier, around 1980.** Method A finds nothing at 2008 (as expected: Milestone 13
+already showed reversal's decline predates the financial crisis by decades). Method B's
+unconstrained search finds a significant break (bootstrap p=0.048) at **August 1980** — the
+early, sharp decline from the extraordinarily high +27%/yr level-shift of the late 1970s
+that Milestone 13's rolling trajectory showed, not a smoothly accumulating multi-decade
+slope. **This further refines Milestone 13's "smooth, statistically significant linear
+decay" framing for reversal**: part of that significant linear trend is better described as
+one sharp early-1980s adjustment than continuous decay across the whole sample.
+
+**Updated conclusion**: neither signal's decline is best described as either a perfectly
+smooth trend or a single obvious break once tested formally and correctly for
+multiple-testing bias. Momentum shows a real, hypothesis-confirmed weakening at the 2008-09
+crisis, but not an unambiguous single structural break when searched for without that prior.
+Reversal shows a genuine, statistically significant break, but decades earlier than any
+milestone had proposed, complicating rather than confirming the smooth-decay story. Both
+results are more conservative and more precisely qualified than any earlier milestone's
+framing — consistent with this project's repeated experience that the more rigorous test
+usually narrows, rather than confirms, the simpler story that preceded it.
+
+**Reproduce this**: `python investigations/structural_break_test.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -944,6 +1008,12 @@ python investigations/all_signals_decay_analysis.py
 # zero-crossing ~2004; see "Quantifying the decay" above)
 python investigations/decay_rate_estimation.py
 
+# Investigation — formal structural-break test: Chow test at a literature-motivated date +
+# Quandt-Andrews sup-Wald search with a block-bootstrap p-value (momentum's 2008 hypothesis
+# holds but an unconstrained search doesn't decisively confirm one dominant break; reversal's
+# real break is ~1980, not 2008; see "A formal structural-break test" above)
+python investigations/structural_break_test.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1086,3 +1156,18 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   contrast, *is* well-described by a smooth linear trend (slope -0.41%/yr, p=0.026, implied
   zero-crossing ~November 2004) — the two signals' declines have genuinely different shapes,
   and neither should be assumed to generalize to the other.
+- **A formal structural-break test qualifies both of Milestone 13's stories further
+  (Milestone 14).** Momentum's "broke around 2008-09" claim was descriptive — the date was
+  chosen by inspecting the data. A properly specified Chow test at the literature-motivated
+  date (2008-09-01) does confirm a real level shift (p=0.026 daily) — but a Quandt-Andrews
+  sup-Wald search that does *not* assume any break date finds its single best-fitting break
+  27 months later (December 2010), and that unconstrained maximum is *not* statistically
+  significant once corrected for having searched ~375 candidate dates via a 400-draw block
+  bootstrap (p=0.138). The specific, externally-motivated hypothesis survives; an
+  unconstrained "find the best break anywhere" search does not decisively confirm one
+  dominant structural break. Reversal shows the opposite pattern: no evidence of a break
+  near 2008 (p=0.34), but the unconstrained search finds a genuine, statistically
+  significant break (bootstrap p=0.048) around **August 1980** — the sharp early decline
+  from reversal's extraordinarily high late-1970s level, not a smoothly accumulating
+  multi-decade slope. Treat both signals' "when did it break" story as more conservative
+  and more precisely qualified than Milestone 13's descriptive framing.

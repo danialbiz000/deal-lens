@@ -215,6 +215,21 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   Momentum's weakness is better attributed to a 2008-09 regime shift (plausibly the same
   2009 momentum crash examined directly in Milestone 11) than to slow, 1990s
   publication-driven crowding.
+- **Milestone 14 formalized the "broke around 2008-09" claim with a proper structural-break
+  test, and the result is more conservative than Milestone 13's descriptive comparison.** A
+  Chow-style test at a single, literature-motivated date (2008-09-01, from Daniel &
+  Moskowitz 2016) confirms a real level shift in momentum (p=0.026 daily) — but an
+  unconstrained Quandt-Andrews sup-Wald search (which does not assume any break date) finds
+  its single best-fitting break 27 months later, at December 2010, and that unconstrained
+  maximum is not statistically significant once corrected for the multiple-testing problem
+  of searching ~375 candidate dates (400-draw block-bootstrap p=0.138). Reversal shows the
+  opposite: no break near 2008 (p=0.34), but a genuine, significant break (bootstrap
+  p=0.048) around August 1980 — the sharp early decline from its extraordinarily high
+  late-1970s level, not a smoothly accumulating multi-decade slope as the linear-trend
+  regression alone suggested. **Rule: a descriptive "this cutoff fits better" comparison
+  and a formal, multiple-testing-corrected structural-break test can disagree even when
+  both are computed correctly on the same data — trust the formal test, and expect it to
+  be more conservative, not less, than the comparison that motivated running it.**
 
 ## 2. Risk-management lessons
 
@@ -341,6 +356,20 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     continuous trend and inspect a rolling, non-parametric trajectory to check whether the
     story you're about to tell (e.g., "publication-driven crowding") actually matches the
     shape of the data, or just happens to fall on the correct side of an arbitrary cutoff.**
+14. **Even a data-driven, non-arbitrary date can still be the wrong test — correct for the
+    search itself before trusting it.** Milestone 13 picked September 2008 by eyeballing a
+    rolling trajectory, which is a comparison, not a test: it doesn't say whether that split
+    is meaningfully better than what chance alone would produce from searching many candidate
+    dates. Milestone 14 ran the actual test two ways: a single pre-registered date (motivated
+    by an external, published crash episode, not this project's own plot) confirmed momentum's
+    break; an unconstrained search over ~375 candidate dates, corrected via bootstrap for
+    having searched that many, did not decisively confirm any single dominant break (its own
+    best-fit date, December 2010, wasn't even the one the earlier milestone had proposed).
+    **Rule: a hypothesis motivated by an external, independent source (a published crash date,
+    a known regulatory change) can be tested directly and cheaply; a hypothesis motivated by
+    your own data (the best-looking split you found by eye) requires a multiple-testing-
+    corrected test before it earns the same confidence — and expect the corrected version to
+    be measurably more conservative.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
