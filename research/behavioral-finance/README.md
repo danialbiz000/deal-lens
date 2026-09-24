@@ -1317,6 +1317,55 @@ control, not a beta hedge), but landing at the same place.
 
 **Reproduce this**: `python investigations/momentum_control_asx_52w_high.py`.
 
+## A new signal: does the low-volatility anomaly replicate anywhere? (Milestone 25)
+
+Every signal in this project so far — momentum, 52-week-high, short-term reversal — is a
+trend/reversal construction built purely from price history. The low-volatility anomaly
+(Ang, Hodrick, Xing & Zhang 2006; Frazzini & Pedersen 2014's "betting against beta") is a
+different bet: rank names by trailing realized volatility, go long the calmest decile,
+short the most volatile one. Standard CAPM says expected return should rise with
+volatility/beta; the anomaly is that historically it hasn't. This milestone builds the
+signal (`signals/low_volatility.py`) and tests it on all three markets immediately with
+this project's current best methodology, rather than repeating the project's own
+methodological history one market at a time.
+
+| | NSE, long leg (daily/monthly) | US, long leg (daily/monthly) | ASX, long leg (daily/monthly) |
+|---|---|---|---|
+| Hedged ann. return / p | -1.70%, p=.673 / -0.46%, p=.857 | -2.45%, p=.172 / -2.19%, p=.125 | +7.73%, p=.090 / **+8.74%, p=.0099** |
+
+| | NSE, combined (daily/monthly) | US, combined (daily/monthly) | ASX, combined (daily/monthly) |
+|---|---|---|---|
+| Hedged ann. return / p | -2.56%, p=.943 / +0.86%, p=.849 | **-20.70%, p=.0002 / -18.09%, p=.0004** | +15.54%, p=.123 / +16.04%, p=.114 |
+
+**No clean story across markets — and the most striking result is a significant
+*inversion*, not a confirmation.** NSE shows nothing at all, either leg, either frequency.
+ASX shows a modest, real signal in the long (low-vol) leg alone — significant monthly
+(p=0.0099), marginal daily (p=0.090) — but the combined book isn't significant. The US
+mirror shows the strongest result of all, and it runs the wrong way: the hedged combined
+book loses **20.70%/yr** (daily) and **18.09%/yr** (monthly), both highly significant
+(p<0.001) — high-volatility names significantly *outperformed* low-volatility ones, net of
+beta, over 1970-2017. This is the opposite of what the anomaly predicts.
+
+**Checked for the obvious confound first, given this project's own history with this exact
+dataset.** Milestone 15 found the US mirror's pre-1985 window is severely thin and
+survivorship-biased for reversal; before trusting a striking US result on the same
+dataset, the same check applies here. Re-running the combined-book regression from ten
+different start dates (1970 through 2000): the negative, anomaly-inverting result holds,
+significant or near-significant (p=0.02-0.09), at every start date from 1978 through 1995
+— it is not a 1970s-thin-universe artifact. It weakens only from a 2000 start (p=0.20,
+n.s.), consistent with genuine decay rather than a data-quality problem concentrated in one
+early window.
+
+**Updated conclusion**: the low-volatility anomaly, as this project has constructed it,
+does not replicate as a positive finding on any of the three markets, and inverts with real
+statistical force on the one market (US) with enough history to test it properly. This
+should not be filed alongside momentum as a second working signal, nor alongside reversal
+and 52-week-high as a cleanly retracted one — it is its own, distinct negative result: a
+well-documented academic anomaly that this project's own data does not support, and on its
+best-tested market, actively contradicts.
+
+**Reproduce this**: `python investigations/low_volatility_all_markets.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -1645,6 +1694,14 @@ python investigations/all_signals_asx_replication.py
 # skill beyond momentum; see "Does ASX 52-week-high carry any skill beyond momentum?" above)
 python investigations/momentum_control_asx_52w_high.py
 
+# Investigation — a new signal (low-volatility anomaly, not previously tested in this
+# project) on all three markets at once, with this project's current best methodology from
+# the start? (no clean replication anywhere; NSE null, ASX weak long-leg-only positive, US
+# significantly INVERTS -- high-vol beat low-vol, net of beta, p<0.001, robust to a
+# 1970s-thin-universe check; see "A new signal: does the low-volatility anomaly replicate
+# anywhere?" above)
+python investigations/low_volatility_all_markets.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1704,7 +1761,14 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    returns, 52-week-high's intercept is statistically indistinguishable from zero at all
    four cuts (p=0.32-0.94) while momentum's own coefficient is highly significant
    everywhere — ASX 52-week-high carries no demonstrated skill independent of momentum,
-   confirming rather than merely suggesting Milestone 23's reading. Momentum's
+   confirming rather than merely suggesting Milestone 23's reading. A genuinely new signal
+   was then introduced (Milestone 25): the low-volatility anomaly, tested on all three
+   markets at once with this project's best methodology from the start. It does not
+   replicate as a positive finding anywhere — null on NSE, a modest long-leg-only signal on
+   ASX, and a statistically significant *inversion* on the US mirror (hedged combined book
+   loses 20.70%/yr, p=0.0002, high-volatility names significantly outperforming low-volatility
+   ones net of beta), robust to the same pre-1985 thin-universe check that mattered for
+   reversal. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -2007,3 +2071,21 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   correlated construction, restoring the same "no independent skill demonstrated" verdict
   Milestones 6-7 reached on NSE and the US mirror — reached here by a direct control
   regression rather than a beta hedge, but landing at the identical conclusion.
+- **The low-volatility anomaly does not replicate positively on any of the three markets,
+  and significantly inverts on the US mirror — a genuinely new, distinct negative result,
+  not a repeat of reversal's or 52-week-high's story (Milestone 25).** Testing a newly
+  built signal (`signals/low_volatility.py`, long the calmest decile, short the most
+  volatile) with this project's out-of-sample hedge and HAC test on all three markets at
+  once: NSE shows nothing (p=0.67-0.94 across all four cuts); ASX shows a real but modest
+  long-leg-only signal (p=0.0099 monthly, p=0.090 daily; combined book not significant);
+  the US mirror shows the strongest result of all, running the wrong way — the hedged
+  combined book loses 20.70%/yr daily and 18.09%/yr monthly, both p<0.001, meaning
+  high-volatility names significantly *outperformed* low-volatility ones net of beta over
+  1970-2017. Checked against the obvious confound given this project's own history with
+  this exact dataset (Milestone 15's pre-1985 thin-universe problem): re-running from ten
+  different start dates, the inversion holds, significant or near-significant, from 1978
+  through 1995, weakening only from a 2000 start — not a thin-universe artifact. **This
+  should not be filed alongside momentum as a second working signal, nor alongside reversal
+  and 52-week-high as a cleanly retracted one — it is its own distinct negative result: a
+  well-documented academic anomaly this project's data does not support, and on its
+  best-tested market, actively contradicts.**

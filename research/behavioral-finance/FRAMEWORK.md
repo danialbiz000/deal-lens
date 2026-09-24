@@ -385,6 +385,18 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   correlation between two results is evidence for a shared mechanism, not proof of one —
   when the tools exist to run the actual control regression, run it, rather than resting
   the conclusion on the correlation coefficient that motivated the suspicion.**
+- **Milestone 25 tested a genuinely new signal (the low-volatility anomaly) on all three
+  markets from the start, and found no clean story — including a statistically significant
+  inversion on the market with the longest history.** NSE showed nothing; ASX showed a
+  modest, real long-leg-only signal; the US mirror's hedged combined book lost 20.70%/yr
+  (p=0.0002) — high-volatility names significantly outperformed low-volatility ones, the
+  opposite of the anomaly's prediction. Checked against this project's own known pre-1985
+  thin-universe problem in this exact dataset (Milestone 15): the inversion held from ten
+  different start dates through 1995, not a data-quality artifact. **Rule: a new signal
+  tested honestly does not have to fit either of the project's two existing templates
+  ("replicates like momentum" or "retracts like reversal") — a well-documented academic
+  anomaly can fail to replicate and invert with real statistical force, and that is itself
+  a legitimate, reportable finding, not a null result to discard.**
 
 ## 2. Risk-management lessons
 
@@ -645,6 +657,16 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     motivates a control test; it is not a substitute for running one — when a suspected
     shared mechanism can be tested directly, the correlation coefficient that raised the
     suspicion should be treated as a lead, not a conclusion.**
+25. **A new signal doesn't have to fit either of your project's existing outcome templates
+    — a genuine, well-documented anomaly can fail and invert, and that is a legitimate
+    finding on its own terms.** Milestone 25 tested the low-volatility anomaly on all three
+    markets at once and found no positive replication anywhere: null on NSE, a modest
+    long-leg-only signal on ASX, and a statistically significant inversion on the US mirror
+    (high-vol beat low-vol net of beta, p<0.001), checked and confirmed not to be a repeat
+    of the pre-1985 thin-universe artifact that sank reversal. **Rule: don't force a new
+    result into "replicates" or "retracts" — a well-documented anomaly that inverts with
+    real statistical force in your own data is its own category of finding, worth reporting
+    plainly rather than filed away as an inconclusive negative.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

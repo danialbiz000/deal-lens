@@ -2440,6 +2440,77 @@ box(
     "beta hedge), but landing at the same place.",
     title="A CORRELATION CONFIRMED, DIRECTLY"
 )
+box(
+    "Section 5.26 introduces this project's first genuinely new signal: "
+    "the low-volatility anomaly, tested on all three markets at once.",
+    kind="fact", title="UPDATE FROM SECTION 5.26"
+)
+
+h1("5.26  Milestone 25 &mdash; A new signal: does the low-volatility anomaly replicate anywhere?")
+p("Every signal in this project so far &mdash; momentum, 52-week-high, "
+  "short-term reversal &mdash; is a trend/reversal construction built "
+  "purely from price history. The low-volatility anomaly (Ang, Hodrick, "
+  "Xing &amp; Zhang 2006; Frazzini &amp; Pedersen 2014's &quot;betting "
+  "against beta&quot;) is a different bet: rank names by trailing "
+  "realized volatility, go long the calmest decile, short the most "
+  "volatile one. Standard CAPM says expected return should rise with "
+  "volatility/beta; the anomaly is that historically it hasn't. This "
+  "milestone builds the signal (<i>signals/low_volatility.py</i>) and "
+  "tests it on all three markets immediately with this project's "
+  "current best methodology, rather than repeating the project's own "
+  "methodological history one market at a time.")
+data_table(
+    ["Long leg", "NSE (daily/monthly)", "US (daily/monthly)", "ASX (daily/monthly)"],
+    [
+        ["Hedged ann. ret / p", "-1.70%, p=.673 / -0.46%, p=.857", "-2.45%, p=.172 / -2.19%, p=.125", "+7.73%, p=.090 / +8.74%, p=.0099"],
+    ],
+    col_widths=[1.4*inch, 2.35*inch, 2.35*inch, 2.35*inch],
+    small=True,
+)
+data_table(
+    ["Combined", "NSE (daily/monthly)", "US (daily/monthly)", "ASX (daily/monthly)"],
+    [
+        ["Hedged ann. ret / p", "-2.56%, p=.943 / +0.86%, p=.849", "-20.70%, p=.0002 / -18.09%, p=.0004", "+15.54%, p=.123 / +16.04%, p=.114"],
+    ],
+    col_widths=[1.4*inch, 2.35*inch, 2.35*inch, 2.35*inch],
+    small=True,
+)
+p("<b>No clean story across markets &mdash; and the most striking "
+  "result is a significant <i>inversion</i>, not a confirmation.</b> "
+  "NSE shows nothing at all, either leg, either frequency. ASX shows a "
+  "modest, real signal in the long (low-vol) leg alone &mdash; "
+  "significant monthly (p=0.0099), marginal daily (p=0.090) &mdash; but "
+  "the combined book isn't significant. The US mirror shows the "
+  "strongest result of all, and it runs the wrong way: the hedged "
+  "combined book loses <b>20.70%/yr</b> (daily) and <b>18.09%/yr</b> "
+  "(monthly), both highly significant (p&lt;0.001) &mdash; "
+  "high-volatility names significantly <i>outperformed</i> "
+  "low-volatility ones, net of beta, over 1970-2017. This is the "
+  "opposite of what the anomaly predicts.")
+p("<b>Checked for the obvious confound first, given this project's own "
+  "history with this exact dataset.</b> Section 5.16 found the US "
+  "mirror's pre-1985 window is severely thin and survivorship-biased "
+  "for reversal; before trusting a striking US result on the same "
+  "dataset, the same check applies here. Re-running the combined-book "
+  "regression from ten different start dates (1970 through 2000): the "
+  "negative, anomaly-inverting result holds, significant or "
+  "near-significant (p=0.02-0.09), at every start date from 1978 "
+  "through 1995 &mdash; it is not a 1970s-thin-universe artifact. It "
+  "weakens only from a 2000 start (p=0.20, n.s.), consistent with "
+  "genuine decay rather than a data-quality problem concentrated in one "
+  "early window.")
+box(
+    "The low-volatility anomaly, as this project has constructed it, "
+    "does not replicate as a positive finding on any of the three "
+    "markets, and inverts with real statistical force on the one market "
+    "(US) with enough history to test it properly. This should not be "
+    "filed alongside momentum as a second working signal, nor alongside "
+    "reversal and 52-week-high as a cleanly retracted one &mdash; it is "
+    "its own, distinct negative result: a well-documented academic "
+    "anomaly that this project's own data does not support, and on its "
+    "best-tested market, actively contradicts.",
+    title="NOT REPLICATED, AND NOT JUST RETRACTED &mdash; INVERTED"
+)
 
 # MARKER_END_PART5
 
@@ -2713,6 +2784,20 @@ box(
     "combined book's variance. Confirms, not just suggests, that "
     "ASX 52-week-high carries no skill independent of momentum.",
     kind="fact", title="UPDATE FROM PART V.25"
+)
+box(
+    "Part V.26 tested a genuinely new signal type &mdash; the low-volatility "
+    "anomaly &mdash; on all three markets at once, rather than repeating the "
+    "project's own crude-to-careful history on each market in turn. No clean "
+    "story emerged: null on NSE, a modest real long-leg signal on ASX that "
+    "doesn't survive in the combined book, and on the US mirror (the only "
+    "market with enough history to test properly) a highly significant "
+    "<i>inversion</i> &mdash; high-volatility names beat low-volatility ones "
+    "by 18-21%/yr, confirmed robust to start date across ten re-runs. Filed "
+    "as its own negative result, distinct from both &quot;replicates&quot; "
+    "and &quot;retracted&quot;: a documented academic anomaly this project's "
+    "own data actively contradicts on its best-tested market.",
+    kind="fact", title="UPDATE FROM PART V.26"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -3025,6 +3110,20 @@ bullets([
     "running one &mdash; when a suspected shared mechanism can be "
     "tested directly, the correlation coefficient that raised the "
     "suspicion should be treated as a lead, not a conclusion.",
+    "<b>A new signal doesn't have to fit either of your project's existing "
+    "outcome templates &mdash; a genuine, well-documented anomaly can fail "
+    "and invert, and that is a legitimate finding on its own terms.</b> "
+    "Part V.26 tested the low-volatility anomaly on all three markets at "
+    "once and found no positive replication anywhere: null on NSE, a "
+    "modest long-leg-only signal on ASX, and a statistically significant "
+    "inversion on the US mirror (high-vol beat low-vol net of beta, "
+    "p&lt;0.001), checked and confirmed not to be a repeat of the "
+    "pre-1985 thin-universe artifact that sank reversal. Don't force a "
+    "new result into &quot;replicates&quot; or &quot;retracts&quot; "
+    "&mdash; a well-documented anomaly that inverts with real "
+    "statistical force in your own data is its own category of finding, "
+    "worth reporting plainly rather than filed away as an inconclusive "
+    "negative.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -3448,6 +3547,28 @@ bullets([
     "finding (still no significant residual alpha), but a live "
     "implementation would need a more robust hedging scheme and would "
     "bear real costs this analysis doesn't capture.",
+    "<b>The low-volatility anomaly does not replicate positively on any "
+    "of the three markets, and significantly inverts on the US mirror "
+    "&mdash; a genuinely new, distinct negative result, not a repeat of "
+    "reversal's or 52-week-high's story (Part V.26).</b> Testing a newly "
+    "built signal (<i>signals/low_volatility.py</i>, long the calmest "
+    "decile, short the most volatile) with this project's out-of-sample "
+    "hedge and HAC test on all three markets at once: NSE shows nothing "
+    "(p=0.67-0.94 across all four cuts); ASX shows a real but modest "
+    "long-leg-only signal (p=0.0099 monthly, p=0.090 daily; combined "
+    "book not significant); the US mirror shows the strongest result of "
+    "all, running the wrong way &mdash; the hedged combined book loses "
+    "20.70%/yr daily and 18.09%/yr monthly, both p&lt;0.001, meaning "
+    "high-volatility names significantly <i>outperformed</i> "
+    "low-volatility ones net of beta over 1970-2017. Checked against the "
+    "obvious confound given this project's own history with this exact "
+    "dataset (Part V.16's pre-1985 thin-universe problem): re-running "
+    "from ten different start dates, the inversion holds, significant or "
+    "near-significant, from 1978 through 1995, weakening only from a "
+    "2000 start &mdash; not a thin-universe artifact. This should not be "
+    "filed alongside momentum as a second working signal, nor alongside "
+    "reversal and 52-week-high as a cleanly retracted one &mdash; it is "
+    "its own distinct negative result, worth reporting on its own terms.",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -3582,7 +3703,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 24 then ran the India findings through "
+  "needed. Milestones 3 through 25 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -3698,7 +3819,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, twenty-one times in a row "
+  "most recent, best-supported-looking result, twenty-two times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -3763,10 +3884,18 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "answers &mdash; one a clean confirmation, one a result that looked "
   "new until the nineteenth check's own lesson (check what a finding "
   "correlates with before counting it twice) was turned on it, and "
-  "finally ran a twenty-first check (Part V.25) that didn't stop at the "
+  "ran a twenty-first check (Part V.25) that didn't stop at the "
   "correlation the twentieth had flagged: it built the actual control "
   "regression, and the result that had looked new dissolved entirely, "
-  "leaving nothing where a suspected second discovery had briefly stood. "
+  "leaving nothing where a suspected second discovery had briefly stood, "
+  "and finally ran a twenty-second check (Part V.26) that wasn't a "
+  "correction of anything either: it built a signal this project had "
+  "never tested before, of a genuinely different kind than the three "
+  "already on the books, and tried it on all three markets at once "
+  "rather than working up to that the slow way &mdash; and found not a "
+  "sixth confirmation but a result with real statistical force running "
+  "backward, checked against the specific thin-universe confound this "
+  "same dataset had already produced once, and cleared it. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -3845,18 +3974,34 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "collapsed to indistinguishable from zero at all four cuts, while "
   "momentum's own coefficient stayed significant throughout, explaining "
   "most of the combined book's variance outright. A correlation had "
-  "raised the suspicion; a control regression settled it. Five settled "
-  "conclusions now, not four: a real, if narrower, US-specific finding for "
+  "raised the suspicion; a control regression settled it. Part V.26 then "
+  "did something none of the prior twenty-five parts had: instead of "
+  "correcting or extending one of this project's own existing signals, "
+  "it introduced an entirely new one &mdash; the low-volatility anomaly, "
+  "a genuinely different kind of bet than momentum, reversal, or "
+  "52-week-high &mdash; and tested it on all three markets from the "
+  "outset. It found no positive replication anywhere: nothing on NSE, a "
+  "modest signal confined to ASX's long leg alone, and on the US mirror, "
+  "the one market with enough history to test the finding's own "
+  "stability, a significant <i>inversion</i> &mdash; high-volatility "
+  "names beating low-volatility ones by double digits a year, net of "
+  "beta, and confirmed by a ten-start-date sweep not to be a repeat of "
+  "the same dataset's pre-1985 thin-universe problem. Six settled "
+  "conclusions now, not five: a real, if narrower, US-specific finding for "
   "momentum, now independently replicated on a third market; two "
   "retractions, reversal's and the NSE signal's, reached for different "
   "reasons but by the same refusal to let a promising number stand "
   "without being taken apart; a genuinely new confirmation, arrived "
   "at not by re-examining an old result but by questioning whether this "
   "project's entire evidentiary base was wide enough to trust in the "
-  "first place; and a fifth, closing a loose end rather than opening one "
+  "first place; a fifth, closing a loose end rather than opening one "
   "&mdash; ASX 52-week-high's apparent edge, checked directly and found "
   "to be momentum's own edge wearing a different construction, not a "
-  "second discovery. What remains open is not a specific "
+  "second discovery; and a sixth, unlike any before it &mdash; a "
+  "well-documented academic anomaly, tested here for the first time, "
+  "that does not merely fail to replicate but actively inverts, "
+  "checked and cleared of the one confound this project's own history "
+  "with this exact dataset would have predicted. What remains open is not a specific "
   "finding but two honest limits of the data itself: whether the crash "
   "mechanism would reactivate in a genuinely severe future crisis, as "
   "opposed to the milder episodes this sample happens to contain, is a "
