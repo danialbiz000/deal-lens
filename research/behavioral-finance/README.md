@@ -1035,6 +1035,62 @@ against since.
 
 **Reproduce this**: `python investigations/momentum_crash_mechanism_persistence.py`.
 
+## Does the crash-mechanism finding survive different regime-construction choices? (Milestone 19)
+
+Every crash-regime result since Milestone 5 rests on two parameter choices baked into
+`build_regime_dummies()`: a 21-trading-day realized-volatility window and a 252-trading-day
+(~1-year) trailing-return lookback for the "Bear" flag. Neither had been stress-tested. This
+matters more than usual for Milestone 18's finding specifically, because "no bear market
+recurred after 2009" is a claim that can only be as robust as the lookback window that
+defines "bear market" — a shorter window would register the sharp 2011 and 2015-16
+drawdowns that a 1-year lookback smooths away. This milestone
+(`investigations/momentum_crash_regime_robustness.py`) reimplements the regime construction
+with configurable windows (the original function used by every prior milestone is
+untouched) and sweeps a 4×4 grid: volatility windows of 10, 21, 42, and 63 trading days,
+crossed with bear-market lookbacks of 126, 189, 252, and 378 trading days — 16 combinations,
+each checked two ways: does a Bear regime ever fire after 2010-01-01, and does Milestone
+16's "interaction dormant pre-2008-09, significant post-2008-09" pattern still hold.
+
+| | Bear lookback 126d | 189d | 252d (default) | 378d |
+|---|---|---|---|---|
+| Bear regime fires post-2010? | **Yes** (200 days, 2010-16) | **Yes** (47 days, 2010-16) | No | No |
+| M16 pattern replicates (vol=10/21/42/63) | 0/1/0/1 of 4 | 0/1/1/0 | 0/1/1/0 (default: yes) | 0/1/1/1 |
+
+**Milestone 18's "no bear regime since 2009" is not robust to the lookback window — this
+is a real qualification, not just a robustness footnote.** At the two shorter, equally
+standard lookbacks (126 trading days ≈ 6 months, 189 ≈ 9 months), the trailing-return bear
+flag *does* fire after 2010 — 200 days clustered in 2010-11 and 2015-16, and 47 days in the
+same years respectively — which is exactly the 2011 European-debt-crisis selloff and the
+Aug 2015-Feb 2016 drawdown that Milestone 18 already named as sharp-but-short episodes the
+252-day window happened to smooth away. Only at lookbacks of 252 days or longer does the
+"no recurrence" claim hold. Milestone 18's finding should be read as conditional on this
+project's own 1-year convention, not as a lookback-independent fact about the market.
+
+**The Milestone 16 interaction pattern itself replicates in 8 of 16 combinations — real,
+but concentrated in a specific part of the parameter space.** It never holds at the
+shortest volatility window (10 days, 0/4 bear-lookbacks) — at that window the pre-2008 era
+itself becomes significant in one case, breaking the "dormant before" half of the claim.
+It rarely holds at the shortest bear-lookback (126 days, 1/4 vol-windows). But it holds
+reliably — 3 of 4 bear-lookbacks — at this project's own default 21-day volatility window
+and the adjacent 42-day window, and the default parameter combination (21-day vol, 252-day
+bear) that Milestones 16-18 actually used sits squarely inside that reliable region, not at
+an edge case cherry-picked to produce significance.
+
+**Updated conclusion**: two different answers for two different claims sharing the same
+regime-construction code. Milestone 16's qualitative story — the crash mechanism was quiet
+before 2008-09 and active during/after it — is reasonably robust to nearby parameter
+choices, failing only at unusually short windows this project never actually used. Milestone
+18's stronger, more specific claim — that *no* bear market recurred anywhere in the
+post-2009 sample — is fragile: it depends on choosing a bear-lookback of a year or longer,
+and a 6- or 9-month lookback, an equally defensible convention, tells a different story.
+The honest combined statement is: momentum's crash-regime exposure is confirmed for the
+2008-09 crisis under every parameter choice tested, and whether it also showed up in 2011 or
+2015-16 is a genuinely open question this project has not yet run — the persistence test
+that Milestone 18 ran only under the default window has not been re-run under the windows
+where a second bear regime actually exists to test it against.
+
+**Reproduce this**: `python investigations/momentum_crash_regime_robustness.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -1278,6 +1334,13 @@ python investigations/momentum_crash_mechanism_nse.py
 # "Was the 2008-09 crash mechanism a permanent regime change, or a one-off crisis?" above)
 python investigations/momentum_crash_mechanism_persistence.py
 
+# Investigation — does the crash-mechanism finding survive different volatility-window and
+# bear-lookback choices? (Milestone 16's pattern replicates in 8/16 combinations, robust
+# near this project's own defaults; Milestone 18's "no bear regime since 2009" does NOT
+# survive shorter, equally standard lookbacks; see "Does the crash-mechanism finding
+# survive different regime-construction choices?" above)
+python investigations/momentum_crash_regime_robustness.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1304,10 +1367,14 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    confirm any single date as *the* dominant break), a causal-mechanism test (Milestone
    16, finding the Daniel-Moskowitz momentum-crash dynamic explains the break), a
    cross-market replication of that mechanism (Milestone 17, finding it does *not*
-   replicate on NSE — a US-specific effect), and a persistence test (Milestone 18, finding
+   replicate on NSE — a US-specific effect), a persistence test (Milestone 18, finding
    the "post-2008" crash-regime significance is generated entirely by the 2008-09 crisis
    itself, since no bear-market regime has recurred in this sample since — so it should be
-   read as "confirmed for one crisis," not "a standing post-2008 feature"). Momentum's
+   read as "confirmed for one crisis," not "a standing post-2008 feature"), and a
+   parameter-robustness sweep (Milestone 19, finding the crash-mechanism *pattern* replicates
+   in 8 of 16 nearby volatility/bear-lookback choices, but Milestone 18's specific "no bear
+   regime recurred" claim does not survive shorter, equally standard lookbacks — a real
+   qualification, not just a footnote). Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -1506,4 +1573,24 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   2008-09 crisis specifically, evidence for volatility and bear-state each mattering
   independently more than for their interaction being the mechanism, and untested — not
   disconfirmed — as a standing post-2008 regime, since no comparable bear market has
-  recurred in this sample to test against.
+  recurred in this sample to test against. **[Qualified by Milestone 19: this "no comparable
+  bear market" claim itself depends on the 252-day (~1-year) trailing-return lookback this
+  project has used since Milestone 5. At shorter, equally standard lookbacks (126 or 189
+  trading days, ~6-9 months), a bear regime *does* fire post-2010 — 200 and 47 days
+  respectively, clustered in 2010-11 and 2015-16 — so "no bear market recurred" is a
+  lookback-dependent claim, not a lookback-independent fact. See "Does the crash-mechanism
+  finding survive different regime-construction choices?" below.]**
+- **The crash-mechanism *pattern* (dormant pre-2008-09, active post) replicates across most,
+  but not all, nearby regime-construction choices — and the specific claim that no bear
+  market recurred after 2009 does not (Milestone 19).** Sweeping a 4×4 grid of volatility
+  windows (10/21/42/63 days) and bear-market lookbacks (126/189/252/378 days): the
+  Milestone 16 pattern holds in 8 of 16 combinations, reliably (3 of 4 lookbacks) at this
+  project's own default 21-day volatility window and the adjacent 42-day window, but never
+  at the shortest 10-day window and rarely at the shortest 126-day bear-lookback. The
+  default parameter combination Milestones 16-18 actually used sits inside the reliable
+  region, not at a cherry-picked edge case. But the bear-regime-frequency finding
+  underlying Milestone 18 is fragile: a bear regime fires post-2010 at both shorter
+  lookbacks tested (126 and 189 days) and never at the two longer ones (252, this project's
+  default, and 378) — so whether the crash mechanism has a "second data point" to test
+  persistence against depends on which standard convention is chosen, and that persistence
+  test has not yet been re-run under the lookbacks where a second bear regime exists.

@@ -308,6 +308,20 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   reading "significant across a multi-year window" as "a standing regime," split the
   window and check whether the effect (and the regime it's conditioned on) is actually
   present throughout, or concentrated in one episode acting as its own control group.**
+- **Milestone 19 swept the two regime-construction parameters every crash-regime finding
+  since Milestone 5 has used, and found two different answers for two different claims.**
+  Testing a 4x4 grid of volatility windows (10/21/42/63 days) and bear-market lookbacks
+  (126/189/252/378 days) against momentum's hedged long leg: Milestone 16's qualitative
+  "dormant pre-2008, active post-2008" pattern replicates in 8 of 16 combinations, reliably
+  near this project's own defaults (21-day vol, 252-day bear) but not at the shortest
+  volatility window (10 days) or shortest bear-lookback (126 days). Milestone 18's specific
+  "no bear market recurred after 2009" claim, however, does not survive shorter, equally
+  standard lookbacks: at 126 or 189 trading days (~6-9 months) instead of 252 (~1 year), a
+  bear regime does fire post-2010 — 200 and 47 days respectively, in 2010-11 and 2015-16.
+  **Rule: a qualitative pattern and the specific quantitative claim built on top of it can
+  have very different robustness — test both separately, and when a finding depends on a
+  binary condition (did X ever happen), check whether that condition's own definition,
+  not just the finding built on it, would survive a different reasonable convention.**
 
 ## 2. Risk-management lessons
 
@@ -500,6 +514,19 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     regime (here, a trailing bear market) actually recurs throughout it — a test that
     silently rests on one sub-period contrasted against a calm remainder is a test of "did
     something happen once," not "is this now a permanent feature."**
+19. **A qualitative pattern and the specific quantitative claim built on it can have very
+    different robustness, and a binary "did X ever happen" claim is only as robust as its
+    own definition.** Milestone 19 swept the two regime-construction parameters (volatility
+    window, bear-market lookback) every crash-regime finding since Milestone 5 has used.
+    Milestone 16's "dormant pre-2008, active post-2008" pattern replicated in 8 of 16 nearby
+    parameter combinations, reliably near this project's own defaults. But Milestone 18's
+    specific "no bear market recurred after 2009" claim did not survive shorter, equally
+    standard bear-lookbacks (126 or 189 trading days instead of 252) — a bear regime fires
+    post-2010 under those conventions. **Rule: test the pattern and the specific claim
+    separately, since they can have different robustness; and when a finding rests on
+    whether some condition ever occurred, stress-test the condition's own definition, not
+    just the finding built on top of it — the definition is often the more arbitrary
+    choice.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
@@ -547,7 +574,10 @@ of its retracted one (reversal).
   trailing bear market — actually recur across the window tested, or is a
   single crisis acting as its own control group and inflating apparent
   significance) before it's presented as a standing risk factor rather than
-  a one-episode finding.
+  a one-episode finding, and a parameter-sensitivity sweep (Milestone 19: does
+  the regime definition itself — the volatility window, the bear-market
+  lookback — hold up under a few other reasonable choices, not just the one
+  that happened to be picked first).
 
 **Minimum viable version**: a report generator that takes a client's
 portfolio or watchlist and CSV price history, and outputs, per name: each
