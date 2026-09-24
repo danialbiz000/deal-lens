@@ -872,6 +872,50 @@ momentum's intact.
 
 **Reproduce this**: `python investigations/reversal_1980_break_diagnostics.py`.
 
+## Does the classic momentum-crash mechanism explain the 2008-09 break? (Milestone 16)
+
+Milestones 13-14 confirmed momentum's long leg broke sharply around September 2008 but
+left the *mechanism* unexplained — Milestone 11 checked a fixed calendar window
+(March-August 2009) and found it only partially mattered. This milestone
+(`investigations/momentum_crash_mechanism_2008.py`) tests the actual, named mechanism
+instead of a calendar window: the classic Daniel & Moskowitz (2016) momentum-crash
+trigger (past losers snapping back hard in a high-volatility market rebound), using the
+same look-ahead-free Bear × High-Volatility regime-interaction regression this project
+built and validated in Milestones 5-6 — where it was tested on the 52-week-high signal,
+full-sample, and found **not** significant. Applying the identical regression to
+momentum's out-of-sample-hedged long leg, split at the same literature-motivated
+2008-09-01 date used throughout Milestones 14-15:
+
+| | Pre-2008-09 | Post-2008-09 |
+|---|---|---|
+| Bear × High-Vol regime frequency | 6.1% of days | 9.1% of days |
+| Bear × High-Vol interaction coefficient | -0.00062/day, p=0.424 (n.s.) | **-0.00218/day, p=0.0081** |
+| Baseline (non-crash-regime) daily alpha | +0.00038, **p=0.003** (~+9.6%/yr) | +0.00017, p=0.203 (n.s., ~+4.3%/yr) |
+| Implied return on a Bear+High-Vol day | ~-11%/yr (n.s.) | **~-37%/yr** |
+
+**The crash mechanism was dormant before 2008 and activated after.** Pre-2008-09, the
+Bear × High-Vol interaction is small and not remotely significant (p=0.42) — consistent
+with Milestones 5-6's original finding that momentum-crash risk wasn't a real driver of
+this project's data. Post-2008-09, the identical interaction term becomes large, negative,
+and statistically significant (p=0.008): on the roughly 9% of post-2008 trading days that
+are both high-volatility and in a trailing bear-market state, momentum's long leg loses at
+an annualized rate around 37%, while its baseline (non-crash) daily alpha has fallen to
+statistically indistinguishable from zero. The combined long-short book shows the same
+sign and similar magnitude but weaker significance (p=0.21) — consistent with the extra
+noise from a still-volatile short leg diluting the signal.
+
+**Updated conclusion**: this gives momentum's 2008-09 structural break a genuine causal
+mechanism, not just a confirmed date. The classic momentum-crash dynamic that this
+project rejected in Milestones 5-6 (for the 52-week-high signal, full-sample) and that
+Milestone 11 found only partially relevant to a fixed 2009 calendar window, turns out to
+be real for momentum specifically — but **conditional on era**: dormant through the
+pre-crisis decades, then active since. This is consistent with, and adds mechanistic
+detail to, the broader post-2008 quant-crowding story already touched on in this
+project's own Quant Quake case study — a market where momentum-following capital had
+scaled up enough by 2008 for the classic crash dynamic to actually bite.
+
+**Reproduce this**: `python investigations/momentum_crash_mechanism_2008.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -1097,6 +1141,12 @@ python investigations/structural_break_test.py
 # break" above)
 python investigations/reversal_1980_break_diagnostics.py
 
+# Investigation — does the classic momentum-crash mechanism (Bear x High-Vol) explain
+# momentum's 2008-09 break? (yes for the long leg — dormant pre-2008 (p=0.42), significant
+# post-2008 (p=0.008); see "Does the classic momentum-crash mechanism explain the 2008-09
+# break?" above)
+python investigations/momentum_crash_mechanism_2008.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1271,3 +1321,14 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   a real 1980 market event — reversal's alpha vanishes entirely from any start date at or
   after 1978, including 1980-08-29 itself (p=0.922). Momentum's break finding in this
   bullet is unaffected — the same diagnostic left it intact.]**
+- **Momentum's 2008-09 break now has a concrete causal mechanism, not just a confirmed
+  date (Milestone 16).** Applying this project's own look-ahead-free Bear × High-Volatility
+  momentum-crash regression (Milestones 5-6, where it was rejected for the 52-week-high
+  signal, full-sample) to momentum's hedged long leg, split at 2008-09-01: the interaction
+  term is small and insignificant pre-2008 (p=0.42) but large, negative, and significant
+  post-2008 (coef=-0.00218/day, p=0.008) — on the ~9% of post-2008 trading days that are
+  both high-volatility and trailing-bear, the long leg loses at an annualized rate around
+  37%. The classic momentum-crash mechanism this project rejected for the original signal
+  turns out to be real for momentum specifically, but conditional on era: dormant through
+  the pre-crisis decades, active since — consistent with a market where momentum-following
+  capital had scaled up enough by 2008 for the mechanism to actually bite.

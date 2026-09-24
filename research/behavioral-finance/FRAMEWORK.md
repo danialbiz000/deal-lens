@@ -260,6 +260,23 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   apparent pre-2005 alpha is retracted outright, not narrowed: this project has found no
   reliably demonstrated reversal edge anywhere in this dataset, in any leg, at any point in
   the sample.
+- **Milestone 16 gave momentum's 2008-09 break a genuine causal mechanism, not just a
+  confirmed date.** This project's own look-ahead-free Bear × High-Volatility
+  momentum-crash regression (built in Milestones 5-6, where it was tested on the
+  52-week-high signal, full-sample, and rejected) was applied to momentum's hedged long
+  leg, split at the same literature-motivated 2008-09-01 date used since Milestone 14. The
+  interaction term is small and statistically insignificant pre-2008 (p=0.42) but large,
+  negative, and significant post-2008 (coef=-0.00218/day, p=0.008): on the roughly 9% of
+  post-2008 trading days that are both high-volatility and trailing-bear, the long leg
+  loses at an annualized rate around 37%, while baseline (non-crash) alpha has fallen to
+  statistically indistinguishable from zero. **Rule: a structural break confirmed by a
+  date is still an unexplained fact until tested against a specific, named mechanism —
+  and a mechanism this project rejected for one signal, in one era, can still be real for
+  a different signal, in a different era; don't let an earlier rejection close off
+  re-testing the same hypothesis somewhere new.** The classic momentum-crash dynamic
+  appears to have been dormant through the pre-crisis decades and active since,
+  consistent with a market where momentum-following capital had scaled up enough by 2008
+  for the mechanism to actually bite.
 
 ## 2. Risk-management lessons
 
@@ -404,6 +421,29 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     your own data (the best-looking split you found by eye) requires a multiple-testing-
     corrected test before it earns the same confidence — and expect the corrected version to
     be measurably more conservative.**
+15. **When a signal's finding depends on data density you haven't checked, check it before
+    trusting the finding.** Milestone 15 traced reversal's August 1980 "break" to its
+    source: a decile portfolio of only 2-4 stocks, drawn from a 9-14-name universe of
+    today's mega-cap survivors backfilled to the 1970s, plus two previously undocumented
+    data anomalies. Reversal's entire positive-alpha claim depended on this unreliable
+    window and vanished completely once excluded, at every later start date tested.
+    Momentum, run through the identical thin data as a control, was unaffected. **Rule: a
+    decile portfolio with 2-4 names is not a diversified strategy, it is a handful of
+    individual stock bets, and "statistically significant" on such a sample tells you
+    about those specific stocks' survivorship, not about a market-wide behavioral effect —
+    check minimum portfolio size and data density for every sub-period a significance
+    claim rests on, not just the full sample's average.**
+16. **A structural break confirmed by a date is still an unexplained fact until tested
+    against a named mechanism.** Milestone 16 applied this project's own Bear ×
+    High-Volatility momentum-crash regression (Milestones 5-6, rejected for the
+    52-week-high signal, full-sample) to momentum's hedged long leg, split at the same
+    2008-09-01 date. The interaction term is insignificant pre-2008 (p=0.42) but large,
+    negative, and significant post-2008 (p=0.008) — the classic momentum-crash mechanism
+    was dormant through the pre-crisis decades and activated since. **Rule: a mechanism
+    this project rejected for one signal, in one era, can still be real for a different
+    signal in a different era — don't let an earlier rejection close off re-testing the
+    same hypothesis somewhere new; a confirmed break date is a fact, not yet an
+    explanation.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
