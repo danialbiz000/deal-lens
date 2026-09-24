@@ -9,14 +9,23 @@ Two source families:
   have (Yahoo, Stooq, SEC EDGAR, and FRED were all blocked by the egress
   proxy) -- run these somewhere with normal network access.
 
-- `load_nse_github_mirror`: a real, working alternative that WAS reachable
-  from that same sandbox, because the proxy allowlists GitHub. See
+- `load_nse_github_mirror` / `load_us_kaggle_mirror` / `load_asx_github_mirror`:
+  real, working alternatives that WERE reachable from that same sandbox,
+  because the proxy allowlists `raw.githubusercontent.com` specifically (not
+  `github.com`'s own pages, `api.github.com` browsing, Kaggle, Hugging Face,
+  or Stooq's static-file host -- all tried and blocked; see Milestone 22's
+  writeup in ../README.md "Data provenance: the ASX GitHub mirror" for what
+  that search process ruled out before landing on this third source). See
   ../README.md "Important limitation of this environment" for exactly which
   function's output is genuinely validated vs. still unexercised.
 """
 from __future__ import annotations
 
+import datetime as dt
 import io
+import re
+import warnings
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pandas as pd
@@ -242,6 +251,137 @@ def load_us_kaggle_mirror(
         raise RuntimeError("No tickers could be loaded from the US Kaggle mirror.")
 
     wide = pd.DataFrame(closes).sort_index()
+    if use_cache:
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        wide.to_parquet(cache_file)
+    return wide
+
+
+# --- third alternative source: the Australian Securities Exchange (ASX), via a
+# community-maintained GitHub mirror of ASX's own daily S&P/ASX300 report emails
+# -- a genuinely independent developed market, not a Kaggle re-export like the
+# two sources above. See ../README.md "Data provenance: the ASX GitHub mirror"
+# for what this is and is not a substitute for, and why Milestone 22 searched
+# for (and could not reach) a European mirror first.
+
+_ASX_REPO_BASE = (
+    "https://raw.githubusercontent.com/grantcarthew/data-asx-historical-share-tables/"
+    "master/csv/Daily/S%26P-ASX300/"
+)
+_ASX_DATES_FILE = Path(__file__).parent / "resources" / "asx300_dates.txt"
+
+# One CSV per report; the filename date is the day the report was PROCESSED
+# (usually the next morning), not the trading date inside the file, and the
+# offset between the two isn't constant (weekends/public holidays shift it) --
+# see _parse_asx_daily_csv, which reads the real trading date out of the
+# file's own header text rather than trusting the filename.
+_ASX_DATE_RE_SLASH = re.compile(r"(\d{1,2}/\d{1,2}/\d{4})")
+_ASX_DATE_RE_LONG = re.compile(r"([A-Za-z]+day,\s*[A-Za-z]+\s+\d{1,2},\s*\d{4})")
+
+
+def _asx_report_dates() -> list[str]:
+    """The list of report-filename dates this loader knows to fetch, derived
+    once by listing grantcarthew/data-asx-historical-share-tables's
+    csv/Daily/S&P-ASX300/ directory (that listing isn't itself re-fetchable
+    through this sandbox's GitHub proxy, which only serves known raw file
+    paths, not directory browsing -- so the list is captured here instead)."""
+    return _ASX_DATES_FILE.read_text().split()
+
+
+def _parse_asx_daily_csv(text: str) -> tuple[pd.Timestamp, pd.Series] | None:
+    """Parse one ASX daily report CSV's text into (trading_date, close_prices
+    indexed by ASX code). Returns None if the file has no recognizable date or
+    header (a handful of report emails in this mirror are malformed/empty)."""
+    lines = text.splitlines(keepends=True)
+    date = None
+    for line in lines[:4]:
+        m = _ASX_DATE_RE_SLASH.search(line)
+        if m:
+            date = pd.Timestamp(dt.datetime.strptime(m.group(1), "%d/%m/%Y"))
+            break
+        m = _ASX_DATE_RE_LONG.search(line)
+        if m:
+            date = pd.Timestamp(dt.datetime.strptime(m.group(1), "%A, %B %d, %Y"))
+            break
+    if date is None:
+        return None
+
+    header_idx = next((i for i, l in enumerate(lines) if l.startswith("52 Week High")), None)
+    if header_idx is None:
+        return None
+
+    with warnings.catch_warnings():
+        # data rows carry two trailing empty fields the header row doesn't --
+        # harmless (index_col=False already prevents pandas mis-parsing the
+        # first column as an index because of it), just noisy.
+        warnings.simplefilter("ignore", category=pd.errors.ParserWarning)
+        df = pd.read_csv(
+            io.StringIO(text), skiprows=header_idx, thousands=",",
+            on_bad_lines="skip", index_col=False,
+        )
+    df.columns = [c.strip() for c in df.columns]
+    if "ASX Code" not in df.columns or "Last Sale" not in df.columns:
+        return None
+    sub = df[["ASX Code", "Last Sale"]].dropna(subset=["ASX Code"])
+    prices = pd.to_numeric(sub["Last Sale"], errors="coerce")
+    prices.index = sub["ASX Code"].astype(str)
+    prices = prices[~prices.index.duplicated(keep="first")]
+    return date, prices
+
+
+def _fetch_asx_daily(report_date: str) -> tuple[pd.Timestamp, pd.Series] | None:
+    url = _ASX_REPO_BASE + requests.utils.quote(f"Daily - S&P-ASX300 - {report_date}.csv")
+    try:
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+        return _parse_asx_daily_csv(resp.text)
+    except Exception:
+        return None
+
+
+def load_asx_github_mirror(
+    use_cache: bool = True, max_workers: int = 20, min_history_days: int = 1000
+) -> pd.DataFrame:
+    """Load the ASX (Australia) S&P/ASX300 daily-report mirror from GitHub,
+    parse each day's report, and pivot to a wide date x ASX-code DataFrame of
+    closing ("Last Sale") prices. Covers 2009-10-20 through 2015-12-31 (this
+    mirror's full range), ~296-300 constituents on every trading day -- a
+    materially more stable universe size than the NSE mirror's early years
+    (see Milestone 15), though shorter in span than either the NSE or US
+    mirrors. Fetches ~1,600 individual daily reports in parallel (one HTTP
+    request per trading day, since this source has no combined file); cached
+    to parquet afterward so repeated runs don't re-fetch.
+
+    Raw parsing yields several hundred extra, mostly near-empty "codes" beyond
+    the ~300 genuine constituents -- deferred-settlement trading variants
+    (suffixes like DA/DC/R that ASX uses temporarily during capital raisings,
+    not separate companies) and a handful of malformed report rows. Dropping
+    any code with fewer than `min_history_days` observations (same threshold
+    and same Milestone-15 motivation as `load_nse_github_mirror`) removes
+    essentially all of them and leaves ~200 persistent constituents.
+    """
+    cache_file = CACHE_DIR / "asx_github_mirror.parquet"
+    if use_cache and cache_file.exists():
+        return pd.read_parquet(cache_file)
+
+    report_dates = _asx_report_dates()
+    rows: dict[pd.Timestamp, pd.Series] = {}
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        for result in pool.map(_fetch_asx_daily, report_dates):
+            if result is None:
+                continue
+            date, prices = result
+            rows[date] = prices
+
+    if not rows:
+        raise RuntimeError("No ASX daily reports could be fetched or parsed.")
+
+    wide = pd.DataFrame(rows).T.sort_index()
+    wide.index.name = "Date"
+
+    long_enough = wide.count() >= min_history_days
+    wide = wide.loc[:, long_enough]
+
     if use_cache:
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
         wide.to_parquet(cache_file)

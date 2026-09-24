@@ -2252,6 +2252,79 @@ box(
     "demonstrated</i>, not merely as an open, promising thread.",
     title="A NAMED CAVEAT, FINALLY TESTED"
 )
+box(
+    "Both of this project's remaining open threads are now closed. Section "
+    "5.23 opens a new one instead: a genuinely independent third market.",
+    kind="fact", title="UPDATE FROM SECTION 5.23"
+)
+
+h1("5.23  Milestone 22 &mdash; A third, independent market: does momentum replicate on ASX?")
+p("NSE and the US Kaggle mirror are this project's only two markets so "
+  "far, and both trace back to community re-exports of specific existing "
+  "datasets (NSE: one uploader's CSV; US: a well-known Kaggle &quot;Huge "
+  "Stock Market Dataset&quot; mirror). Neither is an independent check on "
+  "whether momentum is a market-wide phenomenon or an artifact of how "
+  "those two particular datasets happen to be built. This milestone looks "
+  "for a genuine third source.")
+p("<b>Finding one was harder than expected &mdash; worth documenting as "
+  "part of the result, not just a footnote.</b> An extensive search for a "
+  "European per-company OHLCV mirror (the first choice) found none "
+  "reachable from this sandbox: <i>stooq.com</i>, <i>huggingface.co</i>, "
+  "<i>github.com</i>'s own HTML pages, and <i>api.github.com</i>'s "
+  "general repo-browsing API are all blocked by the network proxy here "
+  "&mdash; only <i>raw.githubusercontent.com</i> is allowlisted, and only "
+  "for exact, known file paths. Several candidate European-stock "
+  "repositories turned out to be pipeline <i>code</i> that fetches from "
+  "Yahoo Finance or Kaggle at run time (also blocked), not committed "
+  "price data. The source that finally worked is "
+  "<i>grantcarthew/data-asx-historical-share-tables</i> &mdash; a GitHub "
+  "mirror of the Australian Securities Exchange's own daily S&amp;P/ASX300 "
+  "constituent report emails, 2009-10-20 to 2015-12-31. Not European, but "
+  "a genuinely independent developed market: different exchange, "
+  "different uploader, official ASX report emails rather than a Kaggle "
+  "re-export, from both NSE and the US mirror.")
+p("<b>Applying this project's current best methodology directly, rather "
+  "than its history.</b> Rather than re-running the original crude "
+  "full-sample regression Sections 5.7-5.9 started with, this test goes "
+  "straight to the out-of-sample rolling hedge and HAC significance check "
+  "this project has used for every market since Section 5.11/5.18:")
+data_table(
+    ["", "Long leg", "Combined long-short"],
+    [
+        ["Raw ann. return (unhedged)", "+8.29%/yr", "+27.15%/yr"],
+        ["Hedged daily ann. return / p", "+11.14%/yr, p=.0085", "+35.45%/yr, p=.0006"],
+        ["Hedged monthly ann. return / p", "+9.97%/yr, p=.0141", "+30.97%/yr, p=.0001"],
+        ["Mean hedge beta", "+0.83", "-0.42"],
+    ],
+    col_widths=[2.3*inch, 2.25*inch, 2.25*inch],
+    small=True,
+)
+p("<b>Momentum replicates cleanly on ASX &mdash; the strongest, most "
+  "unambiguous result of the three markets tested.</b> Both legs are "
+  "significant at both frequencies, on a proper out-of-sample hedge from "
+  "day one (this market never went through the &quot;static full-sample "
+  "regression first, hedge added later&quot; history NSE and the US "
+  "mirror did). The combined book's large magnitude has a plausible, "
+  "checked explanation rather than being a red flag on its own: the "
+  "short leg's mean beta (-1.26) is far more negative than the long "
+  "leg's (+0.83) is positive, consistent with Australia's well-known "
+  "2011-2015 mining and resources downturn &mdash; momentum's short leg "
+  "would have been loaded with high-beta miners that kept "
+  "underperforming through exactly that window, and the rolling beta "
+  "estimates themselves are reasonably stable (std 0.39, no extreme "
+  "outliers) rather than a symptom of an unstable hedge.")
+box(
+    "A genuine limitation, stated plainly: this is the shortest history "
+    "of the three markets. Six years (1,501 trading days) is enough for "
+    "a full-sample significance test but not for the era-splitting, "
+    "structural-break, or persistence checks this project ran "
+    "extensively on the US mirror's 47-year history &mdash; there is no "
+    "&quot;pre-publication vs. post-publication&quot; split possible "
+    "here, and no way yet to check whether ASX momentum's edge is stable "
+    "across sub-periods the way Sections 5.10-5.15 checked for the US. "
+    "That is future work, not a result claimed here.",
+    title="CLEANEST RESULT, SHORTEST HISTORY"
+)
 
 # MARKER_END_PART5
 
@@ -2493,6 +2566,17 @@ box(
     "the same pooling problem diagnosed in the crash mechanism, applied "
     "to this project's own house-favored open thread.",
     kind="fact", title="UPDATE FROM PART V.22"
+)
+box(
+    "Part V.23 found and validated a genuinely independent third market "
+    "(ASX Australia) after ruling out every reachable European source, "
+    "and applied this project's current best methodology &mdash; the "
+    "out-of-sample hedge, not the crude full-sample regression this "
+    "project itself started with &mdash; from the very first test. "
+    "Momentum's long leg came back significant at both daily (p=0.0085) "
+    "and monthly (p=0.0141) frequency, the cleanest result of the three "
+    "markets tested, on this project's shortest sample (six years).",
+    kind="fact", title="UPDATE FROM PART V.23"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -2763,6 +2847,21 @@ bullets([
     "finding to every other finding built the same way, including your "
     "own project's most-favored remaining result &mdash; a named but "
     "untested caveat is unfinished work, not a disclosed limitation.",
+    "<b>A sandbox's specific network allowlist is itself a research "
+    "constraint worth documenting, and a genuinely independent third "
+    "market is worth the search effort even when the first choice "
+    "isn't reachable.</b> Part V.23 spent real effort ruling out Stooq, "
+    "Hugging Face, <i>github.com</i>'s own pages, and general "
+    "<i>api.github.com</i> browsing before finding "
+    "<i>raw.githubusercontent.com</i> could serve a real, committed ASX "
+    "dataset once the exact file paths were known. Momentum replicated "
+    "cleanly there (p=0.0085 daily, p=0.0141 monthly), the strongest of "
+    "the three markets, on a sample too short (six years) for the "
+    "era-stability checks run on the US mirror. Document a data "
+    "search's dead ends, not just its destination &mdash; the next "
+    "milestone benefits from knowing which doors were tried and found "
+    "locked; and label a new result by what it has and hasn't yet been "
+    "checked against, not by how clean it looks on first pass.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -3081,6 +3180,33 @@ bullets([
     "finding. The NSE post-2008 signal should now be read as not "
     "currently demonstrated, not merely as an unconfirmed but promising "
     "thread.",
+    "<b>Momentum replicates on a third, independent market (ASX "
+    "Australia), the cleanest result of the three tested &mdash; but on "
+    "this project's shortest history, and finding the market at all "
+    "took real effort (Part V.23).</b> A thorough search for a European "
+    "per-company OHLCV mirror found none reachable from this sandbox: "
+    "<i>stooq.com</i>, <i>huggingface.co</i>, <i>github.com</i>'s own "
+    "HTML pages, and general <i>api.github.com</i> repo browsing are "
+    "all blocked, and several candidate repositories turned out to be "
+    "fetch-at-runtime pipeline code (also blocked), not committed data. "
+    "<i>grantcarthew/data-asx-historical-share-tables</i> &mdash; a "
+    "mirror of ASX's own daily S&amp;P/ASX300 report emails, 2009-10-20 "
+    "to 2015-12-31 &mdash; was the source that worked. Applying this "
+    "project's out-of-sample hedge and HAC significance test directly "
+    "(not the cruder full-sample regression Parts V.7-9 started with): "
+    "long-leg alpha +11.14%/yr daily (p=0.0085) and +9.97%/yr monthly "
+    "(p=0.0141); the combined book shows an even larger, still-"
+    "significant effect (p&lt;0.001 both frequencies), plausibly tied "
+    "to Australia's 2011-2015 mining-sector downturn loading the short "
+    "leg with high-beta losers (mean short-leg beta -1.26 vs. the long "
+    "leg's +0.83) rather than being a hedge-instability artifact "
+    "(rolling beta std 0.39, no extreme outliers). This is a real "
+    "limitation, not just a caveat: six years is enough for a "
+    "full-sample significance test but not for the era-splits, "
+    "structural-break tests, or persistence checks Parts V.10-15 ran on "
+    "the US mirror's 47-year history &mdash; ASX momentum has not yet "
+    "been checked for stability across sub-periods the way every other "
+    "surviving finding in this project has.",
     "<b>The 52-week-high result's cause: resolved, and it's the boring "
     "answer.</b> Two behavioral/statistical explanations were ruled out by "
     "direct test: crash-window concentration (Part V.4) and a value/growth "
@@ -3241,13 +3367,18 @@ p("The project's real empirical result (Part V.3) delivered a finding more "
   "test. Splitting NSE's universe at the exact date it stopped growing "
   "found the caveat as named wasn't the problem &mdash; but the same "
   "pooled-window pattern this project had just learned to distrust in "
-  "the crash mechanism was.")
+  "the crash mechanism was. Part V.23 then asked a question no "
+  "correction could answer: not what was wrong with a finding already in "
+  "hand, but whether either of this project's two markets was itself "
+  "representative of anything beyond its own dataset. Finding a third, "
+  "independent one took longer than running the actual test once it was "
+  "found.")
 p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "investment framework that explicitly forbids trusting a blend without "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 21 then ran the India findings through "
+  "needed. Milestones 3 through 22 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -3313,7 +3444,15 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "different corner of the project &mdash; a real, named caveat that "
   "turned out not to be the actual problem, sitting next to a pooled-"
   "window artifact nobody had thought to check until the crash mechanism "
-  "taught this project what to look for.")
+  "taught this project what to look for. Part V.23 then stepped back from "
+  "correcting existing findings entirely and asked the question this "
+  "project's own two-market design had left unasked since Part V.3: is "
+  "either market representative of anything, or just of itself? Answering "
+  "it took more effort than any single statistical test in this guide "
+  "&mdash; most of the obvious candidate sources turned out to be "
+  "unreachable, blocked, or not actually data at all &mdash; but the one "
+  "source that worked gave momentum's long leg its cleanest replication "
+  "yet.")
 p("The fix that survived all of that scrutiny is more modest, and "
   "narrower, than any earlier draft of this conclusion claimed: there "
   "is no demonstrated, beta-independent stock-selection skill in the "
@@ -3355,7 +3494,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, eighteen times in a row "
+  "most recent, best-supported-looking result, nineteen times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -3407,7 +3546,13 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "different result: this project's own tentative NSE signal, the one "
   "open thread Part V.18 had left standing with a named but never-tested "
   "caveat. The caveat, tested, wasn't the problem; the exact same pooling "
-  "artifact the seventeenth check had just diagnosed elsewhere was. "
+  "artifact the seventeenth check had just diagnosed elsewhere was, and "
+  "finally ran a nineteenth check (Part V.23) that wasn't aimed at any "
+  "existing finding at all: it asked whether this project's entire "
+  "two-market design was itself sound, went looking for an independent "
+  "third market to find out, and found that the search itself &mdash; "
+  "ruling out one blocked or empty source after another &mdash; took "
+  "longer than the test that followed once a real one turned up. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -3460,17 +3605,34 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "the book on &mdash; was real: Part V.22 tested the one named caveat "
   "attached to it and found a different, more fundamental problem "
   "instead, the identical pooled-window artifact Part V.21 had just "
-  "taught this project to look for. Three settled conclusions now, not "
-  "one: a real, if narrower, US-specific finding for momentum; two "
+  "taught this project to look for. And one question this project had "
+  "never actually asked, because it had never had the means to: whether "
+  "momentum's edge was a property of stock markets generally or of the "
+  "two specific, re-exported datasets this project happened to have "
+  "access to. Part V.23 went looking for a third, independent source "
+  "after ruling out an entire continent's worth of blocked or empty "
+  "candidates, found one in Australia's own exchange, and momentum came "
+  "back significant at both daily and monthly frequency &mdash; the "
+  "cleanest replication in the whole guide, on the one market tested "
+  "with this project's best method from the very first pass rather than "
+  "arriving at it after several corrections. Four settled conclusions "
+  "now, not three: a real, if narrower, US-specific finding for "
+  "momentum, now independently replicated on a third market; two "
   "retractions, reversal's and the NSE signal's, reached for different "
   "reasons but by the same refusal to let a promising number stand "
-  "without being taken apart. What remains open is not a specific "
-  "finding but a limit of the data itself: whether the crash mechanism "
-  "would reactivate in a genuinely severe future crisis, as opposed to "
-  "the milder episodes this sample happens to contain, is a question no "
-  "amount of further re-testing of this history can answer &mdash; the "
-  "most recent decade, for momentum, to size nothing against &mdash; and "
-  "is what a research process built to "
+  "without being taken apart; and a genuinely new confirmation, arrived "
+  "at not by re-examining an old result but by questioning whether this "
+  "project's entire evidentiary base was wide enough to trust in the "
+  "first place. What remains open is not a specific "
+  "finding but two honest limits of the data itself: whether the crash "
+  "mechanism would reactivate in a genuinely severe future crisis, as "
+  "opposed to the milder episodes this sample happens to contain, is a "
+  "question no amount of further re-testing of this history can answer "
+  "&mdash; the most recent decade, for momentum, to size nothing against "
+  "&mdash; and whether ASX momentum's own edge is stable across "
+  "sub-periods the way the US finding eventually was shown to be, a "
+  "check this project's newest market hasn't had enough history yet to "
+  "run. Both are what a research process built to "
   "distrust its own best-looking result eventually converges on.")
 
 # ============================================================ GLOSSARY

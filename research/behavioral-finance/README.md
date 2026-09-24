@@ -1175,6 +1175,62 @@ should be read as *not currently demonstrated*, not merely as an open, promising
 
 **Reproduce this**: `python investigations/momentum_nse_universe_growth_check.py`.
 
+## A third, independent market: does momentum replicate on ASX? (Milestone 22)
+
+NSE and the US Kaggle mirror are this project's only two markets so far, and both trace
+back to community re-exports of specific existing datasets (NSE: one uploader's CSV; US: a
+well-known Kaggle "Huge Stock Market Dataset" mirror). Neither is an independent check on
+whether momentum is a market-wide phenomenon or an artifact of how those two particular
+datasets happen to be built. This milestone looks for a genuine third source.
+
+**Finding one was harder than expected — worth documenting as part of the result, not just
+a footnote.** An extensive search for a European per-company OHLCV mirror (the first
+choice) found none reachable from this sandbox: `stooq.com`, `huggingface.co`,
+`github.com`'s own HTML pages, and `api.github.com`'s general repo-browsing API are all
+blocked by the network proxy here — only `raw.githubusercontent.com` is allowlisted, and
+only for exact, known file paths. Several candidate European-stock repositories turned out
+to be pipeline *code* that fetches from Yahoo Finance or Kaggle at run time (also blocked),
+not committed price data. The source that finally worked is
+[`grantcarthew/data-asx-historical-share-tables`](https://github.com/grantcarthew/data-asx-historical-share-tables)
+— a GitHub mirror of the Australian Securities Exchange's own daily S&P/ASX300 constituent
+report emails, 2009-10-20 to 2015-12-31. Not European, but a genuinely independent
+developed market: different exchange, different uploader, official ASX report emails
+rather than a Kaggle re-export — see "Data provenance: the ASX GitHub mirror" below for
+the parsing and validation details.
+
+**Applying this project's current best methodology directly, rather than its history.**
+Rather than re-running the original crude full-sample regression Milestones 6-8 started
+with, this test goes straight to the out-of-sample rolling hedge and HAC significance
+check this project has used for every market since Milestone 10/17:
+
+| | Long leg | Combined long-short |
+|---|---|---|
+| Raw ann. return (unhedged) | +8.29%/yr | +27.15%/yr |
+| Hedged daily ann. return / p | +11.14%/yr, **p=0.0085** | +35.45%/yr, **p=0.0006** |
+| Hedged monthly ann. return / p | +9.97%/yr, **p=0.0141** | +30.97%/yr, **p=0.0001** |
+| Mean hedge beta | +0.83 | −0.42 |
+
+**Momentum replicates cleanly on ASX — the strongest, most unambiguous result of the three
+markets tested.** Both legs are significant at both frequencies, on a proper out-of-sample
+hedge from day one (this market never went through the "static full-sample regression
+first, hedge added later" history NSE and the US mirror did). The combined book's large
+magnitude has a plausible, checked explanation rather than being a red flag on its own: the
+short leg's mean beta (−1.26) is far more negative than the long leg's (+0.83) is positive,
+consistent with Australia's well-known 2011-2015 mining and resources downturn — momentum's
+short leg would have been loaded with high-beta miners that kept underperforming through
+exactly that window, and the rolling beta estimates themselves are reasonably stable (std
+0.39, no extreme outliers) rather than a symptom of an unstable hedge.
+
+**A genuine limitation, stated plainly: this is the shortest history of the three
+markets.** Six years (1,501 trading days) is enough for a full-sample significance test but
+not for the era-splitting, structural-break, or persistence checks this project ran
+extensively on the US mirror's 47-year history — there is no "pre-publication vs.
+post-publication" split possible here, and no way yet to check whether ASX momentum's edge
+is stable across sub-periods the way Milestones 9-14 checked for the US. That is future
+work, not a result claimed here.
+
+**Reproduce this**: `python investigations/momentum_asx_replication.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -1233,6 +1289,45 @@ data-vendor feed**, same caveat as the NSE mirror above. Specifics:
   1972-06-22. Any result drawing on these tickers' data before ~1975 (INTC) or across
   December 1974 (WMT) should be treated with added caution.
 
+## Data provenance: the ASX GitHub mirror
+
+`load_asx_github_mirror()` pulls ~1,600 individual daily report CSVs (one per trading day,
+fetched in parallel) from
+`raw.githubusercontent.com/grantcarthew/data-asx-historical-share-tables/master/csv/Daily/S%26P-ASX300/`
+— a GitHub mirror of the Australian Securities Exchange's own daily S&P/ASX300 constituent
+report emails, **not a Kaggle re-export like the NSE and US mirrors above**. Specifics:
+
+- **Coverage: 2009-10-20 to 2015-12-31**, ~1,501 trading days — this project's shortest
+  history by far (vs. NSE's 21 years and the US mirror's 47). Treat any full-sample number
+  from this market as a single-era result, not yet checked for stability across sub-periods.
+- **Two report-text formats, parsed both**: reports before mid-2010ish give the trading
+  date as `DD/MM/YYYY`; later reports spell it out (`"Trading data for Thursday, May 12,
+  2011"`). Critically, **the filename's date is the day the report was *processed*
+  (typically the next morning), not the trading date** — and the offset between the two
+  is not constant (it widens across weekends and public holidays, e.g. a report filed
+  2014-06-10 covers trading from 2014-06-06). The loader parses the actual trading date out
+  of each file's own header text rather than trusting the filename.
+- **Raw parsing yields ~638 distinct codes; only 209 are genuine, persistent constituents.**
+  The rest are mostly ASX deferred-settlement trading variants (temporary codes with
+  suffixes like `DA`/`DC`/`R` used during capital raisings, not separate companies) that
+  appear for only a handful of days each. Applying the same data-density discipline
+  Milestone 15 forced onto this project — drop any code with fewer than 1,000 days of
+  history, the identical threshold `load_nse_github_mirror` already uses — removes
+  essentially all of them and leaves a stable ~200-name universe (min 160, median 199 of
+  209 present on any given day; see Milestone 22 above for why this comfortably clears the
+  thin-universe bar).
+- **Spot-checked against known history, not just internally consistent.** BHP, CBA, and
+  ANZ close at $18.09, $85.57, and $27.96 respectively on 2015-12-30 in this mirror —
+  matching the real, publicly known price levels for Australia's largest bank and largest
+  miner at the end of 2015 (BHP mid-recovery from the iron-ore price collapse, CBA near its
+  all-time high before the later bank royal commission). Not a substitute for an audited
+  feed, but a real sanity check beyond internal consistency.
+- **No ticker-rename curation was attempted**, unlike the NSE mirror's explicit
+  `_NSE_RENAME_CHAINS`. If any of the 209 retained ASX codes underwent a symbol change
+  within this window, that company's series would appear artificially truncated rather than
+  merged — a known, undocumented-in-detail limitation, not one this project has checked
+  stock-by-stock.
+
 ## Methodology
 
 ### Case studies (qualitative, `case_studies/`)
@@ -1289,7 +1384,11 @@ Reports how many multiples the Gaussian model underestimates the true tail loss 
   See "Data provenance: the NSE GitHub mirror" above for its caveats.
 - **US Kaggle GitHub mirror** (`load_us_kaggle_mirror`) — 30 US large-caps, listing date
   through 2017-11-10, also reachable via the GitHub allowlist. See "Data provenance: the
-  US Kaggle mirror" above. Both mirrors are the sources actually exercised in this repo.
+  US Kaggle mirror" above.
+- **ASX GitHub mirror** (`load_asx_github_mirror`) — ~209 Australia-listed companies,
+  2009-10-20 to 2015-12-31, a third and genuinely independent GitHub-reachable source (see
+  "Data provenance: the ASX GitHub mirror" above). All three mirrors are the sources
+  actually exercised in this repo.
 - **Yahoo Finance / Stooq** (`load_price_history` / `load_single`) — the original
   US-large-cap, live-data default path. Needs general internet access this sandbox didn't
   have; still unexercised here. Universe is a hard-coded liquid large-cap list, not a
@@ -1439,6 +1538,13 @@ python investigations/momentum_crash_mechanism_recurrence.py
 # "Does the tentative NSE signal survive its own named caveat?" above)
 python investigations/momentum_nse_universe_growth_check.py
 
+# Investigation — does momentum replicate on a third, independent market (ASX Australia),
+# tested with this project's current best methodology from the start? (yes -- both legs
+# significant at daily and monthly frequency, the cleanest result of the three markets
+# tested, though on this project's shortest sample history; see "A third, independent
+# market: does momentum replicate on ASX?" above)
+python investigations/momentum_asx_replication.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1481,7 +1587,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    thread — the tentative NSE post-2008 momentum signal (Milestone 21): splitting by
    universe stability (the specific caveat Milestone 17 itself named) found neither the
    growing-universe years nor the fully stable years significant alone, downgrading the
-   signal from "promising, not confirmed" to "not currently demonstrated." Momentum's
+   signal from "promising, not confirmed" to "not currently demonstrated." Finally, a third
+   independent market was found and tested (Milestone 22, after an extensive search ruled
+   out every reachable European source): momentum replicates cleanly on ASX (Australia),
+   both legs significant at daily and monthly frequency on a proper out-of-sample hedge
+   from the start — the cleanest of the three markets, though on this project's shortest
+   sample history (2009-2015) and not yet checked for era-stability the way the US mirror
+   was. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -1735,3 +1847,22 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   mechanism, applied here to this project's own remaining open finding. **The NSE post-2008
   signal should now be read as not currently demonstrated, not merely as an unconfirmed but
   promising thread.**
+- **Momentum replicates on a third, independent market (ASX Australia), the cleanest result
+  of the three tested — but on this project's shortest history, and finding the market at
+  all took real effort (Milestone 22).** A thorough search for a European per-company OHLCV
+  mirror found none reachable from this sandbox; `stooq.com`, `huggingface.co`,
+  `github.com`'s own HTML pages, and general `api.github.com` repo browsing are all
+  blocked, and several candidate repositories turned out to be fetch-at-runtime pipeline
+  code (also blocked), not committed data. `grantcarthew/data-asx-historical-share-tables`
+  — a mirror of ASX's own daily S&P/ASX300 report emails, 2009-10-20 to 2015-12-31 — was
+  the source that worked. Applying this project's out-of-sample hedge and HAC significance
+  test directly (not the cruder full-sample regression Milestones 6-8 started with):
+  long-leg alpha +11.14%/yr daily (p=0.0085) and +9.97%/yr monthly (p=0.0141); the combined
+  book shows an even larger, still-significant effect (p<0.001 both frequencies), plausibly
+  tied to Australia's 2011-2015 mining-sector downturn loading the short leg with
+  high-beta losers (mean short-leg beta −1.26 vs. the long leg's +0.83) rather than being a
+  hedge-instability artifact (rolling beta std 0.39, no extreme outliers). **This is a real
+  limitation, not just a caveat**: six years is enough for a full-sample significance test
+  but not for the era-splits, structural-break tests, or persistence checks Milestones 9-14
+  ran on the US mirror's 47-year history — ASX momentum has not yet been checked for
+  stability across sub-periods the way every other surviving finding in this project has.

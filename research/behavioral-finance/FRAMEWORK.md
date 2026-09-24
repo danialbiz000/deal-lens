@@ -347,6 +347,22 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   readily as to a market it's studying — a lesson learned from correcting one result (the
   crash mechanism) is worth testing against every other result built the same way (a pooled
   significance test), not treated as specific to the finding that taught it.**
+- **Milestone 22 found and validated a third, genuinely independent market (ASX
+  Australia) after an extensive search ruled out every reachable European source, and
+  momentum replicated cleanly.** `stooq.com`, `huggingface.co`, `github.com`'s own HTML
+  pages, and general `api.github.com` repo browsing are all blocked in this sandbox;
+  several candidate European-stock repositories turned out to be fetch-at-runtime pipeline
+  code, not committed data. `grantcarthew/data-asx-historical-share-tables` — a mirror of
+  ASX's own daily report emails, 2009-2015 — worked. Applying the out-of-sample hedge and
+  HAC test directly (not this project's own cruder early-stage methodology): long-leg
+  alpha significant at both frequencies (p=0.0085 daily, p=0.0141 monthly), the cleanest
+  result of the three markets tested, with the combined book's large magnitude tied to a
+  plausible, checked economic story (Australia's 2011-2015 mining downturn) rather than a
+  hedge artifact. **Rule: when a data source is hard to find, that difficulty is itself
+  worth documenting in the writeup, not just the result once found — future readers (and
+  future milestones) benefit from knowing what was ruled out and why, not just what
+  worked; and a short sample is a stated limitation, not a reason to withhold a
+  significant result — say what the test can and can't yet establish.**
 
 ## 2. Risk-management lessons
 
@@ -574,6 +590,18 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     **Rule: apply a methodology lesson learned from one finding to every other finding
     built the same way, including your own project's most-favored remaining result — a
     named but untested caveat is unfinished work, not a disclosed limitation.**
+22. **A sandbox's specific network allowlist is itself a research constraint worth
+    documenting, and a genuinely independent third market is worth the search effort even
+    when the first choice (Europe) isn't reachable.** Milestone 22 spent real effort
+    ruling out Stooq, Hugging Face, `github.com`'s own pages, and general `api.github.com`
+    browsing before finding `raw.githubusercontent.com` could serve a real, committed ASX
+    dataset once the exact file paths were known. Momentum replicated cleanly there
+    (p=0.0085 daily, p=0.0141 monthly), the strongest of the three markets, on a sample
+    too short (six years) for the era-stability checks run on the US mirror. **Rule:
+    document a data search's dead ends, not just its destination — the next milestone (or
+    the next project) benefits from knowing which doors were tried and found locked; and
+    label a new result by what it has and hasn't yet been checked against, not by how
+    clean it looks on first pass.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
