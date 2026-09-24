@@ -1091,6 +1091,48 @@ where a second bear regime actually exists to test it against.
 
 **Reproduce this**: `python investigations/momentum_crash_regime_robustness.py`.
 
+## Did the crash mechanism reactivate in 2011 or 2015-16? (Milestone 20)
+
+Milestone 19 left one question explicitly open: at bear-market lookbacks of 126 and 189
+trading days (~6 and ~9 months), a bear regime *does* recur post-2010 — clustered in
+2010-11 (the European debt-crisis selloff) and 2015-16 (the Aug 2015-Feb 2016 drawdown) —
+giving 148 and 31 Bear+High-Vol days respectively to actually test the crash mechanism's
+persistence against, something Milestone 18's default 252-day lookback could not do at all.
+This milestone (`investigations/momentum_crash_mechanism_recurrence.py`) closes that thread:
+re-running the Bear × High-Vol interaction regression on the 2010-onward window, under both
+alternate lookbacks, with everything else (the 21-day volatility window, the hedge
+methodology) unchanged from every prior milestone.
+
+| | Bear lookback 126d | Bear lookback 189d |
+|---|---|---|
+| Bear+High-Vol days, 2010 onward | 148 (7.5% of era) | 31 (1.6% of era) |
+| Interaction coefficient | -0.00172/day, p=0.203 (n.s.) | -0.00143/day, p=0.443 (n.s.) |
+| Bear-alone coefficient | +0.00126/day, p=0.226 (n.s.) | **+0.00212/day, p=0.023** |
+
+**The mechanism did not reactivate, under either alternate lookback — and where a coefficient
+was significant, it pointed the wrong way for crash risk.** At neither window is the
+Bear × High-Vol interaction anywhere near significant post-2010 (p=0.20, p=0.44), despite
+now having real bear-regime days to test it against. At the 189-day lookback, the
+bear-market main effect *is* significant (p=0.023) — but positive, not negative: momentum's
+long leg did somewhat *better*, not worse, during 2010-onward trailing-bear periods, the
+opposite sign from both the crisis-era coefficient and what the crash-risk mechanism
+predicts. This is not the pattern of a dormant mechanism waking back up; it is closer to no
+pattern at all.
+
+**Updated conclusion**: this strengthens, rather than merely leaves open, Milestone 18's
+original framing. The crash mechanism is not just *untested* outside the 2008-09 crisis
+under this project's default parameters — now that two alternate, equally standard
+parameter choices supply real bear-regime days post-2010, the mechanism is *tested and not
+found* there. The honest, now-complete statement across Milestones 16, 18, 19, and 20: the
+Bear × High-Vol interaction explains momentum's 2008-09 losses specifically, has not
+reappeared in either of the two next bear-adjacent episodes this sample contains under any
+lookback tested, and a standing "momentum is crash-exposed" risk rule would have been
+wrong to apply in both 2011 and 2015-16. Whether it would reactivate in a genuinely severe
+future crisis — as opposed to the milder episodes of 2011 and 2015-16 — remains open; this
+sample simply has not contained one since 2009.
+
+**Reproduce this**: `python investigations/momentum_crash_mechanism_recurrence.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -1341,6 +1383,13 @@ python investigations/momentum_crash_mechanism_persistence.py
 # survive different regime-construction choices?" above)
 python investigations/momentum_crash_regime_robustness.py
 
+# Investigation — did the crash mechanism reactivate in 2011 or 2015-16, now that a bear
+# regime actually exists there under shorter lookbacks? (no — interaction not significant at
+# either alternate window, and the bear-alone effect flips to positive/significant at the
+# 189-day lookback, the wrong sign for crash risk; see "Did the crash mechanism reactivate
+# in 2011 or 2015-16?" above)
+python investigations/momentum_crash_mechanism_recurrence.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1374,7 +1423,11 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    parameter-robustness sweep (Milestone 19, finding the crash-mechanism *pattern* replicates
    in 8 of 16 nearby volatility/bear-lookback choices, but Milestone 18's specific "no bear
    regime recurred" claim does not survive shorter, equally standard lookbacks — a real
-   qualification, not just a footnote). Momentum's
+   qualification, not just a footnote), and a direct reactivation test (Milestone 20,
+   re-running the persistence test under the lookbacks where a real post-2010 bear regime
+   exists and finding the mechanism did *not* reactivate in either 2011 or 2015-16 —
+   closing Milestone 19's open thread and strengthening, not just leaving open, Milestone
+   18's "confirmed for one crisis" framing). Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -1594,3 +1647,18 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   default, and 378) — so whether the crash mechanism has a "second data point" to test
   persistence against depends on which standard convention is chosen, and that persistence
   test has not yet been re-run under the lookbacks where a second bear regime exists.
+  **[Closed by Milestone 20: re-run under both alternate lookbacks, the mechanism did not
+  reactivate — see below.]**
+- **The crash mechanism did not reactivate in 2011 or 2015-16, even once real bear-regime
+  days exist to test it against (Milestone 20).** Re-running the Bear × High-Vol
+  interaction on the 2010-onward window under the two lookbacks (126 and 189 days) where a
+  bear regime actually recurs: the interaction is not significant at either window
+  (p=0.203 at 126 days, p=0.443 at 189 days), despite 148 and 31 Bear+High-Vol days
+  respectively to test it against. At the 189-day lookback the bear-market main effect *is*
+  significant (p=0.023) but positive — momentum's long leg did somewhat better, not worse,
+  during those trailing-bear periods, the opposite sign from both the 2008-09 crisis
+  coefficient and what the crash-risk mechanism predicts. This strengthens, rather than
+  merely leaves open, Milestone 18's "confirmed for one crisis" framing: the mechanism is
+  now tested and not found outside 2008-09, not just untested. Whether it would reactivate
+  in a genuinely severe future crisis, as opposed to the milder 2011 and 2015-16 episodes,
+  remains open — this sample has not contained one since 2009.

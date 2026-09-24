@@ -322,6 +322,19 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   have very different robustness — test both separately, and when a finding depends on a
   binary condition (did X ever happen), check whether that condition's own definition,
   not just the finding built on it, would survive a different reasonable convention.**
+- **Milestone 20 closed the thread Milestone 19 opened: re-running the crash-mechanism
+  test under the lookbacks where a real post-2010 bear regime exists, the mechanism did not
+  reactivate.** Under both alternate bear-lookbacks (126 and 189 days), the Bear ×
+  High-Vol interaction on the 2010-onward window is nowhere near significant (p=0.20,
+  p=0.44) despite 148 and 31 real Bear+High-Vol days to test it against. At the 189-day
+  lookback the bear-market main effect is significant but positive (p=0.023) — momentum's
+  long leg did better, not worse, during those periods, the opposite sign from the crisis
+  coefficient. **Rule: an "untested" finding and a "tested and not found" finding are
+  different claims with different confidence — once a robustness check surfaces a case
+  where a prior untestable question becomes testable, run the actual test rather than
+  leaving it as a hypothetical; a mechanism that fails to reactivate when given the chance
+  is stronger evidence for its being episode-specific than simply lacking a chance to
+  reactivate.**
 
 ## 2. Risk-management lessons
 
@@ -527,6 +540,17 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     whether some condition ever occurred, stress-test the condition's own definition, not
     just the finding built on top of it — the definition is often the more arbitrary
     choice.**
+20. **"Untested" and "tested and not found" are different claims, and closing a
+    robustness thread means running the test the robustness check made possible, not just
+    noting that it's now possible.** Milestone 20 re-ran the crash-mechanism persistence
+    test under the two bear-lookbacks Milestone 19 found actually see a post-2010 bear
+    regime. The interaction did not reactivate at either window (p=0.20, p=0.44), and at
+    the 189-day lookback the bear-market main effect was significant but positive — the
+    opposite sign from crash risk. **Rule: when a robustness check reveals that a
+    previously untestable question has become testable, run the test rather than leaving
+    it flagged as an open thread — a mechanism that fails to reactivate when given a real
+    chance to is materially stronger evidence than a mechanism that was simply never
+    checked.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

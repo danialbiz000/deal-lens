@@ -2132,6 +2132,65 @@ box(
     "second bear regime exists to test it against.",
     title="ROBUST PATTERN, FRAGILE ABSENCE-CLAIM"
 )
+box(
+    "Section 5.20 closes that open question directly: re-running the "
+    "persistence test under the lookbacks where a real post-2010 bear "
+    "regime exists.",
+    kind="fact", title="UPDATE FROM SECTION 5.21"
+)
+
+h1("5.21  Milestone 20 &mdash; Did the crash mechanism reactivate in 2011 or 2015-16?")
+p("Section 5.20 left one question explicitly open: at bear-market "
+  "lookbacks of 126 and 189 trading days (~6 and ~9 months), a bear "
+  "regime <i>does</i> recur post-2010 &mdash; clustered in 2010-11 (the "
+  "European debt-crisis selloff) and 2015-16 (the Aug 2015-Feb 2016 "
+  "drawdown) &mdash; giving 148 and 31 Bear+High-Vol days respectively "
+  "to actually test the crash mechanism's persistence against, something "
+  "Section 5.19's default 252-day lookback could not do at all. This "
+  "milestone (<i>investigations/momentum_crash_mechanism_recurrence.py</i>) "
+  "closes that thread: re-running the Bear &times; High-Vol interaction "
+  "regression on the 2010-onward window, under both alternate lookbacks, "
+  "with everything else unchanged.")
+data_table(
+    ["", "Bear lookback 126d", "Bear lookback 189d"],
+    [
+        ["Bear+High-Vol days, 2010 onward", "148 (7.5% of era)", "31 (1.6% of era)"],
+        ["Interaction coefficient", "-0.00172/day, p=.203 (n.s.)", "-0.00143/day, p=.443 (n.s.)"],
+        ["Bear-alone coefficient", "+0.00126/day, p=.226 (n.s.)", "+0.00212/day, p=.023"],
+    ],
+    col_widths=[2.1*inch, 2.35*inch, 2.35*inch],
+    small=True,
+)
+p("<b>The mechanism did not reactivate, under either alternate lookback "
+  "&mdash; and where a coefficient was significant, it pointed the wrong "
+  "way for crash risk.</b> At neither window is the Bear &times; "
+  "High-Vol interaction anywhere near significant post-2010 (p=0.20, "
+  "p=0.44), despite now having real bear-regime days to test it against. "
+  "At the 189-day lookback the bear-market main effect <i>is</i> "
+  "significant (p=0.023) &mdash; but positive, not negative: momentum's "
+  "long leg did somewhat <i>better</i>, not worse, during 2010-onward "
+  "trailing-bear periods, the opposite sign from both the crisis-era "
+  "coefficient and what the crash-risk mechanism predicts. This is not "
+  "the pattern of a dormant mechanism waking back up; it is closer to no "
+  "pattern at all.")
+box(
+    "This strengthens, rather than merely leaves open, Section 5.19's "
+    "original framing. The crash mechanism is not just <i>untested</i> "
+    "outside the 2008-09 crisis under this project's default parameters "
+    "&mdash; now that two alternate, equally standard parameter choices "
+    "supply real bear-regime days post-2010, the mechanism is <i>tested "
+    "and not found</i> there. The honest, now-complete statement across "
+    "Sections 5.17, 5.19, 5.20, and 5.21: the Bear &times; High-Vol "
+    "interaction explains momentum's 2008-09 losses specifically, has "
+    "not reappeared in either of the two next bear-adjacent episodes "
+    "this sample contains under any lookback tested, and a standing "
+    "&quot;momentum is crash-exposed&quot; risk rule would have been "
+    "wrong to apply in both 2011 and 2015-16. Whether it would "
+    "reactivate in a genuinely severe future crisis, as opposed to the "
+    "milder episodes of 2011 and 2015-16, remains open &mdash; this "
+    "sample simply has not contained one since 2009.",
+    title="TESTED AND NOT FOUND, NOT JUST UNTESTED"
+)
 
 # MARKER_END_PART5
 
@@ -2345,8 +2404,21 @@ box(
     "equally standard bear-lookbacks: at 126 or 189 trading days instead "
     "of 252, a bear regime fires post-2010, clustered in 2010-11 and "
     "2015-16. Two different robustness verdicts for two different claims "
-    "built on the same code.",
+    "built on the same code. <i>(Part V.21 then ran the persistence test "
+    "this made possible &mdash; see below.)</i>",
     kind="fact", title="UPDATE FROM PART V.20"
+)
+box(
+    "Part V.21 re-ran the crash-mechanism interaction on the 2010-onward "
+    "window under both alternate bear-lookbacks Part V.20 identified. It "
+    "did not reactivate at either (p=0.20, p=0.44), and at the 189-day "
+    "lookback the bear-market main effect was significant but "
+    "<b>positive</b> &mdash; the opposite sign from crash risk. This "
+    "strengthens, not just leaves open, Part V.19's &quot;confirmed for "
+    "one crisis&quot; framing: the mechanism is now tested and not found "
+    "outside 2008-09, in the two next bear-adjacent episodes this sample "
+    "contains, not merely untested.",
+    kind="fact", title="UPDATE FROM PART V.21"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -2590,6 +2662,19 @@ bullets([
     "on whether some condition ever occurred, stress-test the "
     "condition's own definition, not just the finding built on top of "
     "it &mdash; the definition is often the more arbitrary choice.",
+    "<b>&quot;Untested&quot; and &quot;tested and not found&quot; are "
+    "different claims, and closing a robustness thread means running the "
+    "test it made possible, not just noting that it's now possible.</b> "
+    "Part V.21 re-ran the crash-mechanism persistence test under the two "
+    "bear-lookbacks Part V.20 found actually see a post-2010 bear "
+    "regime. The interaction did not reactivate at either window "
+    "(p=0.20, p=0.44), and at the 189-day lookback the bear-market main "
+    "effect was significant but positive &mdash; the opposite sign from "
+    "crash risk. When a robustness check reveals that a previously "
+    "untestable question has become testable, run the test rather than "
+    "leaving it flagged as an open thread &mdash; a mechanism that fails "
+    "to reactivate when given a real chance to is materially stronger "
+    "evidence than a mechanism that was simply never checked.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -2864,7 +2949,27 @@ bullets([
     "crash mechanism has a second data point to test persistence "
     "against depends on which standard convention is chosen, and that "
     "persistence test has not yet been re-run under the windows where a "
-    "second bear regime actually exists.",
+    "second bear regime actually exists. <i>(Closed by Part V.21: "
+    "re-run under both alternate lookbacks, the mechanism did not "
+    "reactivate &mdash; see below.)</i>",
+    "<b>The crash mechanism did not reactivate in 2011 or 2015-16, even "
+    "once real bear-regime days exist to test it against (Part "
+    "V.21).</b> Re-running the Bear &times; High-Vol interaction on the "
+    "2010-onward window under the two lookbacks (126 and 189 days) where "
+    "a bear regime actually recurs: the interaction is not significant "
+    "at either window (p=0.203 at 126 days, p=0.443 at 189 days), "
+    "despite 148 and 31 Bear+High-Vol days respectively to test it "
+    "against. At the 189-day lookback the bear-market main effect "
+    "<i>is</i> significant (p=0.023) but positive &mdash; momentum's "
+    "long leg did somewhat better, not worse, during those trailing-bear "
+    "periods, the opposite sign from both the 2008-09 crisis coefficient "
+    "and what the crash-risk mechanism predicts. This strengthens, "
+    "rather than merely leaves open, Part V.19's &quot;confirmed for one "
+    "crisis&quot; framing: the mechanism is now tested and not found "
+    "outside 2008-09, not just untested. Whether it would reactivate in "
+    "a genuinely severe future crisis, as opposed to the milder 2011 and "
+    "2015-16 episodes, remains open &mdash; this sample has not "
+    "contained one since 2009.",
     "<b>The 52-week-high result's cause: resolved, and it's the boring "
     "answer.</b> Two behavioral/statistical explanations were ruled out by "
     "direct test: crash-window concentration (Part V.4) and a value/growth "
@@ -3075,7 +3180,14 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "one arbitrary-looking choice. It found two different answers hiding "
   "in the same code &mdash; the crash-mechanism pattern survived most "
   "reasonable variations of that choice, but the specific claim that no "
-  "bear market had recurred did not.")
+  "bear market had recurred did not. Part V.21 then finished what Part "
+  "V.20 had only made possible: it actually ran the persistence test "
+  "under the windows where a second bear market exists, instead of "
+  "leaving that as a flagged possibility, and found the mechanism stayed "
+  "quiet &mdash; not because there was nothing to test it against this "
+  "time, but because it was tested and simply didn't show up, with the "
+  "one coefficient that did clear significance pointing the wrong way "
+  "for crash risk entirely.")
 p("The fix that survived all of that scrutiny is more modest, and "
   "narrower, than any earlier draft of this conclusion claimed: there "
   "is no demonstrated, beta-independent stock-selection skill in the "
@@ -3117,7 +3229,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, sixteen times in a row "
+  "most recent, best-supported-looking result, seventeen times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -3151,11 +3263,18 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "exactly one crisis and no second bear market to test persistence "
   "against, and the specific interaction term stopped being what "
   "carried the result once that one crisis was looked at on its own, "
-  "and finally ran a sixteenth check (Part V.20) that questioned the "
+  "ran a sixteenth check (Part V.20) that questioned the "
   "fifteenth's own instrument: was &quot;no second bear market&quot; a "
   "fact about the market, or about the one specific window chosen to "
   "look for one, and found it was partly the latter &mdash; the "
-  "pattern survived nearby choices, the absence-claim did not. "
+  "pattern survived nearby choices, the absence-claim did not, and "
+  "finally ran a seventeenth check (Part V.21) that did not just note "
+  "the sixteenth check's opening but walked through it: reran the "
+  "mechanism against the two windows that now had a real second bear "
+  "market to test against, and found silence &mdash; not the absence of "
+  "a test this time, but a test that came back negative, with the one "
+  "significant coefficient it produced running in the wrong direction "
+  "for crash risk altogether. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -3175,16 +3294,16 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "broken because the classic momentum-crash mechanism &mdash; dormant "
   "for over three decades &mdash; activated during the 2008-09 crisis, "
   "is this project's "
-  "one remaining, sixteen-times-checked finding, confirmed to be a "
+  "one remaining, seventeen-times-checked finding, confirmed to be a "
   "US-specific mechanism after failing to replicate on NSE, confirmed on "
   "the fifteenth check for that one crisis specifically rather than for "
-  "a standing post-2008 regime, and, on the sixteenth, confirmed to be "
+  "a standing post-2008 regime, confirmed on the sixteenth to be "
   "reasonably robust to nearby modeling choices while the specific claim "
-  "that no second bear market has occurred since is not &mdash; under "
-  "this project's own default definition, none has; under two other, "
-  "equally standard definitions, one already has, twice, and the "
-  "persistence question the sixteenth check exists to ask has simply not "
-  "been re-run against them yet. Short-term reversal is "
+  "that no second bear market has occurred since was not, and, on the "
+  "seventeenth, put to the one test that claim's own qualification made "
+  "possible: run against the two windows where a second bear market "
+  "genuinely exists, and it did not reactivate in either. Short-term "
+  "reversal is "
   "not a second one: every version of its apparent edge &mdash; the "
   "original NSE Sharpe ratio, the full-sample beta-adjusted alpha, "
   "the pre-1994 era split, the continuous decay trend, the formal "
@@ -3193,21 +3312,23 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "One signal decays on its own schedule and by its own mechanism, "
   "sized more cautiously than the milestone that first found it would "
   "have suggested; the other was never there to begin with, once "
-  "checked against data good enough to ask the question. Two loose "
-  "threads remain open on purpose, not by oversight: a tentative, "
+  "checked against data good enough to ask the question. One loose "
+  "thread remains open on purpose, not by oversight: a tentative, "
   "&quot;promising not confirmed&quot; post-2008 NSE momentum signal, "
   "found only because this project finally ran its own best method "
   "against a market it thought it had already closed the book on "
   "&mdash; exactly the kind of result this guide's own standards say "
-  "should not yet be trusted, and is not &mdash; and whether the "
-  "momentum-crash mechanism reactivated in 2011 or 2015-16, episodes "
-  "this project's own default bear-market definition was too "
-  "conservative to register as bear markets at all, but that two other, "
-  "equally standard definitions do register. This project has run the "
-  "persistence test that would answer that question exactly once, under "
-  "the one definition guaranteed to find nothing to test it against. "
-  "Both settled conclusions, two "
-  "open questions stated as open, and one honest, thoroughly-stress-tested "
+  "should not yet be trusted, and is not. A second question that looked "
+  "open as recently as Part V.20 &mdash; whether the momentum-crash "
+  "mechanism reactivated in 2011 or 2015-16, episodes this project's own "
+  "default bear-market definition was too conservative to register as "
+  "bear markets at all, but that two other, equally standard definitions "
+  "do register &mdash; is open no longer: Part V.21 ran the persistence "
+  "test against both of those definitions and the mechanism did not "
+  "reactivate in either, with the one coefficient that did clear "
+  "significance running the wrong direction for crash risk. Both settled "
+  "conclusions, one "
+  "open question stated as open, and one honest, thoroughly-stress-tested "
   "absence &mdash; the most recent decade, for momentum, to size "
   "nothing against &mdash; are what a research process built to "
   "distrust its own best-looking result eventually converges on.")
