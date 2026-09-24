@@ -277,6 +277,22 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   appears to have been dormant through the pre-crisis decades and active since,
   consistent with a market where momentum-following capital had scaled up enough by 2008
   for the mechanism to actually bite.
+- **Milestone 17 tested the same crash mechanism on NSE — and, in the process, exposed a
+  methodological gap in this project's own earlier NSE momentum test.** Milestone 8's
+  "no significant NSE momentum alpha" used a static full-sample regression, never the
+  rolling out-of-sample hedge this project has used for every US momentum test since
+  Milestone 7. Applying that hedge to NSE momentum for the first time reaffirms no
+  significant full-sample alpha (daily p=0.170, monthly p=0.168) but surfaces a new,
+  tentative post-2008 signal (daily p=0.044, monthly p=0.073) the cruder test could not
+  have found — with the caveat that NSE's universe grew from ~30 to 48 names over the same
+  window, so part of the improvement may be a less-thin cross-section rather than a real
+  regime change. Separately, the Bear × High-Vol interaction that explained momentum's US
+  break is never significant on NSE (p=0.96 full-sample); NSE instead shows a plain,
+  unconditional Bear effect (p=0.002) — a related but mechanistically different pattern.
+  **Rule: applying your own best methodology to an already-tested market, not just a new
+  one, can still turn up something a cruder earlier pass missed — "already checked" and
+  "checked with your current best method" are not the same claim, and a rejected
+  full-sample result doesn't mean every sub-period was checked with equal power.**
 
 ## 2. Risk-management lessons
 
@@ -444,6 +460,18 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     signal in a different era — don't let an earlier rejection close off re-testing the
     same hypothesis somewhere new; a confirmed break date is a fact, not yet an
     explanation.**
+17. **"Already checked" and "checked with your current best method" are not the same
+    claim.** Milestone 8's NSE momentum test used a static full-sample regression.
+    Applying the rolling out-of-sample hedge this project built in Milestone 7 to NSE
+    momentum for the first time reaffirmed no significant full-sample alpha, but surfaced
+    a tentative post-2008 signal (daily p=0.044, monthly p=0.073) the cruder test lacked
+    the power to see — while the Bear × High-Volatility crash mechanism confirmed for US
+    momentum (Milestone 16) turned out not to replicate on NSE at all. **Rule: a rejected
+    finding on an already-tested market is worth re-checking with each new methodology
+    upgrade this project builds, not just applying new methods to new markets — the
+    earlier rejection may have been correct for the test it used and still be missing
+    something a better test would find; and a confirmed mechanism on one market is a
+    hypothesis, not a law, everywhere else.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

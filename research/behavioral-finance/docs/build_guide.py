@@ -1895,6 +1895,78 @@ box(
     "the classic crash dynamic to actually bite.",
     title="A MECHANISM, NOT JUST A DATE"
 )
+box(
+    "Section 5.18 asks whether the same crash mechanism, and a more "
+    "rigorous re-test of NSE momentum itself, hold up on the market "
+    "this project has tested the most and trusted the least.",
+    kind="fact", title="UPDATE FROM SECTION 5.18"
+)
+
+h1("5.18  Milestone 17 &mdash; Does the momentum-crash mechanism replicate on NSE?")
+p("Section 5.17's finding was established on one market. This "
+  "milestone (<i>investigations/momentum_crash_mechanism_nse.py</i>) "
+  "tests it on NSE (India) &mdash; a market that lived through the "
+  "same 2008 global crisis. Before trusting anything here, the "
+  "Section 5.16 lesson applies: NSE momentum's decile long leg holds "
+  "6-10 names throughout 2000-2021 (vs. the US mirror's notorious 2-4 "
+  "names in the 1970s-80s), a reasonable portfolio size, not the "
+  "thin-universe artifact that sank reversal.")
+p("<b>A genuine methodological gap, closed first.</b> Section 5.9 "
+  "tested NSE momentum's alpha with a single <i>static</i> full-sample "
+  "beta regression and found no significant result. That is a "
+  "materially cruder test than the rolling, out-of-sample hedge this "
+  "project built in Section 5.8 and has used for every US momentum "
+  "test since &mdash; but it had never been applied to NSE momentum "
+  "before. Doing so now:")
+data_table(
+    ["", "Long leg, daily", "Long leg, monthly"],
+    [
+        ["Full sample (2000-2021)", "+3.56%/yr, p=.170 (n.s.)", "+4.55%/yr, p=.168 (n.s.)"],
+        ["Pre-2008-09", "-2.82%/yr, p=.744 (n.s.)", "-1.70%/yr, p=.754 (n.s.)"],
+        ["Post-2008-09", "+7.66%/yr, p=.044", "+7.94%/yr, p=.073 (marginal)"],
+    ],
+    col_widths=[2.0*inch, 2.3*inch, 2.3*inch],
+    small=True,
+)
+p("<b>Full-sample, the more rigorous hedge reaffirms Section 5.9's "
+  "conclusion</b> &mdash; no significant NSE momentum alpha, daily or "
+  "monthly, now on firmer methodological footing. But a "
+  "<b>post-2008-specific signal emerges</b> that the cruder full-sample "
+  "test could not have seen: daily-frequency alpha is significant "
+  "(p=0.044), monthly is marginal (p=0.073). This is genuinely new, "
+  "but should be read as &quot;promising, not confirmed&quot; &mdash; "
+  "this project's own standard label for exactly this strength of "
+  "evidence (Section 5.10) &mdash; and comes with a real caveat: "
+  "NSE's universe itself grew from ~30 to 48 names over this window, "
+  "so part of the post-2008 improvement in signal strength may reflect "
+  "a less thin, better-populated cross-section rather than a genuine "
+  "change in the underlying economics.")
+p("<b>The crash-specific mechanism itself does not replicate.</b> "
+  "Applying Section 5.17's exact Bear &times; High-Vol regression to "
+  "NSE: the interaction term is never significant (p=0.96 full-sample, "
+  "p=0.34 pre-2008, p=0.66 post-2008) &mdash; unlike the US, where it "
+  "activated sharply post-2008. What NSE <i>does</i> show is a plain, "
+  "unconditional <b>Bear</b> effect: the long leg loses significantly "
+  "in any trailing bear market (coef=-0.00095/day, p=0.002 full-sample; "
+  "p=0.001 post-2008), regardless of whether volatility is "
+  "simultaneously high. That is a related but mechanistically "
+  "different pattern from the US's specific crash-<i>rebound</i> "
+  "dynamic &mdash; NSE momentum looks bear-market-sensitive in "
+  "general, not crash-rebound-sensitive in particular.")
+box(
+    "This is not a repeat of the already-settled &quot;does NSE "
+    "momentum work&quot; question &mdash; it is two new, "
+    "honestly-qualified findings. The specific momentum-crash "
+    "mechanism confirmed for the US in Section 5.17 is not universal; "
+    "it does not show up in NSE the same way, even though NSE lived "
+    "through the same 2008 crisis. Separately, a more rigorous re-test "
+    "surfaced a genuinely new, if still tentative, post-2008 NSE "
+    "momentum signal that a cruder test had missed &mdash; evidence "
+    "that this project's own methodology upgrades are still capable of "
+    "finding things earlier, less careful passes did not, even on a "
+    "market already checked multiple times.",
+    title="A NEW SIGNAL, AND A MECHANISM THAT DOESN'T TRAVEL"
+)
 
 # MARKER_END_PART5
 
@@ -2060,6 +2132,20 @@ box(
     "mechanism was dormant before 2008 and activated after &mdash; a "
     "genuine causal story, not just a confirmed date.</b>",
     kind="fact", title="UPDATE FROM PART V.17"
+)
+box(
+    "Part V.18 then tested the same crash mechanism on NSE, and in the "
+    "process exposed a gap in this project's own earlier NSE test. "
+    "Part V.9's &quot;no significant NSE momentum alpha&quot; used a "
+    "static regression, never the rolling out-of-sample hedge used for "
+    "every US test since Part V.8. Applying that hedge to NSE for the "
+    "first time reaffirms no significant full-sample alpha, but finds "
+    "a tentative, &quot;promising not confirmed&quot; post-2008 signal "
+    "(daily p=0.044) the cruder test missed. The Bear &times; High-Vol "
+    "crash mechanism itself, however, does <b>not</b> replicate on "
+    "NSE (p=0.96) &mdash; NSE shows a plain Bear effect instead, not "
+    "the specific crash-rebound dynamic found for the US.",
+    kind="fact", title="UPDATE FROM PART V.18"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -2253,6 +2339,22 @@ bullets([
     "earlier rejection close off re-testing the same hypothesis "
     "somewhere new; a confirmed break date is a fact, not yet an "
     "explanation.",
+    "<b>&quot;Already checked&quot; and &quot;checked with your "
+    "current best method&quot; are not the same claim.</b> Part V.9's "
+    "NSE momentum test used a static full-sample regression. Applying "
+    "the rolling out-of-sample hedge this project built in Part V.8 to "
+    "NSE momentum for the first time reaffirmed no significant "
+    "full-sample alpha, but surfaced a tentative post-2008 signal "
+    "(daily p=0.044, monthly p=0.073) the cruder test lacked the power "
+    "to see &mdash; while the Bear &times; High-Volatility crash "
+    "mechanism confirmed for US momentum (Part V.17) turned out not to "
+    "replicate on NSE at all. A rejected finding on an already-tested "
+    "market is worth re-checking with each new methodology upgrade "
+    "this project builds, not just applying new methods to new "
+    "markets &mdash; the earlier rejection may have been correct for "
+    "the test it used and still be missing something a better test "
+    "would find; and a confirmed mechanism on one market is a "
+    "hypothesis, not a law, everywhere else.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -2460,6 +2562,27 @@ bullets([
     "for the original signal turns out to be real for momentum "
     "specifically, but conditional on era: dormant through the "
     "pre-crisis decades, active since.",
+    "<b>The momentum-crash mechanism does not replicate on NSE "
+    "&mdash; but a more rigorous re-test finds a tentative NSE "
+    "momentum signal a cruder test had missed (Part V.18).</b> Part "
+    "V.9's &quot;no significant NSE momentum alpha&quot; used a "
+    "static full-sample regression; applying the project's own "
+    "rolling out-of-sample hedge (used for every US momentum test "
+    "since Part V.8) to NSE momentum for the first time reaffirms no "
+    "significant alpha full-sample (daily p=0.170, monthly p=0.168), "
+    "but surfaces a new, &quot;promising, not confirmed&quot; "
+    "post-2008 signal (daily p=0.044, monthly p=0.073, marginal) "
+    "&mdash; with the real caveat that NSE's universe itself grew "
+    "from ~30 to 48 names over this window, so part of the "
+    "improvement may reflect a less thin cross-section rather than a "
+    "genuine regime change. Separately, Part V.17's exact Bear "
+    "&times; High-Vol interaction is never significant on NSE (p=0.96 "
+    "full-sample) &mdash; the specific crash-<i>rebound</i> mechanism "
+    "found for US momentum does not generalize. NSE does show a "
+    "plain, unconditional Bear effect instead (loses significantly in "
+    "any trailing bear market, p=0.002 full-sample) &mdash; a related "
+    "but mechanistically different, more generic bear-market "
+    "sensitivity.",
     "<b>The 52-week-high result's cause: resolved, and it's the boring "
     "answer.</b> Two behavioral/statistical explanations were ruled out by "
     "direct test: crash-window concentration (Part V.4) and a value/growth "
@@ -2587,13 +2710,23 @@ p("The project's real empirical result (Part V.3) delivered a finding more "
   "indistinguishable from the earlier full-sample rejection), then "
   "sharply, significantly active since. The one surviving finding in "
   "this entire guide now has not just a confirmed break date, but a "
-  "named, tested reason for it.")
+  "named, tested reason for it. Part V.18 then took that reason abroad, "
+  "to the one market this project had visited more than any other and "
+  "trusted least: does the same crash mechanism show up on NSE, which "
+  "lived through the same 2008 crisis? It doesn't &mdash; the specific "
+  "Bear-plus-High-Vol interaction never clears significance there. But "
+  "testing it required re-running NSE momentum through this project's "
+  "own best hedge methodology for the first time, not the cruder "
+  "regression Part V.9 had used, and that re-run found something new: "
+  "a tentative signal since 2008 the earlier test had lacked the power "
+  "to see. Even a market this project believed it had already closed "
+  "the book on had more to say once asked with a better instrument.")
 p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "investment framework that explicitly forbids trusting a blend without "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 16 then ran the India findings through "
+  "needed. Milestones 3 through 17 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -2631,7 +2764,11 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "second surviving finding entirely &mdash; while Part V.17, applying "
   "the same instinct to the finding that survived, gave momentum's own "
   "2008-09 break a mechanism it had lacked since Part V.13 first "
-  "described its shape.")
+  "described its shape. Part V.18 carried that mechanism to NSE and "
+  "found it didn't travel &mdash; but the trip wasn't wasted: testing "
+  "it exposed that NSE momentum itself had only ever been checked with "
+  "this project's cruder, pre-Part-V.8 method, and the better one found "
+  "a signal since 2008 that the earlier pass had missed entirely.")
 p("The fix that survived all of that scrutiny is more modest, and "
   "narrower, than any earlier draft of this conclusion claimed: there "
   "is no demonstrated, beta-independent stock-selection skill in the "
@@ -2673,7 +2810,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, thirteen times in a row "
+  "most recent, best-supported-looking result, fourteen times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -2691,29 +2828,36 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "that did what none of the previous eleven had: it asked whether the "
   "underlying data could even support the question being asked of it, "
   "and found that for reversal, across every one of those eleven "
-  "checks, it could not &mdash; and finally ran a thirteenth check "
-  "(Part V.17) that, for the first time, wasn't a correction at all: "
-  "it took the one result still standing and asked not whether it was "
-  "real, but why, reapplying a mechanism this project had itself "
-  "rejected elsewhere and finding it fit, conditional on era, exactly "
-  "where the break had been. Not finding an escape hatch, finding the "
+  "checks, it could not, ran a thirteenth check (Part V.17) that, for "
+  "the first time, wasn't a correction at all: it took the one result "
+  "still standing and asked not whether it was real, but why, "
+  "reapplying a mechanism this project had itself rejected elsewhere "
+  "and finding it fit, conditional on era, exactly where the break had "
+  "been &mdash; and finally ran a fourteenth check (Part V.18) that "
+  "took that same mechanism somewhere it had never been asked before, "
+  "found it didn't belong there, and, checking why, found that even the "
+  "project's own earlier verdict on that market had been reached with a "
+  "tool it had since outgrown. Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
   "even that discovery needed a proper test before it could be "
   "trusted, discovering that the entire multi-milestone "
-  "argument about reversal had been conducted on three stocks, and "
-  "finally discovering a real reason behind the one number that "
-  "survived all of it, are all findings: the project never found a "
-  "result, an explanation, or even a way of testing an explanation, "
-  "durable enough to stop re-checking. What survives is smaller and "
-  "more precisely qualified "
+  "argument about reversal had been conducted on three stocks, "
+  "discovering a real reason behind the one number that survived all of "
+  "it, and finally discovering that a market believed fully closed still "
+  "had something left to find, are all findings: the project never "
+  "found a result, an explanation, or even a way of testing an "
+  "explanation, durable enough to stop re-checking. What survives is "
+  "smaller and more precisely qualified "
   "than any single milestone first suggested: momentum's long leg, "
   "real and strong pre-2008-09, confirmed weakened specifically at "
   "that literature-motivated date though not provably the site of the "
   "single largest break in the series, and now understood to have "
   "broken because the classic momentum-crash mechanism &mdash; dormant "
   "for over three decades &mdash; finally activated, is this project's "
-  "one remaining, thirteen-times-checked finding. Short-term reversal is "
+  "one remaining, fourteen-times-checked finding, confirmed to be a "
+  "US-specific mechanism after failing to replicate on NSE. Short-term "
+  "reversal is "
   "not a second one: every version of its apparent edge &mdash; the "
   "original NSE Sharpe ratio, the full-sample beta-adjusted alpha, "
   "the pre-1994 era split, the continuous decay trend, the formal "
@@ -2722,11 +2866,17 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "One signal decays on its own schedule and by its own mechanism, "
   "sized more cautiously than the milestone that first found it would "
   "have suggested; the other was never there to begin with, once "
-  "checked against data good enough to ask the question. Both "
-  "conclusions, and one honest, thoroughly-stress-tested absence "
-  "&mdash; the most recent decade, for momentum, to size nothing "
-  "against &mdash; are what a research process built to distrust its "
-  "own best-looking result eventually converges on.")
+  "checked against data good enough to ask the question. One loose "
+  "thread remains open on purpose, not by oversight: a tentative, "
+  "&quot;promising not confirmed&quot; post-2008 NSE momentum signal, "
+  "found only because this project finally ran its own best method "
+  "against a market it thought it had already closed the book on "
+  "&mdash; exactly the kind of result this guide's own standards say "
+  "should not yet be trusted, and is not. Both settled conclusions, one "
+  "open question stated as one, and one honest, thoroughly-stress-tested "
+  "absence &mdash; the most recent decade, for momentum, to size "
+  "nothing against &mdash; are what a research process built to "
+  "distrust its own best-looking result eventually converges on.")
 
 # ============================================================ GLOSSARY
 story.append(PageBreak())

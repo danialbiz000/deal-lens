@@ -916,6 +916,58 @@ scaled up enough by 2008 for the classic crash dynamic to actually bite.
 
 **Reproduce this**: `python investigations/momentum_crash_mechanism_2008.py`.
 
+## Does the momentum-crash mechanism replicate on NSE? (Milestone 17)
+
+Milestone 16's finding was established on one market. This milestone
+(`investigations/momentum_crash_mechanism_nse.py`) tests it on NSE (India) — a market
+that lived through the same 2008 global crisis. Before trusting anything here, the
+Milestone 15 lesson applies: NSE momentum's decile long leg holds 6-10 names throughout
+2000-2021 (vs. the US mirror's notorious 2-4 names in the 1970s-80s), a reasonable
+portfolio size, not the thin-universe artifact that sank reversal.
+
+**A genuine methodological gap, closed first.** Milestone 8 tested NSE momentum's alpha
+with a single *static* full-sample beta regression and found no significant result. That
+is a materially cruder test than the rolling, out-of-sample hedge this project built in
+Milestone 7 and has used for every US momentum test since — but it had never been applied
+to NSE momentum before. Doing so now:
+
+| | Long leg, daily | Long leg, monthly |
+|---|---|---|
+| Full sample (2000-2021) | +3.56%/yr, p=0.170 (n.s.) | +4.55%/yr, p=0.168 (n.s.) |
+| Pre-2008-09 | -2.82%/yr, p=0.744 (n.s.) | -1.70%/yr, p=0.754 (n.s.) |
+| Post-2008-09 | +7.66%/yr, **p=0.044** | +7.94%/yr, p=0.073 (marginal) |
+
+**Full-sample, the more rigorous hedge reaffirms Milestone 8's conclusion** — no
+significant NSE momentum alpha, daily or monthly, now on firmer methodological footing.
+But a **post-2008-specific signal emerges** that the cruder full-sample test could not
+have seen: daily-frequency alpha is significant (p=0.044), monthly is marginal (p=0.073).
+This is genuinely new, but should be read as "promising, not confirmed" — this project's
+own standard label for exactly this strength of evidence (see Milestone 9) — and comes
+with a real caveat: NSE's universe itself grew from ~30 to 48 names over this window, so
+part of the post-2008 improvement in the strength of the signal may reflect a less thin,
+better-populated cross-section rather than a genuine change in the underlying economics.
+
+**The crash-specific mechanism itself does not replicate.** Applying Milestone 16's exact
+Bear × High-Vol regression to NSE: the interaction term is never significant (p=0.96
+full-sample, p=0.34 pre-2008, p=0.66 post-2008) — unlike the US, where it activated
+sharply post-2008. What NSE *does* show is a plain, unconditional **Bear** effect: the
+long leg loses significantly in any trailing bear market (coef=-0.00095/day, p=0.002
+full-sample; p=0.001 post-2008), regardless of whether volatility is simultaneously high.
+That is a related but mechanistically different pattern from the US's specific
+crash-*rebound* dynamic — NSE momentum looks bear-market-sensitive in general, not
+crash-rebound-sensitive in particular.
+
+**Updated conclusion**: this is not a repeat of the already-settled "does NSE momentum
+work" question — it is two new, honestly-qualified findings. The specific momentum-crash
+mechanism confirmed for the US in Milestone 16 is not universal; it does not show up in
+NSE the same way, even though NSE lived through the same 2008 crisis. Separately, a more
+rigorous re-test surfaced a genuinely new, if still tentative, post-2008 NSE momentum
+signal that a cruder test had missed — evidence that this project's own methodology
+upgrades are still capable of finding things the earlier, less careful passes did not,
+even on a market already checked multiple times.
+
+**Reproduce this**: `python investigations/momentum_crash_mechanism_nse.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -1147,6 +1199,12 @@ python investigations/reversal_1980_break_diagnostics.py
 # break?" above)
 python investigations/momentum_crash_mechanism_2008.py
 
+# Investigation — does the momentum-crash mechanism replicate on NSE, and does the
+# project's own more rigorous hedge methodology find NSE momentum alpha a cruder test
+# missed? (mechanism does not replicate; a tentative post-2008 signal does emerge; see
+# "Does the momentum-crash mechanism replicate on NSE?" above)
+python investigations/momentum_crash_mechanism_nse.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1332,3 +1390,17 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   turns out to be real for momentum specifically, but conditional on era: dormant through
   the pre-crisis decades, active since — consistent with a market where momentum-following
   capital had scaled up enough by 2008 for the mechanism to actually bite.
+- **The momentum-crash mechanism does not replicate on NSE — but a more rigorous re-test
+  finds a tentative NSE momentum signal a cruder test had missed (Milestone 17).**
+  Milestone 8's "no significant NSE momentum alpha" used a static full-sample regression;
+  applying the project's own rolling out-of-sample hedge (used for every US momentum test
+  since Milestone 7) to NSE momentum for the first time reaffirms no significant alpha
+  full-sample (daily p=0.170, monthly p=0.168), but surfaces a new, "promising, not
+  confirmed" post-2008 signal (daily p=0.044, monthly p=0.073, marginal) — with the real
+  caveat that NSE's universe itself grew from ~30 to 48 names over this window, so part of
+  the improvement may reflect a less thin cross-section rather than a genuine regime
+  change. Separately, Milestone 16's exact Bear × High-Vol interaction is never significant
+  on NSE (p=0.96 full-sample) — the specific crash-*rebound* mechanism found for US
+  momentum does not generalize. NSE does show a plain, unconditional Bear effect instead
+  (loses significantly in any trailing bear market, p=0.002 full-sample) — a related but
+  mechanistically different, more generic bear-market sensitivity.
