@@ -2191,6 +2191,67 @@ box(
     "sample simply has not contained one since 2009.",
     title="TESTED AND NOT FOUND, NOT JUST UNTESTED"
 )
+box(
+    "The crash-mechanism chain is now closed. Section 5.22 turns the "
+    "same pooled-window lesson back on this project's own other open "
+    "finding: the tentative NSE post-2008 momentum signal.",
+    kind="fact", title="UPDATE FROM SECTION 5.22"
+)
+
+h1("5.22  Milestone 21 &mdash; Does the tentative NSE signal survive its own named caveat?")
+p("Section 5.18's tentative post-2008 NSE momentum signal (long leg, "
+  "daily p=0.044, monthly p=0.073) shipped with an explicit, unresolved "
+  "caveat: NSE's universe grew from ~30 names in 2000 to a full 48 by "
+  "late 2010, so part of the apparent post-2008 improvement could "
+  "reflect a less thin, better-populated cross-section rather than a "
+  "genuine change in the underlying economics. That caveat was named "
+  "but never tested &mdash; until now. Checking the NSE mirror's daily "
+  "coverage directly finds the universe was still expanding through "
+  "2009 (45 of 48 names on average) but has been <b>perfectly fixed at "
+  "exactly 48 names, every single day, from 2010-11-04 through the end "
+  "of the sample (2021-04-30)</b> &mdash; 10.5 of the ~12.7 years in "
+  "Section 5.18's &quot;post-2008&quot; window. That split gives a "
+  "clean test: does the signal survive when restricted to only the "
+  "years where a growth confound is definitionally impossible, because "
+  "the universe never changed size at all?")
+data_table(
+    ["", "Post-2008 full", "Growing (2008-09 to 2010-11)", "Stable (2010-11+, fixed 48)"],
+    [
+        ["Days", "3,114", "535", "2,579"],
+        ["Daily ann. return / p", "+7.66%/yr, p=.044", "+23.72%/yr, p=.112 (n.s.)", "+4.60%/yr, p=.180 (n.s.)"],
+        ["Monthly ann. return / p", "+7.94%/yr, p=.073", "+21.55%/yr, p=.132 (n.s.)", "+4.96%/yr, p=.250 (n.s.)"],
+    ],
+    col_widths=[1.65*inch, 1.45*inch, 2.15*inch, 1.85*inch],
+    small=True,
+)
+p("<b>Not the confound named, but a different and arguably more serious "
+  "problem for the same finding.</b> The growth-confound story predicted "
+  "the <i>growing</i> years would show inflated, thin-universe "
+  "significance that the <i>stable</i> years would lack &mdash; but the "
+  "opposite pattern shows up in the point estimates: the growing "
+  "sub-period's annualized return is actually <i>larger</i> (+23.72%/yr "
+  "vs. +4.60%/yr), not smaller, so this is not evidence the universe "
+  "growth specifically inflated the signal. What it does show is "
+  "something this project has now learned to recognize from Sections "
+  "5.19-5.21: <b>the full-window significance is a pooling "
+  "artifact.</b> Neither natural sub-period &mdash; not the growing "
+  "years, not the fully stable, fixed-48-name years &mdash; reaches "
+  "significance on its own, at either frequency. The signal exists only "
+  "when the two are pooled together.")
+box(
+    "Section 5.18's own &quot;promising, not confirmed&quot; label "
+    "undersold how fragile this finding is. It is not just unconfirmed; "
+    "it does not survive being split by the one structural feature "
+    "(universe stability) this project already knew was a live concern, "
+    "in either direction the split could have gone. Applying the same "
+    "lesson Sections 5.19-5.21 learned about the crash mechanism &mdash; "
+    "a pooled window's significance can come from combining two periods "
+    "rather than a persisting effect in either &mdash; to this project's "
+    "own tentative finding rather than only to someone else's: the NSE "
+    "post-2008 momentum signal should be read as <i>not currently "
+    "demonstrated</i>, not merely as an open, promising thread.",
+    title="A NAMED CAVEAT, FINALLY TESTED"
+)
 
 # MARKER_END_PART5
 
@@ -2370,7 +2431,9 @@ box(
     "(daily p=0.044) the cruder test missed. The Bear &times; High-Vol "
     "crash mechanism itself, however, does <b>not</b> replicate on "
     "NSE (p=0.96) &mdash; NSE shows a plain Bear effect instead, not "
-    "the specific crash-rebound dynamic found for the US.",
+    "the specific crash-rebound dynamic found for the US. <i>(Part V.22 "
+    "later found this tentative NSE signal does not survive its own "
+    "named universe-growth caveat &mdash; see below.)</i>",
     kind="fact", title="UPDATE FROM PART V.18"
 )
 box(
@@ -2419,6 +2482,17 @@ box(
     "outside 2008-09, in the two next bear-adjacent episodes this sample "
     "contains, not merely untested.",
     kind="fact", title="UPDATE FROM PART V.21"
+)
+box(
+    "Part V.22 turned the pooled-window lesson from Parts V.19-21 back "
+    "on this project's own remaining open finding: Part V.18's tentative "
+    "NSE signal. Splitting at the date NSE's universe became permanently "
+    "fixed at 48 names, neither the growing sub-period nor the fully "
+    "stable sub-period is significant alone (p=0.11, p=0.18) &mdash; "
+    "only the pooled full window is. Not the growth confound named, but "
+    "the same pooling problem diagnosed in the crash mechanism, applied "
+    "to this project's own house-favored open thread.",
+    kind="fact", title="UPDATE FROM PART V.22"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -2675,6 +2749,20 @@ bullets([
     "leaving it flagged as an open thread &mdash; a mechanism that fails "
     "to reactivate when given a real chance to is materially stronger "
     "evidence than a mechanism that was simply never checked.",
+    "<b>A named caveat is a promise to test it, and a lesson learned "
+    "from one correction applies to your own other findings, not just "
+    "the one that taught it.</b> Part V.22 tested the growth-confound "
+    "caveat Part V.18 attached to the tentative NSE momentum signal, "
+    "splitting at the exact date NSE's universe became permanently "
+    "fixed at 48 names. The growing sub-period showed a larger point "
+    "estimate, not a smaller, thin-universe-inflated one, so the named "
+    "confound wasn't confirmed &mdash; but neither sub-period reached "
+    "significance alone, only the pooled full window, the identical "
+    "pooled-window pattern Parts V.19-21 had just diagnosed in the "
+    "crash mechanism. Apply a methodology lesson learned from one "
+    "finding to every other finding built the same way, including your "
+    "own project's most-favored remaining result &mdash; a named but "
+    "untested caveat is unfinished work, not a disclosed limitation.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -2897,7 +2985,9 @@ bullets([
     "&mdash; with the real caveat that NSE's universe itself grew "
     "from ~30 to 48 names over this window, so part of the "
     "improvement may reflect a less thin cross-section rather than a "
-    "genuine regime change. Separately, Part V.17's exact Bear "
+    "genuine regime change. <i>(Downgraded by Part V.22: testing this "
+    "exact caveat found neither sub-period significant alone &mdash; "
+    "see below.)</i> Separately, Part V.17's exact Bear "
     "&times; High-Vol interaction is never significant on NSE (p=0.96 "
     "full-sample) &mdash; the specific crash-<i>rebound</i> mechanism "
     "found for US momentum does not generalize. NSE does show a "
@@ -2970,6 +3060,27 @@ bullets([
     "a genuinely severe future crisis, as opposed to the milder 2011 and "
     "2015-16 episodes, remains open &mdash; this sample has not "
     "contained one since 2009.",
+    "<b>The tentative NSE post-2008 momentum signal (Part V.18) does not "
+    "survive splitting by universe stability &mdash; its own named "
+    "caveat, finally tested (Part V.22).</b> NSE's universe grew from "
+    "~30 names in 2000 to a fixed 48 by 2010-11-04, then stayed at "
+    "exactly 48 names every day through the end of the sample. "
+    "Splitting Part V.18's post-2008 window at that date: the growing "
+    "sub-period (2008-09 to 2010-11, n=535 days) shows a <i>larger</i> "
+    "point estimate (+23.72%/yr) than the full window but is not "
+    "significant (p=0.112) on its own; the fully stable, fixed-48-name "
+    "sub-period (2010-11 onward, n=2,579 days) shows a smaller point "
+    "estimate (+4.60%/yr) and is also not significant (p=0.180). "
+    "Neither direction of the growth-confound concern is confirmed "
+    "&mdash; the growing years are not where the significance is "
+    "concentrated &mdash; but a different, arguably more serious "
+    "problem is: the full-window significance (p=0.044) exists only "
+    "when the two sub-periods are pooled, echoing the exact "
+    "pooled-window lesson Parts V.19-21 learned about the crash "
+    "mechanism, applied here to this project's own remaining open "
+    "finding. The NSE post-2008 signal should now be read as not "
+    "currently demonstrated, not merely as an unconfirmed but promising "
+    "thread.",
     "<b>The 52-week-high result's cause: resolved, and it's the boring "
     "answer.</b> Two behavioral/statistical explanations were ruled out by "
     "direct test: crash-window concentration (Part V.4) and a value/growth "
@@ -3122,13 +3233,21 @@ p("The project's real empirical result (Part V.3) delivered a finding more "
   "windows found both answers at once &mdash; the crash-mechanism "
   "pattern held up under most choices tested, but the specific claim "
   "that no bear market recurred did not, vanishing the moment a shorter, "
-  "equally ordinary lookback was used instead.")
+  "equally ordinary lookback was used instead. Part V.22 then closed the "
+  "loop on this project's own last untested claim, aiming the same "
+  "instrument at itself one more time: the tentative NSE signal Part "
+  "V.18 had flagged, not as a finding, but as a &quot;promising, not "
+  "confirmed&quot; result with a named caveat nobody had gone back to "
+  "test. Splitting NSE's universe at the exact date it stopped growing "
+  "found the caveat as named wasn't the problem &mdash; but the same "
+  "pooled-window pattern this project had just learned to distrust in "
+  "the crash mechanism was.")
 p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "investment framework that explicitly forbids trusting a blend without "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 19 then ran the India findings through "
+  "needed. Milestones 3 through 21 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -3187,7 +3306,14 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "quiet &mdash; not because there was nothing to test it against this "
   "time, but because it was tested and simply didn't show up, with the "
   "one coefficient that did clear significance pointing the wrong way "
-  "for crash risk entirely.")
+  "for crash risk entirely. Part V.22 then took the same instrument this "
+  "project had just used on its own crash-mechanism finding and pointed "
+  "it at the one other open thread still standing: the tentative NSE "
+  "signal. It found the same failure mode again, in a completely "
+  "different corner of the project &mdash; a real, named caveat that "
+  "turned out not to be the actual problem, sitting next to a pooled-"
+  "window artifact nobody had thought to check until the crash mechanism "
+  "taught this project what to look for.")
 p("The fix that survived all of that scrutiny is more modest, and "
   "narrower, than any earlier draft of this conclusion claimed: there "
   "is no demonstrated, beta-independent stock-selection skill in the "
@@ -3229,7 +3355,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, seventeen times in a row "
+  "most recent, best-supported-looking result, eighteen times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -3267,14 +3393,21 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "fifteenth's own instrument: was &quot;no second bear market&quot; a "
   "fact about the market, or about the one specific window chosen to "
   "look for one, and found it was partly the latter &mdash; the "
-  "pattern survived nearby choices, the absence-claim did not, and "
-  "finally ran a seventeenth check (Part V.21) that did not just note "
+  "pattern survived nearby choices, the absence-claim did not, ran a "
+  "seventeenth check (Part V.21) that did not just note "
   "the sixteenth check's opening but walked through it: reran the "
   "mechanism against the two windows that now had a real second bear "
   "market to test against, and found silence &mdash; not the absence of "
   "a test this time, but a test that came back negative, with the one "
   "significant coefficient it produced running in the wrong direction "
-  "for crash risk altogether. "
+  "for crash risk altogether, and finally ran an eighteenth check (Part "
+  "V.22) that took the exact instrument the seventeenth had just used "
+  "&mdash; splitting a pooled window to see if a finding survived on "
+  "either side of the split &mdash; and pointed it at a completely "
+  "different result: this project's own tentative NSE signal, the one "
+  "open thread Part V.18 had left standing with a named but never-tested "
+  "caveat. The caveat, tested, wasn't the problem; the exact same pooling "
+  "artifact the seventeenth check had just diagnosed elsewhere was. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -3312,25 +3445,32 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "One signal decays on its own schedule and by its own mechanism, "
   "sized more cautiously than the milestone that first found it would "
   "have suggested; the other was never there to begin with, once "
-  "checked against data good enough to ask the question. One loose "
-  "thread remains open on purpose, not by oversight: a tentative, "
-  "&quot;promising not confirmed&quot; post-2008 NSE momentum signal, "
-  "found only because this project finally ran its own best method "
-  "against a market it thought it had already closed the book on "
-  "&mdash; exactly the kind of result this guide's own standards say "
-  "should not yet be trusted, and is not. A second question that looked "
-  "open as recently as Part V.20 &mdash; whether the momentum-crash "
-  "mechanism reactivated in 2011 or 2015-16, episodes this project's own "
-  "default bear-market definition was too conservative to register as "
-  "bear markets at all, but that two other, equally standard definitions "
-  "do register &mdash; is open no longer: Part V.21 ran the persistence "
-  "test against both of those definitions and the mechanism did not "
-  "reactivate in either, with the one coefficient that did clear "
-  "significance running the wrong direction for crash risk. Both settled "
-  "conclusions, one "
-  "open question stated as open, and one honest, thoroughly-stress-tested "
-  "absence &mdash; the most recent decade, for momentum, to size "
-  "nothing against &mdash; are what a research process built to "
+  "checked against data good enough to ask the question. Two threads "
+  "that looked open as recently as Part V.20 are open no longer. "
+  "Whether the momentum-crash mechanism reactivated in 2011 or 2015-16, "
+  "episodes this project's own default bear-market definition was too "
+  "conservative to register as bear markets at all, but that two other, "
+  "equally standard definitions do register: Part V.21 ran the "
+  "persistence test against both of those definitions and the mechanism "
+  "did not reactivate in either, with the one coefficient that did clear "
+  "significance running the wrong direction for crash risk. And whether "
+  "the tentative, &quot;promising not confirmed&quot; post-2008 NSE "
+  "momentum signal &mdash; found only because this project finally ran "
+  "its own best method against a market it thought it had already closed "
+  "the book on &mdash; was real: Part V.22 tested the one named caveat "
+  "attached to it and found a different, more fundamental problem "
+  "instead, the identical pooled-window artifact Part V.21 had just "
+  "taught this project to look for. Three settled conclusions now, not "
+  "one: a real, if narrower, US-specific finding for momentum; two "
+  "retractions, reversal's and the NSE signal's, reached for different "
+  "reasons but by the same refusal to let a promising number stand "
+  "without being taken apart. What remains open is not a specific "
+  "finding but a limit of the data itself: whether the crash mechanism "
+  "would reactivate in a genuinely severe future crisis, as opposed to "
+  "the milder episodes this sample happens to contain, is a question no "
+  "amount of further re-testing of this history can answer &mdash; the "
+  "most recent decade, for momentum, to size nothing against &mdash; and "
+  "is what a research process built to "
   "distrust its own best-looking result eventually converges on.")
 
 # ============================================================ GLOSSARY

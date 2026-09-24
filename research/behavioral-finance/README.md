@@ -1133,6 +1133,48 @@ sample simply has not contained one since 2009.
 
 **Reproduce this**: `python investigations/momentum_crash_mechanism_recurrence.py`.
 
+## Does the tentative NSE signal survive its own named caveat? (Milestone 21)
+
+Milestone 17's tentative post-2008 NSE momentum signal (long leg, daily p=0.044, monthly
+p=0.073) shipped with an explicit, unresolved caveat: NSE's universe grew from ~30 names in
+2000 to a full 48 by late 2010, so part of the apparent post-2008 improvement could reflect
+a less thin, better-populated cross-section rather than a genuine change in the underlying
+economics. That caveat was named but never tested — until now.
+Checking the NSE mirror's daily coverage directly finds the universe was still expanding
+through 2009 (45 of 48 names on average) but has been **perfectly fixed at exactly 48
+names, every single day, from 2010-11-04 through the end of the sample (2021-04-30)** — 10.5
+of the ~12.7 years in Milestone 17's "post-2008" window. That split gives a clean test:
+does the signal survive when restricted to only the years where a growth confound is
+definitionally impossible, because the universe never changed size at all?
+
+| | Post-2008 full (Milestone 17) | Growing (2008-09 to 2010-11) | Stable (2010-11 onward, fixed 48 names) |
+|---|---|---|---|
+| Days | 3,114 | 535 | 2,579 |
+| Daily ann. return / p-value | +7.66%/yr, **p=0.044** | +23.72%/yr, p=0.112 (n.s.) | +4.60%/yr, p=0.180 (n.s.) |
+| Monthly ann. return / p-value | +7.94%/yr, p=0.073 (marginal) | +21.55%/yr, p=0.132 (n.s.) | +4.96%/yr, p=0.250 (n.s.) |
+
+**Not the confound named, but a different and arguably more serious problem for the same
+finding.** The growth-confound story predicted the *growing* years would show inflated,
+thin-universe significance that the *stable* years would lack — but the opposite pattern
+shows up in the point estimates: the growing sub-period's annualized return is actually
+*larger* (+23.72%/yr vs. +4.60%/yr), not smaller, so this is not evidence the universe
+growth specifically inflated the signal. What it does show is something this project has
+now learned to recognize from Milestones 18-20: **the full-window significance is a
+pooling artifact.** Neither natural sub-period — not the growing years, not the fully
+stable, fixed-48-name years — reaches significance on its own, at either frequency. The
+signal exists only when the two are pooled together.
+
+**Updated conclusion**: Milestone 17's own "promising, not confirmed" label undersold how
+fragile this finding is. It is not just unconfirmed; it does not survive being split by
+the one structural feature (universe stability) this project already knew was a live
+concern, in either direction the split could have gone. Applying the same lesson Milestones
+18-20 learned about the crash mechanism — a pooled window's significance can come from
+combining two periods rather than a persisting effect in either — to this project's own
+tentative finding rather than only to someone else's: the NSE post-2008 momentum signal
+should be read as *not currently demonstrated*, not merely as an open, promising thread.
+
+**Reproduce this**: `python investigations/momentum_nse_universe_growth_check.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -1390,6 +1432,13 @@ python investigations/momentum_crash_regime_robustness.py
 # in 2011 or 2015-16?" above)
 python investigations/momentum_crash_mechanism_recurrence.py
 
+# Investigation — does the tentative NSE post-2008 momentum signal (Milestone 17) survive
+# splitting by universe stability, testing its own named growth-confound caveat? (not the
+# confound named, but a worse problem: neither the growing-universe years nor the fully
+# stable, fixed-48-name years is significant alone -- the signal only exists pooled; see
+# "Does the tentative NSE signal survive its own named caveat?" above)
+python investigations/momentum_nse_universe_growth_check.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1427,7 +1476,12 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    re-running the persistence test under the lookbacks where a real post-2010 bear regime
    exists and finding the mechanism did *not* reactivate in either 2011 or 2015-16 —
    closing Milestone 19's open thread and strengthening, not just leaving open, Milestone
-   18's "confirmed for one crisis" framing). Momentum's
+   18's "confirmed for one crisis" framing). A separate line of work applied that same
+   pooled-window lesson to this project's own remaining open, "promising not confirmed"
+   thread — the tentative NSE post-2008 momentum signal (Milestone 21): splitting by
+   universe stability (the specific caveat Milestone 17 itself named) found neither the
+   growing-universe years nor the fully stable years significant alone, downgrading the
+   signal from "promising, not confirmed" to "not currently demonstrated." Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -1605,7 +1659,11 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   confirmed" post-2008 signal (daily p=0.044, monthly p=0.073, marginal) — with the real
   caveat that NSE's universe itself grew from ~30 to 48 names over this window, so part of
   the improvement may reflect a less thin cross-section rather than a genuine regime
-  change. Separately, Milestone 16's exact Bear × High-Vol interaction is never significant
+  change. **[Downgraded by Milestone 21: testing this exact caveat found neither the
+  growing-universe sub-period nor the fully universe-stable sub-period significant on its
+  own — the full-window significance is a pooling artifact, not evidence of a genuine,
+  sub-period-independent signal. See "Does the tentative NSE signal survive its own named
+  caveat?" below.]** Separately, Milestone 16's exact Bear × High-Vol interaction is never significant
   on NSE (p=0.96 full-sample) — the specific crash-*rebound* mechanism found for US
   momentum does not generalize. NSE does show a plain, unconditional Bear effect instead
   (loses significantly in any trailing bear market, p=0.002 full-sample) — a related but
@@ -1662,3 +1720,18 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   now tested and not found outside 2008-09, not just untested. Whether it would reactivate
   in a genuinely severe future crisis, as opposed to the milder 2011 and 2015-16 episodes,
   remains open — this sample has not contained one since 2009.
+- **The tentative NSE post-2008 momentum signal (Milestone 17) does not survive splitting
+  by universe stability — its own named caveat, finally tested (Milestone 21).** NSE's
+  universe grew from ~30 names in 2000 to a fixed 48 by 2010-11-04, then stayed at exactly
+  48 names every day through the end of the sample. Splitting Milestone 17's post-2008
+  window at that date: the growing sub-period (2008-09 to 2010-11, n=535 days) shows a
+  *larger* point estimate (+23.72%/yr) than the full window but is not significant
+  (p=0.112) on its own; the fully stable, fixed-48-name sub-period (2010-11 onward, n=2,579
+  days) shows a smaller point estimate (+4.60%/yr) and is also not significant (p=0.180).
+  Neither direction of the growth-confound concern is confirmed — the growing years are not
+  where the significance is concentrated — but a different, arguably more serious problem
+  is: the full-window significance (p=0.044) exists only when the two sub-periods are
+  pooled, echoing the exact pooled-window lesson Milestones 18-20 learned about the crash
+  mechanism, applied here to this project's own remaining open finding. **The NSE post-2008
+  signal should now be read as not currently demonstrated, not merely as an unconfirmed but
+  promising thread.**

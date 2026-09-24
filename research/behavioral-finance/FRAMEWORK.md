@@ -335,6 +335,18 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   leaving it as a hypothetical; a mechanism that fails to reactivate when given the chance
   is stronger evidence for its being episode-specific than simply lacking a chance to
   reactivate.**
+- **Milestone 21 turned the pooled-window lesson from Milestones 18-20 back on this
+  project's own remaining open finding, and it didn't survive.** The tentative NSE
+  post-2008 momentum signal (Milestone 17) shipped with a named, untested caveat: NSE's
+  universe grew from ~30 to 48 names over the window. Splitting at 2010-11-04, when the
+  universe became permanently fixed at 48 names: the growing sub-period actually shows a
+  *larger* point estimate (+23.72%/yr) than the full window, not a smaller, thin-universe-
+  inflated one, so the growth-confound story specifically isn't confirmed — but neither
+  sub-period is significant alone (p=0.11, p=0.18), only the pooled full window (p=0.044).
+  **Rule: a project's own house methodology should be applied to its own findings as
+  readily as to a market it's studying — a lesson learned from correcting one result (the
+  crash mechanism) is worth testing against every other result built the same way (a pooled
+  significance test), not treated as specific to the finding that taught it.**
 
 ## 2. Risk-management lessons
 
@@ -551,6 +563,17 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     it flagged as an open thread — a mechanism that fails to reactivate when given a real
     chance to is materially stronger evidence than a mechanism that was simply never
     checked.**
+21. **A named caveat is a promise to test it, and a lesson learned from one correction
+    applies to your own other findings, not just the one that taught it.** Milestone 21
+    tested the growth-confound caveat Milestone 17 attached to the tentative NSE momentum
+    signal, splitting at the exact date NSE's universe became permanently fixed at 48
+    names. The growing sub-period showed a larger point estimate, not a smaller,
+    thin-universe-inflated one, so the named confound wasn't confirmed — but neither
+    sub-period reached significance alone, only the pooled full window, the identical
+    pooled-window pattern Milestones 18-20 had just diagnosed in the crash mechanism.
+    **Rule: apply a methodology lesson learned from one finding to every other finding
+    built the same way, including your own project's most-favored remaining result — a
+    named but untested caveat is unfinished work, not a disclosed limitation.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
