@@ -968,6 +968,73 @@ even on a market already checked multiple times.
 
 **Reproduce this**: `python investigations/momentum_crash_mechanism_nse.py`.
 
+## Was the 2008-09 crash mechanism a permanent regime change, or a one-off crisis? (Milestone 18)
+
+Milestone 16 tested the Bear × High-Volatility interaction on the *whole* post-2008-09
+block (Sept 2008 through the end of the US mirror's coverage in Nov 2017, n=2,309 days)
+and found it significant (p=0.008), reading that as evidence the crash mechanism
+"activated" for good after 2008. But that block pools two very different periods: the
+acute 2008-09 crisis itself, and eight subsequent years. This milestone
+(`investigations/momentum_crash_mechanism_persistence.py`) splits the post-2008-09 block
+at 2009-12-31 and re-runs the identical regression on each half separately, to test
+whether the crash-regime effect persisted past the crisis or was concentrated in it.
+
+The split immediately surfaces a structural fact this project had not checked before:
+**the US mirror's trailing-12-month market return never went negative again after
+September 2009**, all the way through the end of its coverage in November 2017 — the 2011
+European-debt-crisis selloff and the Aug 2015-Feb 2016 drawdown were sharp but both
+recovered within the 252-day lookback before ever registering as a sustained bear state
+under this project's own (Milestone 5) definition. Bear+High-Vol regime frequency by
+sub-period:
+
+| | Pre-2008-09 | Crisis (2008-09 to 2009-12) | Post-crisis (2010-01 onward) |
+|---|---|---|---|
+| Trading days | 8,983 | 337 | 1,972 |
+| Bear × High-Vol regime frequency | 6.1% | 62.3% | **0.0%** |
+| High-Vol × Bear interaction coef (long leg) | -0.00062/day, p=0.42 (n.s.) | +0.00115/day, p=0.26 (n.s.) | *cannot be estimated — no Bear days in this window* |
+| High-Vol alone (crisis window) | — | -0.00361/day, **p<0.0001** | — |
+| Bear alone (crisis window) | — | -0.00188/day, **p=0.036** | — |
+
+**Two refinements to Milestone 16's framing, not a retraction of its core fact.**
+Momentum's long leg still lost heavily during 2008-09 — that empirical fact is
+unchanged and confirmed again here. But two things Milestone 16's pooled test could not
+show on its own:
+
+1. **There is no evidence of a persisting post-2008 bear-market regime to test.** Because
+   the trailing-return bear flag never fired again after September 2009, the "post-2008-09"
+   window Milestone 16 tested is, for the interaction term's purposes, entirely carried by
+   the 16-month crisis sub-window — the other ~2,000 days post-crisis contribute zero
+   Bear+High-Vol observations. Framing this as a standing "post-2008 regime change" was an
+   overstatement; the honest description is "active during the 2008-09 crisis, untested
+   since, because no comparable bear market has recurred in this sample."
+2. **Isolated to the crisis window alone, the specific multiplicative interaction is not
+   what's doing the work.** When the regression is run on the crisis's 337 days by
+   themselves, the interaction term (`high_vol_x_bear`) is *not* significant (p=0.26 long
+   leg, p=0.31 combined) — instead, high volatility alone (p<0.0001) and the bear-market
+   flag alone (p=0.036 long leg, p=0.005 combined) each independently explain the losses.
+   Milestone 16's pooled significance for the *interaction specifically* came from
+   contrasting the crisis window against ~2,000 calm, non-bear post-crisis days as an
+   implicit control group — a valid test of "did something change after 2008," but weaker
+   evidence for "the interaction, specifically, is the mechanism" than the p=0.008 headline
+   number suggested in isolation.
+
+Neither sub-window shows any hedged-alpha significance in the plain daily/monthly check
+either (crisis: p=0.84 daily, n=15 months insufficient for HAC; post-crisis: p=0.86 daily,
+p=0.57 monthly) — consistent with Milestone 16's original post-2008 baseline-alpha result
+(p=0.20, n.s.).
+
+**Updated conclusion**: the 2008-09 break is real and tied to volatility and bear-market
+state, but this project has no evidence it is a *standing* feature of the post-2008 world,
+because the specific bear-market condition this project uses to define "crash regime" has
+not recurred since 2009 in this sample. A risk model built on Milestone 16's finding alone
+would be over-claiming "momentum has been crash-exposed since 2008"; the accurate claim is
+narrower: "momentum was crash-exposed during the one bear market this sample's post-2008
+window actually contains." Whether the mechanism would reactivate in a future bear market
+is a hypothesis this data cannot confirm or rule out — there simply hasn't been one to test
+against since.
+
+**Reproduce this**: `python investigations/momentum_crash_mechanism_persistence.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -1205,6 +1272,12 @@ python investigations/momentum_crash_mechanism_2008.py
 # "Does the momentum-crash mechanism replicate on NSE?" above)
 python investigations/momentum_crash_mechanism_nse.py
 
+# Investigation — was the 2008-09 crash-mechanism finding (Milestone 16) a permanent
+# post-2008 regime, or specific to the crisis itself? (no bear-market regime recurred
+# after Sept 2009 in this sample, so the interaction cannot even be tested post-crisis; see
+# "Was the 2008-09 crash mechanism a permanent regime change, or a one-off crisis?" above)
+python investigations/momentum_crash_mechanism_persistence.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1228,8 +1301,15 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    continuous decay-rate estimate showing its weakness is a sharp 2008-09 break rather than
    smooth decay (Milestone 13), and a formal, multiple-testing-corrected structural-break
    test (Milestone 14, confirming the specific 2008-09 hypothesis while declining to
-   confirm any single date as *the* dominant break). Momentum's pre-2008-09 alpha is this
-   repo's one surviving, repeatedly-stress-tested finding. **Short-term reversal's
+   confirm any single date as *the* dominant break), a causal-mechanism test (Milestone
+   16, finding the Daniel-Moskowitz momentum-crash dynamic explains the break), a
+   cross-market replication of that mechanism (Milestone 17, finding it does *not*
+   replicate on NSE — a US-specific effect), and a persistence test (Milestone 18, finding
+   the "post-2008" crash-regime significance is generated entirely by the 2008-09 crisis
+   itself, since no bear-market regime has recurred in this sample since — so it should be
+   read as "confirmed for one crisis," not "a standing post-2008 feature"). Momentum's
+   pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
+   **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
    it depended entirely on a severely thin (2-4 stock), survivorship-biased, and partly
    data-glitched 1972-1977 sample window, and vanishes completely (p=0.54-0.96) once that
@@ -1389,7 +1469,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   37%. The classic momentum-crash mechanism this project rejected for the original signal
   turns out to be real for momentum specifically, but conditional on era: dormant through
   the pre-crisis decades, active since — consistent with a market where momentum-following
-  capital had scaled up enough by 2008 for the mechanism to actually bite.
+  capital had scaled up enough by 2008 for the mechanism to actually bite. **[Refined,
+  not retracted, by Milestone 18: splitting "post-2008" into the 2008-09 crisis itself vs.
+  2010-onward found the trailing-return bear flag never fired again after September 2009 in
+  this sample — so the "active since" framing overstates what was tested. The mechanism is
+  confirmed for the one bear market this sample's post-2008 window actually contains, not
+  demonstrated to be a standing post-2008 feature. See "Was the 2008-09 crash mechanism a
+  permanent regime change, or a one-off crisis?" below.]**
 - **The momentum-crash mechanism does not replicate on NSE — but a more rigorous re-test
   finds a tentative NSE momentum signal a cruder test had missed (Milestone 17).**
   Milestone 8's "no significant NSE momentum alpha" used a static full-sample regression;
@@ -1404,3 +1490,20 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   momentum does not generalize. NSE does show a plain, unconditional Bear effect instead
   (loses significantly in any trailing bear market, p=0.002 full-sample) — a related but
   mechanistically different, more generic bear-market sensitivity.
+- **Milestone 16's "post-2008 crash regime" is really "the one crisis in the post-2008
+  window," not a standing feature — and in isolation, the interaction term itself is not
+  what's significant (Milestone 18).** Splitting the post-2008-09 block at 2009-12-31: the
+  US mirror's trailing-12-month market return never went negative again after September
+  2009, all the way through the end of its coverage (Nov 2017) — the 2011 and 2015-16
+  selloffs both recovered before the 252-day lookback registered them as sustained bear
+  states. That means Milestone 16's "post-2008" test is entirely carried, for the
+  interaction term, by the 337-day 2008-09 crisis window; the other ~2,000 post-crisis days
+  contribute zero Bear+High-Vol observations, so the interaction cannot even be estimated
+  there (rank-deficient regression). Worse for the "interaction" framing specifically: run
+  on the crisis window alone, the multiplicative term itself is *not* significant
+  (p=0.26 long leg, p=0.31 combined) — high volatility alone (p<0.0001) and the bear flag
+  alone (p=0.036-0.005) do the work instead. Read Milestone 16's finding as: real for the
+  2008-09 crisis specifically, evidence for volatility and bear-state each mattering
+  independently more than for their interaction being the mechanism, and untested — not
+  disconfirmed — as a standing post-2008 regime, since no comparable bear market has
+  recurred in this sample to test against.

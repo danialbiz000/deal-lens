@@ -1967,6 +1967,92 @@ box(
     "market already checked multiple times.",
     title="A NEW SIGNAL, AND A MECHANISM THAT DOESN'T TRAVEL"
 )
+box(
+    "Section 5.17's &quot;post-2008&quot; block pools the 2008-09 crisis "
+    "with eight subsequent years. Section 5.19 splits it and asks "
+    "whether the crash-regime effect actually persisted, or was the "
+    "crisis alone.",
+    kind="fact", title="UPDATE FROM SECTION 5.19"
+)
+
+h1("5.19  Milestone 18 &mdash; Does the 2008-09 crash mechanism persist after the crisis?")
+p("Section 5.17 tested the Bear &times; High-Volatility interaction on the "
+  "<i>whole</i> post-2008-09 block (Sept 2008 through the end of the US "
+  "mirror's coverage in Nov 2017, n=2,309 days) and found it significant "
+  "(p=0.008), reading that as the crash mechanism having &quot;activated&quot; "
+  "for good after 2008. But that block pools two very different periods: "
+  "the acute 2008-09 crisis itself, and eight subsequent years. This "
+  "milestone (<i>investigations/momentum_crash_mechanism_persistence.py</i>) "
+  "splits the post-2008-09 block at 2009-12-31 and re-runs the identical "
+  "regression on each half separately.")
+p("The split immediately surfaces a structural fact this project had not "
+  "checked before: <b>the US mirror's trailing-12-month market return "
+  "never went negative again after September 2009</b>, all the way through "
+  "the end of its coverage in November 2017 &mdash; the 2011 European-debt-"
+  "crisis selloff and the Aug 2015-Feb 2016 drawdown were sharp but both "
+  "recovered within the 252-day lookback before ever registering as a "
+  "sustained bear state under this project's own (Section 5.5) definition.")
+data_table(
+    ["", "Pre-2008-09", "Crisis (2008-09 to 2009-12)", "Post-crisis (2010-01+)"],
+    [
+        ["Trading days", "8,983", "337", "1,972"],
+        ["Bear x High-Vol frequency", "6.1%", "62.3%", "0.0%"],
+        ["Interaction coef (long leg)", "-0.00062/day, p=.42 (n.s.)", "+0.00115/day, p=.26 (n.s.)", "cannot be estimated"],
+        ["High-Vol alone (crisis)", "-", "-0.00361/day, p<.0001", "-"],
+        ["Bear alone (crisis)", "-", "-0.00188/day, p=.036", "-"],
+    ],
+    col_widths=[1.7*inch, 1.5*inch, 1.85*inch, 1.55*inch],
+    small=True,
+)
+p("<b>Two refinements to Section 5.17's framing, not a retraction of its "
+  "core fact.</b> Momentum's long leg still lost heavily during 2008-09 "
+  "&mdash; that empirical fact is unchanged and confirmed again here. But "
+  "two things Section 5.17's pooled test could not show on its own:")
+bullets([
+    "<b>There is no evidence of a persisting post-2008 bear-market regime "
+    "to test.</b> Because the trailing-return bear flag never fired again "
+    "after September 2009, the &quot;post-2008-09&quot; window Section "
+    "5.17 tested is, for the interaction term's purposes, entirely carried "
+    "by the 16-month crisis sub-window &mdash; the other ~2,000 days "
+    "post-crisis contribute zero Bear+High-Vol observations. Framing this "
+    "as a standing &quot;post-2008 regime change&quot; was an "
+    "overstatement; the honest description is &quot;active during the "
+    "2008-09 crisis, untested since, because no comparable bear market "
+    "has recurred in this sample.&quot;",
+    "<b>Isolated to the crisis window alone, the specific multiplicative "
+    "interaction is not what's doing the work.</b> Run on the crisis's "
+    "337 days by themselves, the interaction term is <i>not</i> "
+    "significant (p=0.26 long leg, p=0.31 combined) &mdash; instead, high "
+    "volatility alone (p&lt;0.0001) and the bear-market flag alone "
+    "(p=0.036 long leg, p=0.005 combined) each independently explain the "
+    "losses. Section 5.17's pooled significance for the interaction "
+    "specifically came from contrasting the crisis window against "
+    "~2,000 calm, non-bear post-crisis days as an implicit control group "
+    "&mdash; a valid test of &quot;did something change after 2008,&quot; "
+    "but weaker evidence for &quot;the interaction, specifically, is the "
+    "mechanism&quot; than the p=0.008 headline number suggested in "
+    "isolation.",
+])
+p("Neither sub-window shows any hedged-alpha significance in the plain "
+  "daily/monthly check either (crisis: p=0.84 daily, n=15 months "
+  "insufficient for HAC; post-crisis: p=0.86 daily, p=0.57 monthly) "
+  "&mdash; consistent with Section 5.17's original post-2008 "
+  "baseline-alpha result (p=0.20, n.s.).")
+box(
+    "The 2008-09 break is real and tied to volatility and bear-market "
+    "state, but this project has no evidence it is a <i>standing</i> "
+    "feature of the post-2008 world, because the specific bear-market "
+    "condition this project uses to define &quot;crash regime&quot; has "
+    "not recurred since 2009 in this sample. A risk model built on "
+    "Section 5.17's finding alone would be over-claiming &quot;momentum "
+    "has been crash-exposed since 2008&quot;; the accurate claim is "
+    "narrower: &quot;momentum was crash-exposed during the one bear "
+    "market this sample's post-2008 window actually contains.&quot; "
+    "Whether the mechanism would reactivate in a future bear market is a "
+    "hypothesis this data cannot confirm or rule out &mdash; there simply "
+    "hasn't been one to test against since.",
+    title="ONE CRISIS, NOT YET A REGIME"
+)
 
 # MARKER_END_PART5
 
@@ -2130,7 +2216,9 @@ box(
     "leg loses at roughly a 37% annualized rate post-2008, versus an "
     "insignificant ~11% pre-2008. <b>The classic momentum-crash "
     "mechanism was dormant before 2008 and activated after &mdash; a "
-    "genuine causal story, not just a confirmed date.</b>",
+    "genuine causal story, not just a confirmed date.</b> <i>(Part "
+    "V.19 later refined &mdash; did not retract &mdash; the &quot;activated "
+    "after&quot; framing: see below.)</i>",
     kind="fact", title="UPDATE FROM PART V.17"
 )
 box(
@@ -2146,6 +2234,23 @@ box(
     "NSE (p=0.96) &mdash; NSE shows a plain Bear effect instead, not "
     "the specific crash-rebound dynamic found for the US.",
     kind="fact", title="UPDATE FROM PART V.18"
+)
+box(
+    "Part V.19 then split Part V.17's &quot;post-2008&quot; block at "
+    "2009-12-31 and found the trailing-12-month market return never went "
+    "negative again after September 2009 through the end of the US "
+    "sample &mdash; so the interaction term's pooled significance was "
+    "carried entirely by the 337-day crisis window, and cannot even be "
+    "tested against the ~2,000 days since (zero Bear+High-Vol "
+    "observations there). Worse for the &quot;interaction&quot; framing "
+    "specifically: run on the crisis window alone, the multiplicative "
+    "term itself is not significant (p=0.26) &mdash; high volatility and "
+    "bear-state each mattered independently instead. <b>The 2008-09 "
+    "break is real; &quot;activated since 2008&quot; is not demonstrated "
+    "&mdash; it is confirmed for the one crisis this sample's post-2008 "
+    "window actually contains, and untested since, because no comparable "
+    "bear market has recurred.</b>",
+    kind="fact", title="UPDATE FROM PART V.19"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -2355,6 +2460,23 @@ bullets([
     "the test it used and still be missing something a better test "
     "would find; and a confirmed mechanism on one market is a "
     "hypothesis, not a law, everywhere else.",
+    "<b>A pooled multi-year regression's significant coefficient can be "
+    "one crisis acting as its own control group, not a persisting "
+    "regime.</b> Part V.19 split Part V.17's &quot;post-2008&quot; test "
+    "window at end-2009 and found the US mirror's trailing-12-month "
+    "market return never went negative again after September 2009 "
+    "through the end of the sample &mdash; so the interaction term found "
+    "significant across the whole post-2008 block had zero Bear+High-Vol "
+    "observations to draw on outside the 337-day crisis itself. Run on "
+    "the crisis window alone, the multiplicative interaction specifically "
+    "was not significant (p=0.26); volatility and bear-state each "
+    "mattered on their own instead. Before reading a coefficient "
+    "significant across a multi-year window as evidence of a standing "
+    "regime, split the window and check whether the conditioning regime "
+    "actually recurs throughout it &mdash; a test that silently rests on "
+    "one sub-period contrasted against a calm remainder is a test of "
+    "&quot;did something happen once,&quot; not &quot;is this now a "
+    "permanent feature.&quot;",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -2561,7 +2683,9 @@ bullets([
     "37%. The classic momentum-crash mechanism this project rejected "
     "for the original signal turns out to be real for momentum "
     "specifically, but conditional on era: dormant through the "
-    "pre-crisis decades, active since.",
+    "pre-crisis decades, active since. <i>(Refined, not retracted, by "
+    "Part V.19: the &quot;active since&quot; framing overstates what was "
+    "tested &mdash; see below.)</i>",
     "<b>The momentum-crash mechanism does not replicate on NSE "
     "&mdash; but a more rigorous re-test finds a tentative NSE "
     "momentum signal a cruder test had missed (Part V.18).</b> Part "
@@ -2583,6 +2707,30 @@ bullets([
     "any trailing bear market, p=0.002 full-sample) &mdash; a related "
     "but mechanistically different, more generic bear-market "
     "sensitivity.",
+    "<b>Milestone 16's &quot;post-2008 crash regime&quot; is really "
+    "&quot;the one crisis in the post-2008 window,&quot; not a standing "
+    "feature &mdash; and in isolation, the interaction term itself is "
+    "not what's significant (Part V.19).</b> Splitting the post-2008-09 "
+    "block at 2009-12-31: the US mirror's trailing-12-month market "
+    "return never went negative again after September 2009, through the "
+    "end of its coverage (Nov 2017) &mdash; the 2011 and 2015-16 "
+    "selloffs both recovered before the 252-day lookback registered them "
+    "as sustained bear states. That means Part V.17's &quot;post-2008&quot; "
+    "test is entirely carried, for the interaction term, by the 337-day "
+    "2008-09 crisis window; the other ~2,000 post-crisis days contribute "
+    "zero Bear+High-Vol observations, so the interaction cannot even be "
+    "estimated there (rank-deficient regression). Worse for the "
+    "&quot;interaction&quot; framing specifically: run on the crisis "
+    "window alone, the multiplicative term itself is <i>not</i> "
+    "significant (p=0.26 long leg, p=0.31 combined) &mdash; high "
+    "volatility alone (p&lt;0.0001) and the bear flag alone (p=0.036-"
+    "0.005) do the work instead. Read Part V.17's finding as: real for "
+    "the 2008-09 crisis specifically, evidence for volatility and "
+    "bear-state each mattering independently more than for their "
+    "interaction being the mechanism, and untested &mdash; not "
+    "disconfirmed &mdash; as a standing post-2008 regime, since no "
+    "comparable bear market has recurred in this sample to test "
+    "against.",
     "<b>The 52-week-high result's cause: resolved, and it's the boring "
     "answer.</b> Two behavioral/statistical explanations were ruled out by "
     "direct test: crash-window concentration (Part V.4) and a value/growth "
@@ -2688,7 +2836,7 @@ p("The project's real empirical result (Part V.3) delivered a finding more "
   "significant once that search was accounted for &mdash; and reversal's "
   "&quot;smooth&quot; decline turned out to hide a real, significant "
   "break of its own, decades earlier than anyone had looked. Part V.16 "
-  "then did what none of the previous fifteen checks had: it asked "
+  "then did what none of the previous checks had: it asked "
   "<i>why</i> that August 1980 date, rather than reporting it as a fact "
   "and moving on. The answer was not a market event. It was a decile "
   "portfolio of two to four stocks, drawn from a universe of today's "
@@ -2720,13 +2868,21 @@ p("The project's real empirical result (Part V.3) delivered a finding more "
   "regression Part V.9 had used, and that re-run found something new: "
   "a tentative signal since 2008 the earlier test had lacked the power "
   "to see. Even a market this project believed it had already closed "
-  "the book on had more to say once asked with a better instrument.")
+  "the book on had more to say once asked with a better instrument. "
+  "Part V.19 then turned that same instinct back on Part V.17's own "
+  "result: was the crash mechanism's &quot;post-2008&quot; significance "
+  "a standing regime, or one crisis pooled with eight quiet years? "
+  "Splitting the window apart found the market's own trailing-bear "
+  "indicator had not fired once since September 2009 &mdash; the "
+  "significance Part V.17 reported had nowhere else to come from but "
+  "the crisis itself, and, isolated there, even the specific "
+  "interaction term stopped being what carried it.")
 p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "investment framework that explicitly forbids trusting a blend without "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 17 then ran the India findings through "
+  "needed. Milestones 3 through 18 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -2768,7 +2924,12 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "found it didn't travel &mdash; but the trip wasn't wasted: testing "
   "it exposed that NSE momentum itself had only ever been checked with "
   "this project's cruder, pre-Part-V.8 method, and the better one found "
-  "a signal since 2008 that the earlier pass had missed entirely.")
+  "a signal since 2008 that the earlier pass had missed entirely. Part "
+  "V.19 then asked one question of Part V.17's own mechanism that no "
+  "earlier milestone had: not whether it was real, but whether it was "
+  "still happening, and found the &quot;post-2008&quot; window it was "
+  "tested against had, itself, only one crisis in it to be significant "
+  "about.")
 p("The fix that survived all of that scrutiny is more modest, and "
   "narrower, than any earlier draft of this conclusion claimed: there "
   "is no demonstrated, beta-independent stock-selection skill in the "
@@ -2810,7 +2971,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, fourteen times in a row "
+  "most recent, best-supported-looking result, fifteen times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -2833,11 +2994,18 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "still standing and asked not whether it was real, but why, "
   "reapplying a mechanism this project had itself rejected elsewhere "
   "and finding it fit, conditional on era, exactly where the break had "
-  "been &mdash; and finally ran a fourteenth check (Part V.18) that "
+  "been &mdash; ran a fourteenth check (Part V.18) that "
   "took that same mechanism somewhere it had never been asked before, "
   "found it didn't belong there, and, checking why, found that even the "
   "project's own earlier verdict on that market had been reached with a "
-  "tool it had since outgrown. Not finding an escape hatch, finding the "
+  "tool it had since outgrown, and finally ran a fifteenth check (Part "
+  "V.19) that turned the same &quot;is it still true&quot; question "
+  "back on the mechanism itself: split apart, the &quot;post-2008&quot; "
+  "window the mechanism was confirmed against turned out to contain "
+  "exactly one crisis and no second bear market to test persistence "
+  "against, and the specific interaction term stopped being what "
+  "carried the result once that one crisis was looked at on its own. "
+  "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
   "even that discovery needed a proper test before it could be "
@@ -2854,10 +3022,14 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "that literature-motivated date though not provably the site of the "
   "single largest break in the series, and now understood to have "
   "broken because the classic momentum-crash mechanism &mdash; dormant "
-  "for over three decades &mdash; finally activated, is this project's "
-  "one remaining, fourteen-times-checked finding, confirmed to be a "
-  "US-specific mechanism after failing to replicate on NSE. Short-term "
-  "reversal is "
+  "for over three decades &mdash; activated during the 2008-09 crisis, "
+  "is this project's "
+  "one remaining, fifteen-times-checked finding, confirmed to be a "
+  "US-specific mechanism after failing to replicate on NSE, and, on the "
+  "fifteenth check, confirmed for that one crisis specifically rather "
+  "than for a standing post-2008 regime &mdash; a distinction this "
+  "sample cannot yet resolve either way, since no second bear market "
+  "has occurred in it to test against. Short-term reversal is "
   "not a second one: every version of its apparent edge &mdash; the "
   "original NSE Sharpe ratio, the full-sample beta-adjusted alpha, "
   "the pre-1994 era split, the continuous decay trend, the formal "
@@ -2866,14 +3038,18 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "One signal decays on its own schedule and by its own mechanism, "
   "sized more cautiously than the milestone that first found it would "
   "have suggested; the other was never there to begin with, once "
-  "checked against data good enough to ask the question. One loose "
-  "thread remains open on purpose, not by oversight: a tentative, "
+  "checked against data good enough to ask the question. Two loose "
+  "threads remain open on purpose, not by oversight: a tentative, "
   "&quot;promising not confirmed&quot; post-2008 NSE momentum signal, "
   "found only because this project finally ran its own best method "
   "against a market it thought it had already closed the book on "
   "&mdash; exactly the kind of result this guide's own standards say "
-  "should not yet be trusted, and is not. Both settled conclusions, one "
-  "open question stated as one, and one honest, thoroughly-stress-tested "
+  "should not yet be trusted, and is not &mdash; and whether the "
+  "momentum-crash mechanism itself would reactivate in a future bear "
+  "market, a question this project's own best data cannot answer, "
+  "because the specific condition its own definition requires has not "
+  "recurred since 2009. Both settled conclusions, two "
+  "open questions stated as open, and one honest, thoroughly-stress-tested "
   "absence &mdash; the most recent decade, for momentum, to size "
   "nothing against &mdash; are what a research process built to "
   "distrust its own best-looking result eventually converges on.")
