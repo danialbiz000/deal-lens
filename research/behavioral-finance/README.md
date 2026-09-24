@@ -1282,6 +1282,41 @@ alongside momentum as a second confirmed ASX edge.
 
 **Reproduce this**: `python investigations/all_signals_asx_replication.py`.
 
+## Does ASX 52-week-high carry any skill beyond momentum? (Milestone 24)
+
+Milestone 23 left one specific check unrun: whether 52-week-high's significant ASX alpha
+survives once momentum is held constant as an explicit control, rather than just compared
+against it after the fact via a correlation coefficient. This milestone runs it directly:
+regress 52-week-high's out-of-sample-hedged return series on momentum's own hedged return
+series (both built identically to Milestones 22-23) and check whether 52-week-high's
+intercept — its alpha net of momentum exposure — is still significant.
+
+| | Long leg (daily / monthly) | Combined long-short (daily / monthly) |
+|---|---|---|
+| Intercept (alpha net of momentum) | p=0.318 / p=0.349 | p=0.747 / p=0.936 |
+| Momentum exposure coefficient | +0.265, **p=0.017** / +0.303, **p=0.015** | +0.876, **p<0.0001** / +0.842, **p<0.0001** |
+| R² | 0.089 / 0.082 | 0.658 / 0.596 |
+
+**Decisive: 52-week-high's ASX alpha does not survive controlling for momentum, in any of
+the four cuts.** Once momentum's own hedged return series is included as a regressor, the
+intercept collapses to statistically indistinguishable from zero at both frequencies, both
+legs — a sharp contrast with Milestone 23's uncontrolled check, where 52-week-high's alpha
+was significant at every one of those same four cuts. The momentum exposure coefficient,
+meanwhile, is highly significant everywhere, and for the combined long-short book it
+explains the large majority of 52-week-high's variance (R²=0.60-0.66, momentum coefficient
+≈0.84-0.88) — 52-week-high's combined book moves almost one-for-one with momentum's own.
+
+**Updated conclusion**: this confirms, rather than merely suggests, Milestone 23's "same
+mechanism" reading. ASX 52-week-high carries no demonstrated independent stock-selection
+skill once momentum exposure is accounted for — its apparent edge is momentum's own ASX
+alpha, viewed through a highly correlated construction, not a second, distinct behavioral
+anomaly. This closes the open thread Milestone 23 left explicitly unresolved, and restores
+52-week-high to the same "no independent skill demonstrated" verdict Milestones 6-7 reached
+on NSE and the US mirror — reached here by a different, more direct test (a momentum
+control, not a beta hedge), but landing at the same place.
+
+**Reproduce this**: `python investigations/momentum_control_asx_52w_high.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -1603,6 +1638,13 @@ python investigations/momentum_asx_replication.py
 # second independent edge; see "Completing the ASX picture" above)
 python investigations/all_signals_asx_replication.py
 
+# Investigation — does ASX 52-week-high's alpha survive momentum as an explicit control,
+# closing the thread Milestone 23 left open? (no -- intercept collapses to insignificant at
+# all four cuts (p=0.32-0.94) once momentum is included as a regressor, while momentum's own
+# coefficient is highly significant everywhere; confirms 52-week-high has no independent ASX
+# skill beyond momentum; see "Does ASX 52-week-high carry any skill beyond momentum?" above)
+python investigations/momentum_control_asx_52w_high.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1657,7 +1699,12 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    significant hedged alpha, but at 0.76-0.82 return correlation with momentum's own ASX
    result, this looks like the same mechanism viewed through a highly correlated signal,
    not a second independent ASX edge — left as an open, mechanism-ambiguous finding, not
-   folded in as a confirmed second anomaly. Momentum's
+   folded in as a confirmed second anomaly. That open thread was then closed directly
+   (Milestone 24): regressing 52-week-high's hedged returns on momentum's own hedged
+   returns, 52-week-high's intercept is statistically indistinguishable from zero at all
+   four cuts (p=0.32-0.94) while momentum's own coefficient is highly significant
+   everywhere — ASX 52-week-high carries no demonstrated skill independent of momentum,
+   confirming rather than merely suggesting Milestone 23's reading. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -1946,4 +1993,17 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   no further qualification. **Treat 52-week-high's ASX result as open and
   mechanism-ambiguous, not as a second confirmed ASX anomaly alongside momentum** — the
   natural next check (momentum as an explicit control in the same regression) has not yet
-  been run.
+  been run. **[Closed by Milestone 24: run directly, momentum as an explicit control fully
+  explains 52-week-high's ASX alpha — see below.]**
+- **ASX 52-week-high carries no skill independent of momentum, confirmed directly rather
+  than inferred from a correlation coefficient (Milestone 24).** Regressing 52-week-high's
+  out-of-sample-hedged returns on momentum's own hedged returns: 52-week-high's intercept
+  (alpha net of momentum exposure) is not significant at any of the four cuts (long leg
+  p=0.318 daily, p=0.349 monthly; combined book p=0.747 daily, p=0.936 monthly), while
+  momentum's own coefficient is highly significant everywhere (p≤0.017, and p<0.0001 for
+  the combined book, which momentum alone explains R²=0.60-0.66 of). This decisively
+  confirms Milestone 23's "same mechanism" reading rather than merely leaving it plausible:
+  ASX 52-week-high's apparent edge is momentum's own alpha viewed through a highly
+  correlated construction, restoring the same "no independent skill demonstrated" verdict
+  Milestones 6-7 reached on NSE and the US mirror — reached here by a direct control
+  regression rather than a beta hedge, but landing at the identical conclusion.

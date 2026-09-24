@@ -2388,6 +2388,58 @@ box(
     "control in the same regression) has not yet been run.",
     title="ONE MECHANISM, TWO CONSTRUCTIONS"
 )
+box(
+    "Section 5.24 left one check unrun: momentum as an explicit control. "
+    "Section 5.25 runs it directly.",
+    kind="fact", title="UPDATE FROM SECTION 5.25"
+)
+
+h1("5.25  Milestone 24 &mdash; Does ASX 52-week-high carry any skill beyond momentum?")
+p("Section 5.24 left one specific check unrun: whether 52-week-high's "
+  "significant ASX alpha survives once momentum is held constant as an "
+  "explicit control, rather than just compared against it after the "
+  "fact via a correlation coefficient. This milestone runs it directly: "
+  "regress 52-week-high's out-of-sample-hedged return series on "
+  "momentum's own hedged return series (both built identically to "
+  "Sections 5.23-5.24) and check whether 52-week-high's intercept "
+  "&mdash; its alpha net of momentum exposure &mdash; is still "
+  "significant.")
+data_table(
+    ["", "Long leg (daily / monthly)", "Combined (daily / monthly)"],
+    [
+        ["Intercept (alpha net of momentum)", "p=.318 / p=.349", "p=.747 / p=.936"],
+        ["Momentum exposure coefficient", "+0.265, p=.017 / +0.303, p=.015", "+0.876, p<.0001 / +0.842, p<.0001"],
+        ["R2", "0.089 / 0.082", "0.658 / 0.596"],
+    ],
+    col_widths=[2.0*inch, 2.5*inch, 2.5*inch],
+    small=True,
+)
+p("<b>Decisive: 52-week-high's ASX alpha does not survive controlling "
+  "for momentum, in any of the four cuts.</b> Once momentum's own "
+  "hedged return series is included as a regressor, the intercept "
+  "collapses to statistically indistinguishable from zero at both "
+  "frequencies, both legs &mdash; a sharp contrast with Section 5.24's "
+  "uncontrolled check, where 52-week-high's alpha was significant at "
+  "every one of those same four cuts. The momentum exposure "
+  "coefficient, meanwhile, is highly significant everywhere, and for "
+  "the combined long-short book it explains the large majority of "
+  "52-week-high's variance (R&sup2;=0.60-0.66, momentum coefficient "
+  "&asymp;0.84-0.88) &mdash; 52-week-high's combined book moves almost "
+  "one-for-one with momentum's own.")
+box(
+    "This confirms, rather than merely suggests, Section 5.24's &quot;same "
+    "mechanism&quot; reading. ASX 52-week-high carries no demonstrated "
+    "independent stock-selection skill once momentum exposure is "
+    "accounted for &mdash; its apparent edge is momentum's own ASX "
+    "alpha, viewed through a highly correlated construction, not a "
+    "second, distinct behavioral anomaly. This closes the open thread "
+    "Section 5.24 left explicitly unresolved, and restores 52-week-high "
+    "to the same &quot;no independent skill demonstrated&quot; verdict "
+    "Sections 5.7-5.8 reached on NSE and the US mirror &mdash; reached "
+    "here by a different, more direct test (a momentum control, not a "
+    "beta hedge), but landing at the same place.",
+    title="A CORRELATION CONFIRMED, DIRECTLY"
+)
 
 # MARKER_END_PART5
 
@@ -2652,6 +2704,15 @@ box(
     "mining divergence) viewed through two correlated constructions, not "
     "two independent confirmed anomalies.",
     kind="fact", title="UPDATE FROM PART V.24"
+)
+box(
+    "Part V.25 turned that correlation into a direct test: 52-week-high's "
+    "hedged returns regressed on momentum's own. The intercept collapsed "
+    "to insignificant at all four cuts (p=0.32-0.94); momentum's own "
+    "coefficient was significant everywhere, explaining up to 66% of the "
+    "combined book's variance. Confirms, not just suggests, that "
+    "ASX 52-week-high carries no skill independent of momentum.",
+    kind="fact", title="UPDATE FROM PART V.25"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -2952,6 +3013,18 @@ bullets([
     "confirmed one built from related inputs &mdash; a shared "
     "underlying driver can make one real economic effect look like two "
     "separate discoveries.",
+    "<b>A correlation is a hypothesis about a shared mechanism, not a "
+    "test of one &mdash; run the control regression once the tools "
+    "exist to.</b> Part V.25 regressed ASX 52-week-high's hedged "
+    "returns directly on momentum's, rather than resting on Part V.24's "
+    "0.76-0.82 correlation coefficient. 52-week-high's intercept "
+    "collapsed to insignificant at all four cuts (p=0.32-0.94); "
+    "momentum's own coefficient was significant everywhere, explaining "
+    "up to 66% of the combined book's variance. A correlation between "
+    "two findings motivates a control test; it is not a substitute for "
+    "running one &mdash; when a suspected shared mechanism can be "
+    "tested directly, the correlation coefficient that raised the "
+    "suspicion should be treated as a lead, not a conclusion.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -3332,7 +3405,26 @@ bullets([
     "its established null. Treat 52-week-high's ASX result as open and "
     "mechanism-ambiguous, not as a second confirmed ASX anomaly alongside "
     "momentum &mdash; the natural next check (momentum as an explicit "
-    "control in the same regression) has not yet been run.",
+    "control in the same regression) has not yet been run. <i>(Closed "
+    "by Part V.25: run directly, momentum fully explains 52-week-high's "
+    "ASX alpha &mdash; see below.)</i>",
+    "<b>ASX 52-week-high carries no skill independent of momentum, "
+    "confirmed directly rather than inferred from a correlation "
+    "coefficient (Part V.25).</b> Regressing 52-week-high's "
+    "out-of-sample-hedged returns on momentum's own hedged returns: "
+    "52-week-high's intercept (alpha net of momentum exposure) is not "
+    "significant at any of the four cuts (long leg p=0.318 daily, "
+    "p=0.349 monthly; combined book p=0.747 daily, p=0.936 monthly), "
+    "while momentum's own coefficient is highly significant everywhere "
+    "(p&le;0.017, and p&lt;0.0001 for the combined book, which momentum "
+    "alone explains R&sup2;=0.60-0.66 of). This decisively confirms Part "
+    "V.24's &quot;same mechanism&quot; reading rather than merely "
+    "leaving it plausible: ASX 52-week-high's apparent edge is "
+    "momentum's own alpha viewed through a highly correlated "
+    "construction, restoring the same &quot;no independent skill "
+    "demonstrated&quot; verdict Parts V.7-8 reached on NSE and the US "
+    "mirror &mdash; reached here by a direct control regression rather "
+    "than a beta hedge, but landing at the identical conclusion.",
     "<b>Transaction costs are a simple linear model</b>, not a real "
     "market-impact model; a strategy sized for real capital would need a "
     "proper implementation-shortfall estimate.",
@@ -3490,7 +3582,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 23 then ran the India findings through "
+  "needed. Milestones 3 through 24 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -3606,7 +3698,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, twenty times in a row "
+  "most recent, best-supported-looking result, twenty-one times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -3664,13 +3756,17 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "two-market design was itself sound, went looking for an independent "
   "third market to find out, and found that the search itself &mdash; "
   "ruling out one blocked or empty source after another &mdash; took "
-  "longer than the test that followed once a real one turned up, and "
-  "finally ran a twentieth check (Part V.24) that finished what the "
+  "longer than the test that followed once a real one turned up, ran a "
+  "twentieth check (Part V.24) that finished what the "
   "nineteenth had left half-open: a third market tested on one signal "
   "only. The second and third signals, run on it, gave two different "
   "answers &mdash; one a clean confirmation, one a result that looked "
   "new until the nineteenth check's own lesson (check what a finding "
-  "correlates with before counting it twice) was turned on it. "
+  "correlates with before counting it twice) was turned on it, and "
+  "finally ran a twenty-first check (Part V.25) that didn't stop at the "
+  "correlation the twentieth had flagged: it built the actual control "
+  "regression, and the result that had looked new dissolved entirely, "
+  "leaving nothing where a suspected second discovery had briefly stood. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -3742,27 +3838,34 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "checking its correlation with momentum's own ASX result (0.76-0.82) "
   "showed the two signals were picking substantially the same stocks, "
   "the same lesson Part V.23 itself had just taught this project applied "
-  "to a market it had barely finished exploring. Four settled conclusions "
-  "now, not three: a real, if narrower, US-specific finding for "
+  "to a market it had barely finished exploring. Part V.25 then closed "
+  "that thread properly: not a stronger correlation number, but "
+  "52-week-high's hedged returns regressed directly on momentum's own. "
+  "The intercept &mdash; alpha net of momentum exposure &mdash; "
+  "collapsed to indistinguishable from zero at all four cuts, while "
+  "momentum's own coefficient stayed significant throughout, explaining "
+  "most of the combined book's variance outright. A correlation had "
+  "raised the suspicion; a control regression settled it. Five settled "
+  "conclusions now, not four: a real, if narrower, US-specific finding for "
   "momentum, now independently replicated on a third market; two "
   "retractions, reversal's and the NSE signal's, reached for different "
   "reasons but by the same refusal to let a promising number stand "
-  "without being taken apart; and a genuinely new confirmation, arrived "
+  "without being taken apart; a genuinely new confirmation, arrived "
   "at not by re-examining an old result but by questioning whether this "
   "project's entire evidentiary base was wide enough to trust in the "
-  "first place. What remains open is not a specific "
-  "finding but three honest limits of the data itself: whether the crash "
+  "first place; and a fifth, closing a loose end rather than opening one "
+  "&mdash; ASX 52-week-high's apparent edge, checked directly and found "
+  "to be momentum's own edge wearing a different construction, not a "
+  "second discovery. What remains open is not a specific "
+  "finding but two honest limits of the data itself: whether the crash "
   "mechanism would reactivate in a genuinely severe future crisis, as "
   "opposed to the milder episodes this sample happens to contain, is a "
   "question no amount of further re-testing of this history can answer "
   "&mdash; the most recent decade, for momentum, to size nothing against "
-  "&mdash; whether ASX momentum's own edge is stable across "
+  "&mdash; and whether ASX momentum's own edge is stable across "
   "sub-periods the way the US finding eventually was shown to be, a "
   "check this project's newest market hasn't had enough history yet to "
-  "run, and whether ASX 52-week-high carries any skill beyond what its "
-  "correlation with momentum already explains, a check that needs "
-  "momentum held constant as an explicit control rather than compared "
-  "after the fact. All three are what a research process built to "
+  "run. Both are what a research process built to "
   "distrust its own best-looking result eventually converges on.")
 
 # ============================================================ GLOSSARY

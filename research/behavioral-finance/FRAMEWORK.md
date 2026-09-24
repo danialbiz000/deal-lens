@@ -376,6 +376,15 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   check whether the new result is actually independent of an already-confirmed finding
   before treating it as a second discovery — two signals moving together on one market can
   look like two confirmations while really being one.**
+- **Milestone 24 turned a suggestive correlation into a decisive test, closing the thread
+  Milestone 23 left explicitly open.** Regressing 52-week-high's ASX hedged returns on
+  momentum's own hedged returns: 52-week-high's intercept collapses to insignificant at all
+  four cuts (p=0.32-0.94), while momentum's coefficient is highly significant everywhere,
+  explaining up to 66% of the combined book's variance. Not a stronger correlation number —
+  a direct test that a correlation coefficient alone cannot substitute for. **Rule: a
+  correlation between two results is evidence for a shared mechanism, not proof of one —
+  when the tools exist to run the actual control regression, run it, rather than resting
+  the conclusion on the correlation coefficient that motivated the suspicion.**
 
 ## 2. Risk-management lessons
 
@@ -627,6 +636,15 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     correlation with an already-confirmed one built from related inputs — a shared
     underlying driver can make one real economic effect look like two separate
     discoveries.**
+24. **A correlation is a hypothesis about a shared mechanism, not a test of one — run the
+    control regression once the tools exist to.** Milestone 24 regressed ASX 52-week-high's
+    hedged returns directly on momentum's, rather than resting on Milestone 23's 0.76-0.82
+    correlation coefficient. 52-week-high's intercept collapsed to insignificant at all four
+    cuts (p=0.32-0.94); momentum's own coefficient was significant everywhere, explaining up
+    to 66% of the combined book's variance. **Rule: a correlation between two findings
+    motivates a control test; it is not a substitute for running one — when a suspected
+    shared mechanism can be tested directly, the correlation coefficient that raised the
+    suspicion should be treated as a lead, not a conclusion.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
