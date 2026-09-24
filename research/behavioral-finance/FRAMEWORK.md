@@ -363,6 +363,19 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   future milestones) benefit from knowing what was ruled out and why, not just what
   worked; and a short sample is a stated limitation, not a reason to withhold a
   significant result — say what the test can and can't yet establish.**
+- **Milestone 23 completed the ASX picture and reopened a question two other markets had
+  called resolved.** Testing 52-week-high and reversal on ASX with the same methodology as
+  momentum: reversal replicates the established null cleanly (p=0.49-0.82, no edge, exactly
+  as on NSE and the US mirror). 52-week-high does not — its hedged combined book is
+  significant at both frequencies, unlike the "zero alpha in 12 of 12 regressions" verdict
+  Milestones 6-7 reached on the other two markets. But 52-week-high's and momentum's ASX
+  leg returns correlate at 0.76-0.82, and their short legs carry nearly identical mean
+  betas (−1.36 vs. −1.26) — both signals are substantially picking the same names, pointing
+  to a shared driver (Australia's 2011-2015 mining divergence) rather than a second,
+  independent anomaly. **Rule: when a new market reopens a question resolved elsewhere,
+  check whether the new result is actually independent of an already-confirmed finding
+  before treating it as a second discovery — two signals moving together on one market can
+  look like two confirmations while really being one.**
 
 ## 2. Risk-management lessons
 
@@ -602,6 +615,18 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     the next project) benefits from knowing which doors were tried and found locked; and
     label a new result by what it has and hasn't yet been checked against, not by how
     clean it looks on first pass.**
+23. **A correlated pair of signals confirming together is not two confirmations — check
+    whether a new result is independent of an already-established one before counting it
+    separately.** Milestone 23 completed the ASX picture: reversal replicated its
+    established null cleanly, but 52-week-high showed significant hedged alpha where
+    Milestones 6-7 had found zero alpha in 12 of 12 regressions on the other two markets.
+    Checking the correlation between 52-week-high's and momentum's ASX leg returns (0.76
+    long leg, 0.82 combined) and their near-identical short-leg betas (−1.36 vs. −1.26)
+    showed the two signals were substantially picking the same names. **Rule: before
+    treating a new significant result as a second, independent finding, check its
+    correlation with an already-confirmed one built from related inputs — a shared
+    underlying driver can make one real economic effect look like two separate
+    discoveries.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

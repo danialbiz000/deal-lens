@@ -1231,6 +1231,57 @@ work, not a result claimed here.
 
 **Reproduce this**: `python investigations/momentum_asx_replication.py`.
 
+## Completing the ASX picture: do 52-week-high and reversal replicate too? (Milestone 23)
+
+Milestone 22 tested only momentum on ASX. NSE and the US mirror were both tested on all
+three signals from the first pass (Milestone 3) — ASX had an incomplete picture by
+comparison. This milestone runs 52-week-high and short-term reversal on ASX with the
+identical out-of-sample hedge + HAC methodology, closing that gap.
+
+| | Long leg (daily / monthly) | Combined long-short (daily / monthly) |
+|---|---|---|
+| 52-week-high | +7.00%/yr, p=0.099 (marg.) / +8.41%/yr, **p=0.0091** | +24.52%/yr, **p=0.0126** / +23.80%/yr, **p=0.0023** |
+| Short-term reversal | −4.04%/yr, p=0.491 (n.s.) / −3.40%/yr, p=0.529 (n.s.) | −3.14%/yr, p=0.818 (n.s.) / −2.49%/yr, p=0.719 (n.s.) |
+
+**Reversal replicates the established pattern: no edge, anywhere.** Consistent with
+Milestone 15's full retraction on NSE and the US mirror, reversal shows nothing on ASX
+either — not close to significant at either frequency, either leg. A third market, the
+identical null. This is a confirming result, not a new one, and needs no further
+qualification.
+
+**52-week-high does not — and this is a genuine update to a conclusion this project called
+"resolved" three signals ago.** Milestones 6-7 found 52-week-high's apparent edge on NSE
+and the US mirror was *entirely* a construction flaw: an uncontrolled long/short beta
+mismatch, with **zero** significant alpha in 12 of 12 hedged regressions across both
+markets and both frequencies. On ASX, the hedged combined book is significant at both
+frequencies (p=0.0126 daily, p=0.0023 monthly), and even the long leg alone clears
+significance monthly (p=0.0091). This is not the same failure mode Milestones 6-7 found —
+the alpha survives the hedge here, rather than vanishing once beta is controlled for.
+
+**But this likely isn't a second, independent anomaly — it's the same mechanism as
+momentum's ASX result, viewed through a highly correlated signal.** 52-week-high and 12-1
+momentum are both trend-following constructions (recent winners vs. losers), and on ASX
+their leg returns are correlated at **0.76 (long leg) and 0.82 (combined book)** — they are
+substantially picking the same names. The short leg's mean beta (−1.36) is close to
+momentum's own short-leg beta (−1.26) from Milestone 22, consistent with both signals'
+short sides being loaded with the same high-beta mining and resources stocks that
+underperformed through 2011-2015. The honest reading: ASX's 2011-2015 divergence was
+severe and persistent enough that *any* reasonable trend-following construction would have
+captured it, not that 52-week-high anchoring specifically is a real, independent
+behavioral edge on this market. Milestones 6-7's core finding — that 52-week-high carries
+no *independent* stock-selection skill beyond what a beta or momentum exposure would
+already explain — is not disproven here; it has simply never been tested with momentum as
+an explicit control on this market, which is the natural next check, not one this
+milestone runs.
+
+**Updated conclusion**: momentum remains this project's one demonstrably robust,
+independently-replicated finding across all three markets. 52-week-high's ASX result
+should be read as an open, mechanism-ambiguous finding — real and hedge-robust, but not
+yet shown to be *more* than momentum wearing a different construction — not folded in
+alongside momentum as a second confirmed ASX edge.
+
+**Reproduce this**: `python investigations/all_signals_asx_replication.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -1545,6 +1596,13 @@ python investigations/momentum_nse_universe_growth_check.py
 # market: does momentum replicate on ASX?" above)
 python investigations/momentum_asx_replication.py
 
+# Investigation — do 52-week-high and short-term reversal replicate on ASX too, completing
+# the three-signal picture Milestone 22 only ran for momentum? (reversal: no, consistent
+# with the established null everywhere; 52-week-high: significant hedged alpha, but highly
+# correlated (0.76-0.82) with momentum's own ASX result -- likely the same mechanism, not a
+# second independent edge; see "Completing the ASX picture" above)
+python investigations/all_signals_asx_replication.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1593,7 +1651,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    both legs significant at daily and monthly frequency on a proper out-of-sample hedge
    from the start — the cleanest of the three markets, though on this project's shortest
    sample history (2009-2015) and not yet checked for era-stability the way the US mirror
-   was. Momentum's
+   was. The other two signals were then tested on ASX too (Milestone 23, completing the
+   three-signal picture NSE/US had from the start): reversal replicates the established
+   null (no edge, consistent with its full retraction elsewhere); 52-week-high shows
+   significant hedged alpha, but at 0.76-0.82 return correlation with momentum's own ASX
+   result, this looks like the same mechanism viewed through a highly correlated signal,
+   not a second independent ASX edge — left as an open, mechanism-ambiguous finding, not
+   folded in as a confirmed second anomaly. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -1866,3 +1930,20 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   but not for the era-splits, structural-break tests, or persistence checks Milestones 9-14
   ran on the US mirror's 47-year history — ASX momentum has not yet been checked for
   stability across sub-periods the way every other surviving finding in this project has.
+- **52-week-high shows significant hedged alpha on ASX — reopening, not confirming, a
+  question Milestones 6-7 called resolved — but it is highly correlated with momentum's own
+  ASX result, not clearly a second independent edge (Milestone 23).** Milestones 6-7 found
+  52-week-high's NSE/US "edge" was entirely a beta-construction flaw: zero significant
+  alpha in 12 of 12 hedged regressions across both markets. On ASX, the hedged combined
+  book is significant at both frequencies (p=0.0126 daily, p=0.0023 monthly) — the alpha
+  survives the hedge this time, a different failure mode than before. But 52-week-high's
+  and momentum's ASX leg returns correlate at 0.76 (long leg) and 0.82 (combined book), and
+  the short leg's mean beta (−1.36) closely matches momentum's own (−1.26) — both signals
+  are substantially picking the same names, consistent with both simply capturing
+  Australia's 2011-2015 mining-sector divergence rather than 52-week-high anchoring being an
+  independent behavioral edge on this market. Reversal, tested alongside it, shows nothing
+  (p=0.49-0.82 across all four cuts) — a clean confirmation of its established null, needing
+  no further qualification. **Treat 52-week-high's ASX result as open and
+  mechanism-ambiguous, not as a second confirmed ASX anomaly alongside momentum** — the
+  natural next check (momentum as an explicit control in the same regression) has not yet
+  been run.

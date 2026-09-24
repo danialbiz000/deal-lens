@@ -2325,6 +2325,69 @@ box(
     "That is future work, not a result claimed here.",
     title="CLEANEST RESULT, SHORTEST HISTORY"
 )
+box(
+    "Section 5.23 tested only momentum on ASX. Section 5.24 completes the "
+    "picture: do 52-week-high and reversal replicate too?",
+    kind="fact", title="UPDATE FROM SECTION 5.24"
+)
+
+h1("5.24  Milestone 23 &mdash; Completing the ASX picture: do 52-week-high and reversal replicate too?")
+p("Section 5.23 tested only momentum on ASX. NSE and the US mirror were "
+  "both tested on all three signals from the first pass (Section 5.4) "
+  "&mdash; ASX had an incomplete picture by comparison. This milestone "
+  "runs 52-week-high and short-term reversal on ASX with the identical "
+  "out-of-sample hedge + HAC methodology, closing that gap.")
+data_table(
+    ["", "Long leg (daily / monthly)", "Combined (daily / monthly)"],
+    [
+        ["52-week-high", "+7.00%/yr, p=.099 / +8.41%/yr, p=.0091", "+24.52%/yr, p=.0126 / +23.80%/yr, p=.0023"],
+        ["Short-term reversal", "-4.04%/yr, p=.491 / -3.40%/yr, p=.529", "-3.14%/yr, p=.818 / -2.49%/yr, p=.719"],
+    ],
+    col_widths=[1.5*inch, 2.75*inch, 2.75*inch],
+    small=True,
+)
+p("<b>Reversal replicates the established pattern: no edge, anywhere.</b> "
+  "Consistent with Section 5.16's full retraction on NSE and the US "
+  "mirror, reversal shows nothing on ASX either &mdash; not close to "
+  "significant at either frequency, either leg. A third market, the "
+  "identical null. This is a confirming result, not a new one, and needs "
+  "no further qualification.")
+p("<b>52-week-high does not &mdash; and this is a genuine update to a "
+  "conclusion this project called &quot;resolved&quot; three signals "
+  "ago.</b> Sections 5.7-5.8 found 52-week-high's apparent edge on NSE "
+  "and the US mirror was <i>entirely</i> a construction flaw: an "
+  "uncontrolled long/short beta mismatch, with <b>zero</b> significant "
+  "alpha in 12 of 12 hedged regressions across both markets and both "
+  "frequencies. On ASX, the hedged combined book is significant at both "
+  "frequencies (p=0.0126 daily, p=0.0023 monthly), and even the long leg "
+  "alone clears significance monthly (p=0.0091). This is not the same "
+  "failure mode Sections 5.7-5.8 found &mdash; the alpha survives the "
+  "hedge here, rather than vanishing once beta is controlled for.")
+p("<b>But this likely isn't a second, independent anomaly &mdash; it's "
+  "the same mechanism as momentum's ASX result, viewed through a highly "
+  "correlated signal.</b> 52-week-high and 12-1 momentum are both "
+  "trend-following constructions (recent winners vs. losers), and on "
+  "ASX their leg returns are correlated at <b>0.76 (long leg) and 0.82 "
+  "(combined book)</b> &mdash; they are substantially picking the same "
+  "names. The short leg's mean beta (-1.36) is close to momentum's own "
+  "short-leg beta (-1.26) from Section 5.23, consistent with both "
+  "signals' short sides being loaded with the same high-beta mining and "
+  "resources stocks that underperformed through 2011-2015. The honest "
+  "reading: ASX's 2011-2015 divergence was severe and persistent enough "
+  "that <i>any</i> reasonable trend-following construction would have "
+  "captured it, not that 52-week-high anchoring specifically is a real, "
+  "independent behavioral edge on this market.")
+box(
+    "Momentum remains this project's one demonstrably robust, "
+    "independently-replicated finding across all three markets. "
+    "52-week-high's ASX result should be read as an open, "
+    "mechanism-ambiguous finding &mdash; real and hedge-robust, but not "
+    "yet shown to be <i>more</i> than momentum wearing a different "
+    "construction &mdash; not folded in alongside momentum as a second "
+    "confirmed ASX edge. The natural next check (momentum as an explicit "
+    "control in the same regression) has not yet been run.",
+    title="ONE MECHANISM, TWO CONSTRUCTIONS"
+)
 
 # MARKER_END_PART5
 
@@ -2577,6 +2640,18 @@ box(
     "and monthly (p=0.0141) frequency, the cleanest result of the three "
     "markets tested, on this project's shortest sample (six years).",
     kind="fact", title="UPDATE FROM PART V.23"
+)
+box(
+    "Part V.24 completed the ASX picture. Reversal replicated its "
+    "established null cleanly. 52-week-high did not: significant hedged "
+    "alpha at both frequencies, reopening a question Parts V.7-8 had "
+    "called resolved. But its ASX leg returns correlate 0.76-0.82 with "
+    "momentum's own, and its short-leg beta (-1.36) nearly matches "
+    "momentum's (-1.26) &mdash; the two signals are substantially "
+    "picking the same names. Read as one mechanism (ASX's 2011-2015 "
+    "mining divergence) viewed through two correlated constructions, not "
+    "two independent confirmed anomalies.",
+    kind="fact", title="UPDATE FROM PART V.24"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -2862,6 +2937,21 @@ bullets([
     "milestone benefits from knowing which doors were tried and found "
     "locked; and label a new result by what it has and hasn't yet been "
     "checked against, not by how clean it looks on first pass.",
+    "<b>A correlated pair of signals confirming together is not two "
+    "confirmations &mdash; check whether a new result is independent of "
+    "an already-established one before counting it separately.</b> Part "
+    "V.24 completed the ASX picture: reversal replicated its established "
+    "null cleanly, but 52-week-high showed significant hedged alpha "
+    "where Parts V.7-8 had found zero alpha in 12 of 12 regressions on "
+    "the other two markets. Checking the correlation between "
+    "52-week-high's and momentum's ASX leg returns (0.76 long leg, 0.82 "
+    "combined) and their near-identical short-leg betas (-1.36 vs. "
+    "-1.26) showed the two signals were substantially picking the same "
+    "names. Before treating a new significant result as a second, "
+    "independent finding, check its correlation with an already-"
+    "confirmed one built from related inputs &mdash; a shared "
+    "underlying driver can make one real economic effect look like two "
+    "separate discoveries.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -3220,7 +3310,29 @@ bullets([
     "returned ~20%/year. Once beta is controlled for, alpha is "
     "insignificant in all 12 regressions tested. There is no demonstrated "
     "stock-selection skill in this signal, in either direction, as "
-    "currently built.",
+    "currently built. <i>(Reopened, not overturned, by Part V.24: ASX "
+    "shows significant hedged 52-week-high alpha, but it correlates "
+    "0.76-0.82 with momentum's own ASX result &mdash; likely the same "
+    "mechanism, not new independent skill. See below.)</i>",
+    "<b>52-week-high shows significant hedged alpha on ASX &mdash; "
+    "reopening, not confirming, a question Parts V.7-8 called resolved "
+    "&mdash; but it is highly correlated with momentum's own ASX result, "
+    "not clearly a second independent edge (Part V.24).</b> On ASX, the "
+    "hedged combined book is significant at both frequencies (p=0.0126 "
+    "daily, p=0.0023 monthly) &mdash; the alpha survives the hedge this "
+    "time, a different failure mode than before. But 52-week-high's and "
+    "momentum's ASX leg returns correlate at 0.76 (long leg) and 0.82 "
+    "(combined book), and the short leg's mean beta (-1.36) closely "
+    "matches momentum's own (-1.26) &mdash; both signals are "
+    "substantially picking the same names, consistent with both simply "
+    "capturing Australia's 2011-2015 mining-sector divergence rather "
+    "than 52-week-high anchoring being an independent behavioral edge on "
+    "this market. Reversal, tested alongside it, shows nothing "
+    "(p=0.49-0.82 across all four cuts) &mdash; a clean confirmation of "
+    "its established null. Treat 52-week-high's ASX result as open and "
+    "mechanism-ambiguous, not as a second confirmed ASX anomaly alongside "
+    "momentum &mdash; the natural next check (momentum as an explicit "
+    "control in the same regression) has not yet been run.",
     "<b>Transaction costs are a simple linear model</b>, not a real "
     "market-impact model; a strategy sized for real capital would need a "
     "proper implementation-shortfall estimate.",
@@ -3378,7 +3490,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 22 then ran the India findings through "
+  "needed. Milestones 3 through 23 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -3494,7 +3606,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, nineteen times in a row "
+  "most recent, best-supported-looking result, twenty times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -3546,13 +3658,19 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "different result: this project's own tentative NSE signal, the one "
   "open thread Part V.18 had left standing with a named but never-tested "
   "caveat. The caveat, tested, wasn't the problem; the exact same pooling "
-  "artifact the seventeenth check had just diagnosed elsewhere was, and "
-  "finally ran a nineteenth check (Part V.23) that wasn't aimed at any "
+  "artifact the seventeenth check had just diagnosed elsewhere was, "
+  "ran a nineteenth check (Part V.23) that wasn't aimed at any "
   "existing finding at all: it asked whether this project's entire "
   "two-market design was itself sound, went looking for an independent "
   "third market to find out, and found that the search itself &mdash; "
   "ruling out one blocked or empty source after another &mdash; took "
-  "longer than the test that followed once a real one turned up. "
+  "longer than the test that followed once a real one turned up, and "
+  "finally ran a twentieth check (Part V.24) that finished what the "
+  "nineteenth had left half-open: a third market tested on one signal "
+  "only. The second and third signals, run on it, gave two different "
+  "answers &mdash; one a clean confirmation, one a result that looked "
+  "new until the nineteenth check's own lesson (check what a finding "
+  "correlates with before counting it twice) was turned on it. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -3615,7 +3733,16 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "back significant at both daily and monthly frequency &mdash; the "
   "cleanest replication in the whole guide, on the one market tested "
   "with this project's best method from the very first pass rather than "
-  "arriving at it after several corrections. Four settled conclusions "
+  "arriving at it after several corrections. Part V.24 then finished "
+  "what Part V.23 had left half-done: NSE and the US mirror were both "
+  "tested on all three signals from the start, ASX had only been tested "
+  "on one. Reversal, run on ASX, changed nothing &mdash; the same null "
+  "as everywhere else. 52-week-high did: significant hedged alpha, "
+  "reopening a question Parts V.7-8 had called resolved &mdash; until "
+  "checking its correlation with momentum's own ASX result (0.76-0.82) "
+  "showed the two signals were picking substantially the same stocks, "
+  "the same lesson Part V.23 itself had just taught this project applied "
+  "to a market it had barely finished exploring. Four settled conclusions "
   "now, not three: a real, if narrower, US-specific finding for "
   "momentum, now independently replicated on a third market; two "
   "retractions, reversal's and the NSE signal's, reached for different "
@@ -3624,15 +3751,18 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "at not by re-examining an old result but by questioning whether this "
   "project's entire evidentiary base was wide enough to trust in the "
   "first place. What remains open is not a specific "
-  "finding but two honest limits of the data itself: whether the crash "
+  "finding but three honest limits of the data itself: whether the crash "
   "mechanism would reactivate in a genuinely severe future crisis, as "
   "opposed to the milder episodes this sample happens to contain, is a "
   "question no amount of further re-testing of this history can answer "
   "&mdash; the most recent decade, for momentum, to size nothing against "
-  "&mdash; and whether ASX momentum's own edge is stable across "
+  "&mdash; whether ASX momentum's own edge is stable across "
   "sub-periods the way the US finding eventually was shown to be, a "
   "check this project's newest market hasn't had enough history yet to "
-  "run. Both are what a research process built to "
+  "run, and whether ASX 52-week-high carries any skill beyond what its "
+  "correlation with momentum already explains, a check that needs "
+  "momentum held constant as an explicit control rather than compared "
+  "after the fact. All three are what a research process built to "
   "distrust its own best-looking result eventually converges on.")
 
 # ============================================================ GLOSSARY
