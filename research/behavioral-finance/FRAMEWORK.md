@@ -197,7 +197,9 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   two of three signals' long legs, consistent with a market-wide explanation (the same
   1990s-2000s scaling-up of quantitative, cross-sectional strategies this project's own
   case studies on LTCM and the 2007 Quant Quake already document as reshaping US equity
-  markets over exactly this period) rather than a fluke specific to one anomaly.
+  markets over exactly this period) rather than a fluke specific to one anomaly. *[Since
+  retracted for reversal — Milestone 15 traced this "genuine pre-1994 alpha" to a thin,
+  survivorship-biased 1972-1977 sample window; see below.]*
 - **Milestone 13 quantified the decay directly instead of relying on a fixed 1994 cutoff,
   and found the two surviving long legs decay in genuinely different shapes.** A
   continuous linear-trend regression on momentum's long leg gives a slope that is not
@@ -214,7 +216,9 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   non-parametric rolling trajectory, before writing up "gradual decay" as the mechanism.**
   Momentum's weakness is better attributed to a 2008-09 regime shift (plausibly the same
   2009 momentum crash examined directly in Milestone 11) than to slow, 1990s
-  publication-driven crowding.
+  publication-driven crowding. *[Since retracted for reversal — Milestone 15 found this
+  "smooth trend" was itself an artifact of unreliable early data; momentum's finding here
+  is unaffected.]*
 - **Milestone 14 formalized the "broke around 2008-09" claim with a proper structural-break
   test, and the result is more conservative than Milestone 13's descriptive comparison.** A
   Chow-style test at a single, literature-motivated date (2008-09-01, from Daniel &
@@ -229,7 +233,33 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   regression alone suggested. **Rule: a descriptive "this cutoff fits better" comparison
   and a formal, multiple-testing-corrected structural-break test can disagree even when
   both are computed correctly on the same data — trust the formal test, and expect it to
-  be more conservative, not less, than the comparison that motivated running it.**
+  be more conservative, not less, than the comparison that motivated running it.** *[Since
+  retracted for reversal — Milestone 15 found this August 1980 "break" is a thin-universe
+  and data-quality artifact, not a real 1980 market event; momentum's finding here is
+  unaffected.]*
+- **Milestone 15 investigated the mechanism behind that August 1980 break, at explicit
+  request — and the answer reverses, not just refines, everything Milestones 9, 12, 13,
+  and 14 had concluded about reversal.** The reversal signal's decile long leg is only 2-4
+  stocks from 1972 through 1983, drawn from a total universe of 9-14 names — today's
+  mega-cap survivors (AAPL, JPM, JNJ, PG, XOM, and so on) backfilled to their earliest
+  available data, a textbook survivorship-biased sample where every name, by construction,
+  went on to become a winner. Two genuine, previously undocumented data anomalies compound
+  this (`WMT` round-trips -52%/+109% across two weeks in December 1974; `INTC` jumps +101%
+  and +51% in 1972, both consistent with split-adjustment errors in the raw feed).
+  Re-testing reversal's long-leg significance from a range of start dates shows its entire
+  positive-alpha claim (already only marginal at full sample, p=0.068) depends completely
+  on the unreliable 1972-1977 window: from any later start, including the exact date
+  Milestone 14's own search identified (1980-08-29), alpha is never significant (p=0.54 to
+  0.96, usually slightly negative). **Momentum, run through the identical thin, biased,
+  partly-glitched early data as a control, was unaffected — significant (p≤0.02) at every
+  comparable start date.** **Rule: when a signal's finding depends on data density you
+  haven't checked, check it before trusting the finding — a decile portfolio with 2-4
+  names is not a diversified strategy, it is a handful of individual stock bets, and
+  &quot;statistically significant&quot; on such a sample tells you about those specific
+  stocks' survivorship, not about a market-wide behavioral effect.** Short-term reversal's
+  apparent pre-2005 alpha is retracted outright, not narrowed: this project has found no
+  reliably demonstrated reversal edge anywhere in this dataset, in any leg, at any point in
+  the sample.
 
 ## 2. Risk-management lessons
 
@@ -356,6 +386,10 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     continuous trend and inspect a rolling, non-parametric trajectory to check whether the
     story you're about to tell (e.g., "publication-driven crowding") actually matches the
     shape of the data, or just happens to fall on the correct side of an arbitrary cutoff.**
+    *[Reversal's "genuinely smooth" decay cited here was itself later retracted by
+    Milestone 15 — it turned out to be an artifact of thin, unreliable early data, not a
+    real trend at all. The lesson (quantify continuously, don't stop at a binary split)
+    still holds; the specific reversal example does not.]*
 14. **Even a data-driven, non-arbitrary date can still be the wrong test — correct for the
     search itself before trusting it.** Milestone 13 picked September 2008 by eyeballing a
     rolling trajectory, which is a comparison, not a test: it doesn't say whether that split
@@ -401,9 +435,13 @@ of its retracted one (reversal).
   is genuine stock-selection skill or just uncontrolled market exposure, and
   a pre/post-publication decay split re-confirmed with an actual rolling,
   out-of-sample hedge (Milestones 9-10) for any signal drawn from published
-  academic research — checks most factor-data vendors don't surface at all,
-  and which this project's own experience shows can materially change the
-  answer versus an in-sample split alone.
+  academic research, and a minimum-data-density check flagging any period
+  where a decile portfolio would hold fewer than, say, 10 names (Milestone
+  15, which found a "genuine" edge that was actually 2-4 survivor-biased
+  stocks masquerading as a diversified portfolio) — checks most
+  factor-data vendors don't surface at all, and which this project's own
+  experience shows can materially change the answer versus an in-sample
+  split alone.
 - **Risk side**: the regime-switching stress-VaR methodology from
   `risk_simulation/fat_tails_vs_normal.py`, run against a client's actual
   position correlations and leverage, reporting calm-regime vs. stress-regime

@@ -808,6 +808,70 @@ usually narrows, rather than confirms, the simpler story that preceded it.
 
 **Reproduce this**: `python investigations/structural_break_test.py`.
 
+## Investigating the mechanism behind the 1980 reversal break — a major correction (Milestone 15)
+
+Milestone 14 found a genuine, statistically significant structural break for reversal
+around August 1980, but offered no explanation for the date. At the user's explicit
+request, this milestone (`investigations/reversal_1980_break_diagnostics.py`)
+investigates the mechanism directly rather than reporting the date and moving on — and
+the result substantially revises this project's understanding of reversal's status.
+
+**The universe is severely thin in the 1970s-early 1980s — 2-4 stocks, not a portfolio.**
+From 1972 through 1983, the reversal signal's decile "long leg" contains only **2-4
+stocks**, drawn from a total universe of just 9-14 names. The underlying universe itself
+is a small, hand-picked subset of *today's* largest surviving companies (AAPL, JPM, JNJ,
+PG, XOM, KO, PEP, WMT, HD, DIS, CVX, PFE, INTC, VZ, T, MRK, ABT, MCD) backfilled to their
+earliest available data — a textbook survivorship-biased sample: every name in this era's
+universe is, by construction, a company that *did* go on to become a mega-cap winner by
+2017. Any stock that dipped temporarily in the 1970s-80s was, in hindsight, virtually
+guaranteed to "bounce back," mechanically inflating an apparent reversal effect that has
+nothing to do with genuine investor overreaction.
+
+**A genuine data-quality defect, not previously flagged, compounds the problem.** Scanning
+this era for single-day moves exceeding 50% (the usual fingerprint of an unadjusted stock
+split) turns up two real anomalies: **WMT** drops 52% on 1974-12-06 and then jumps back
++109% twelve days later on 1974-12-18 (price round-trips from $0.0171 to $0.0082 and back
+— consistent with a split-adjustment error that later self-corrects in the raw feed), and
+**INTC** jumps +101% on 1972-01-27 and a further +51% on 1972-06-22. These are new,
+previously undocumented data-quality issues in the US Kaggle mirror, beyond the general
+"not an official source" caveat already in this README's "Data provenance" section.
+
+**The decisive test: does reversal's alpha survive excluding the thinnest years?** No.
+Re-running the identical out-of-sample-hedged significance test from a range of start
+dates:
+
+| Start date | Reversal ann. ret / p | Momentum (control) ann. ret / p |
+|---|---|---|
+| 1972-01-01 (full sample) | +2.64%/yr, p=0.068 (already only marginal) | +6.21%/yr, **p=0.0008** |
+| 1978-01-01 | -0.59%/yr, p=0.833 | +6.38%/yr, **p=0.0014** |
+| 1980-08-29 (the break date itself) | -1.24%/yr, p=0.922 | +6.20%/yr, **p=0.0027** |
+| 1985-01-01 | -1.20%/yr, p=0.935 | +5.90%/yr, **p=0.0056** |
+| 1990-01-01 | -0.73%/yr, p=0.896 | +5.47%/yr, **p=0.0192** |
+| 1995-01-01 | +0.48%/yr, p=0.581 | +3.75%/yr, p=0.121 |
+
+**Reversal's entire positive-alpha claim depends on the unreliable 1972-1977 window and
+disappears completely once it is excluded** — from any start date at or after 1978,
+including the Method B break date itself, p ranges 0.54-0.96 and the point estimate is
+usually slightly negative. **Momentum, run as a control through the exact same thin,
+survivorship-biased, partly data-glitched early universe, is unaffected**: it remains
+highly significant (p≤0.02) at every start date through 1990, fading only toward the
+already-established, externally-motivated 2008-09 territory from 1995 onward. The same
+data limitation affects both signals identically; only reversal's finding depended on it.
+
+**Updated conclusion — this reverses, not just refines, earlier milestones' framing for
+reversal.** The August 1980 "break" is not evidence of a real 1980 market event: it is the
+Quandt-Andrews search correctly detecting that reversal's entire apparent edge lives
+inside an unreliable, thin, survivorship-biased, and partly data-glitched early sample
+window, with nothing genuine on either side of any split point once that window is
+excluded. **The "reversal has genuine pre-2005 alpha" claim carried since Milestone 9
+through Milestone 14 should be treated as retracted, not merely decayed or narrowed:
+reversal shows no reliably demonstrated edge anywhere in this dataset once the unreliable
+years are excluded.** Momentum is unaffected by this correction and, if anything, comes
+out more strongly validated: the same diagnostic that broke reversal's finding left
+momentum's intact.
+
+**Reproduce this**: `python investigations/reversal_1980_break_diagnostics.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -852,6 +916,19 @@ data-vendor feed**, same caveat as the NSE mirror above. Specifics:
 - **Same survivorship caveat as the NSE mirror**: this is `DEFAULT_UNIVERSE`, a
   present-day-chosen large-cap list, not a point-in-time constituents file for any given
   historical date.
+- **The universe is severely thin before the mid-1980s, and this materially matters, not
+  just cosmetically (Milestone 15).** Only 9-14 of the 30 default tickers have any price
+  data before 1983; a 5-decile backtest's long leg is consequently just 2-4 stocks from
+  1972 through 1983. This thin-universe problem, combined with survivorship bias (every
+  name in this era's universe is, by construction, a company that went on to become a
+  mega-cap winner by 2017), was found to entirely explain short-term reversal's apparent
+  pre-1994 alpha — see "Investigating the mechanism behind the 1980 reversal break" above.
+- **Two specific unadjusted-split-like data anomalies were found in this era (Milestone
+  15), not previously documented**: `WMT` drops 52% on 1974-12-06 then jumps back +109% on
+  1974-12-18 (a round-trip, consistent with a split-adjustment error that later
+  self-corrects in the raw feed), and `INTC` jumps +101% on 1972-01-27 and +51% on
+  1972-06-22. Any result drawing on these tickers' data before ~1975 (INTC) or across
+  December 1974 (WMT) should be treated with added caution.
 
 ## Methodology
 
@@ -1014,6 +1091,12 @@ python investigations/decay_rate_estimation.py
 # real break is ~1980, not 2008; see "A formal structural-break test" above)
 python investigations/structural_break_test.py
 
+# Investigation — what caused the 1980 reversal break: a real market event, or thin/biased
+# data? (thin/biased data — reversal's entire alpha claim is retracted; momentum, tested as
+# a control, is unaffected; see "Investigating the mechanism behind the 1980 reversal
+# break" above)
+python investigations/reversal_1980_break_diagnostics.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1024,29 +1107,29 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
 
 1. **An investment framework** — a composite behavioral mispricing score usable as a
    screening/tilt signal alongside fundamental analysis, now with real empirical caveats
-   attached (see "Empirical results" through "Quantifying the decay" above): don't trust
-   it blind on a large-cap-only
-   universe, check which sub-signal is actually carrying any edge before combining them,
-   and beta-neutralize long-short legs before crediting any performance difference to a
-   behavioral effect rather than to uncontrolled market exposure. No cell in this project
-   currently survives every check applied at this repo's own highest standard of rigor:
-   US 12-1 momentum's long leg passed decomposition, cross-market replication, and a
-   beta-adjusted significance test, and even an in-sample publication-decay split
-   (Milestone 9) — but once tested with an actual rolling, out-of-sample hedge instead of
-   an in-sample regression (Milestone 10), its post-1994 alpha is not statistically
-   distinguishable from zero either, and Milestone 11's follow-up investigation confirmed
-   that null result is genuine, ongoing decay rather than an artifact of the 2009 crash or
-   the hedge's rolling window. Milestone 12 then showed this same "real pre-1994, decayed
-   since" pattern also appears in short-term reversal's long leg — so it is a market-wide
-   phenomenon, not a momentum-specific quirk — while 52-week-high never had genuine alpha
-   in either era. Milestone 13 then quantified the decay directly instead of assuming the
-   1994 cutoff: reversal's decline is well-described by a smooth, statistically significant
-   linear trend (zero-crossing ~2004), but momentum's is not — a rolling trajectory shows
-   momentum's alpha held flat and strong through 2008 and then broke sharply, a pattern
-   better described as a 2008-09 regime shift than gradual publication-driven decay. The
-   pre-2009 (momentum) / pre-2005ish (reversal) alpha remains this repo's one genuinely
-   robust, hedge-confirmed finding; nothing in this project has yet demonstrated a
-   forward-sizeable edge in the most recent decade, for any signal, in either direction.
+   attached (see "Empirical results" through "Investigating the mechanism behind the 1980
+   reversal break" above): don't trust it blind on a large-cap-only universe, check which
+   sub-signal is actually carrying any edge before combining them, and beta-neutralize
+   long-short legs before crediting any performance difference to a behavioral effect
+   rather than to uncontrolled market exposure. No cell in this project currently survives
+   every check applied at this repo's own highest standard of rigor: US 12-1 momentum's
+   long leg passed decomposition, cross-market replication, a beta-adjusted significance
+   test, an in-sample publication-decay split (Milestone 9), an actual rolling
+   out-of-sample hedge (Milestone 10), a deep investigation into whether that hedge's null
+   result was a crash or methodology artifact (Milestone 11, confirming it was neither), a
+   continuous decay-rate estimate showing its weakness is a sharp 2008-09 break rather than
+   smooth decay (Milestone 13), and a formal, multiple-testing-corrected structural-break
+   test (Milestone 14, confirming the specific 2008-09 hypothesis while declining to
+   confirm any single date as *the* dominant break). Momentum's pre-2008-09 alpha is this
+   repo's one surviving, repeatedly-stress-tested finding. **Short-term reversal's
+   apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
+   it depended entirely on a severely thin (2-4 stock), survivorship-biased, and partly
+   data-glitched 1972-1977 sample window, and vanishes completely (p=0.54-0.96) once that
+   window is excluded — including from the exact date Milestone 14's own structural-break
+   search identified.** Momentum, tested as a control against the identical unreliable
+   early data, was unaffected — its significance does not depend on those years at all.
+   Nothing in this project has demonstrated a forward-sizeable edge in the most recent
+   decade or so, for any signal, in either direction.
 2. **Risk-management lessons** — a stress-testing playbook (derived from the Q1 simulation)
    for any leveraged or "market-neutral" strategy: never calibrate tail risk on a calm-regime
    correlation matrix alone.
@@ -1093,15 +1176,20 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
 - **Momentum and reversal did not replicate consistently across the two markets tested**
   (see "Replication on a second market") — treat any single-market anomaly finding in this
   repo as provisional until it's been checked on at least one more, independent universe.
-- **Short-term reversal's "positive" empirical result is retracted at full-sample level
-  (Milestone 8) — but its long leg specifically turns out to be a decayed, not a never-real,
-  effect (Milestone 12).** Milestone 8 ran the same CAPM beta check that debunked the
-  52-week-high signal against reversal too: none of its 12 full-sample alpha tests (2
-  markets × 3 legs × 2 frequencies) are significant. That full-sample verdict is accurate but
-  incomplete: Milestone 12 later found reversal's long leg carries a real, significant
-  pre-1994 alpha (+5.31%/yr, p=0.046) that decays fully to noise post-1994 (+0.25%/yr,
-  p=0.629) — the identical pattern found for momentum, invisible in a single full-sample
-  average. Reversal's short leg and combined book remain non-significant in every era tested.
+- **Short-term reversal's "positive" empirical result is retracted, fully, at every level
+  this project checked (Milestones 8, then 12, then 15 — a claim that briefly looked
+  rehabilitated before being retracted again, more thoroughly).** Milestone 8's full-sample
+  CAPM beta check found none of reversal's 12 alpha tests significant. Milestone 12 then
+  found this incomplete: reversal's long leg carried a real-looking, significant pre-1994
+  alpha (+5.31%/yr, p=0.046) hidden inside that full-sample average. But Milestone 15
+  traced that apparent pre-1994 alpha to its source and found it depends entirely on a
+  severely thin (2-4 stock), survivorship-biased, partly data-glitched 1972-1977 sample
+  window — it vanishes completely (p=0.54-0.96, often slightly negative) from any start
+  date at or after 1978, including the exact date Milestone 14's own structural-break
+  search identified as reversal's "true" break (1980-08-29, p=0.922). Momentum, tested
+  through the identical unreliable early data as a control, was unaffected (p≤0.02 at
+  every comparable start date). **Reversal shows no reliably demonstrated edge anywhere in
+  this dataset, in any leg, at any point in the sample, once properly checked.**
 - **US 12-1 momentum's alpha decays after publication, as expected (Milestone 9) — and
   does not survive an actual out-of-sample hedge post-1994 (Milestone 10, superseding
   Milestone 9's framing).** Milestone 9's in-sample per-era regression found the long
@@ -1142,7 +1230,10 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   alpha (p=0.046) fully decayed to noise post-1994 (p=0.629) — which Milestone 8's
   full-sample regression correctly found non-significant overall but could not distinguish
   from "never real." Treat Milestone 8's reversal retraction as accurate at the full-sample
-  level but incomplete: the long leg was a genuine, decayed effect, not pure noise.
+  level but incomplete: the long leg was a genuine, decayed effect, not pure noise. **[Since
+  retracted: Milestone 15 traced this "genuine pre-1994 alpha" to a thin, survivorship-biased
+  1972-1977 sample window and found it does not survive removing those years — see
+  "Investigating the mechanism behind the 1980 reversal break" above.]**
 - **The 1994 cutoff, while directionally right for momentum, misdescribes its shape and
   timing (Milestone 13).** Quantifying the decay as a continuous linear trend rather than a
   binary split finds momentum's slope is *not* statistically significant (p=0.15) — the
@@ -1155,7 +1246,11 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   in Milestone 11) than gradual, 1994-onward publication decay. Reversal's decay, by
   contrast, *is* well-described by a smooth linear trend (slope -0.41%/yr, p=0.026, implied
   zero-crossing ~November 2004) — the two signals' declines have genuinely different shapes,
-  and neither should be assumed to generalize to the other.
+  and neither should be assumed to generalize to the other. **[Since retracted for reversal:
+  Milestone 15 found this "smooth trend" is itself an artifact — reversal has no significant
+  alpha at all once the thin, unreliable 1972-1977 window is excluded, so there is no real
+  decline left to describe as smooth or otherwise. Momentum's finding in this bullet is
+  unaffected.]**
 - **A formal structural-break test qualifies both of Milestone 13's stories further
   (Milestone 14).** Momentum's "broke around 2008-09" claim was descriptive — the date was
   chosen by inspecting the data. A properly specified Chow test at the literature-motivated
@@ -1170,4 +1265,9 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   significant break (bootstrap p=0.048) around **August 1980** — the sharp early decline
   from reversal's extraordinarily high late-1970s level, not a smoothly accumulating
   multi-decade slope. Treat both signals' "when did it break" story as more conservative
-  and more precisely qualified than Milestone 13's descriptive framing.
+  and more precisely qualified than Milestone 13's descriptive framing. **[Since retracted
+  for reversal: Milestone 15 investigated this August 1980 break directly and found it
+  reflects a thin (2-4 stock), survivorship-biased, partly data-glitched early universe, not
+  a real 1980 market event — reversal's alpha vanishes entirely from any start date at or
+  after 1978, including 1980-08-29 itself (p=0.922). Momentum's break finding in this
+  bullet is unaffected — the same diagnostic left it intact.]**
