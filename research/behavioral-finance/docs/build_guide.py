@@ -2581,6 +2581,77 @@ box(
     "by decade.",
     title="A REAL EFFECT, BUT A DECADE WIDE, NOT FORTY-SEVEN YEARS WIDE"
 )
+box(
+    "Section 5.28 turns Section 5.27's own two tools back on this "
+    "project's older, cumulative-sweep-validated conclusions &mdash; "
+    "reversal's null, momentum's pre-1994 significance, and ASX's two "
+    "positive findings &mdash; none of which had ever been checked this "
+    "way before.",
+    kind="fact", title="UPDATE FROM SECTION 5.28"
+)
+
+h1("5.28  Milestone 27 &mdash; A retroactive audit of the project's own older conclusions")
+p("The cumulative &quot;from-date-X-onward&quot; sweep methodology "
+  "Section 5.27 just replaced was used <i>first</i>, back in Sections "
+  "5.16-5.17, to validate the two conclusions this project has rested "
+  "on ever since: reversal's edge is null &quot;from every start "
+  "date,&quot; and momentum's pre-1994 edge is significant &quot;from "
+  "every start date through 1990.&quot; Neither had ever been "
+  "re-checked with the non-overlapping-decade version of the test. Nor "
+  "had ASX's two positive findings (momentum's cleanest replication "
+  "yet, and low-volatility's long-leg signal) ever had the "
+  "ticker-concentration/leave-one-out check, despite using an "
+  "identical decile methodology. This milestone runs both audits.")
+data_table(
+    ["Decade", "Reversal ann.ret / p", "Momentum ann.ret / p"],
+    [
+        ["1970-1979", "+21.38%, p=0.0022", "+5.91%, p=0.168"],
+        ["1980-1989", "-1.25%, p=0.937", "+8.48%, p=0.045"],
+        ["1990-1999", "-3.48%, p=0.539", "+11.47%, p=0.014"],
+        ["2000-2009", "+1.95%, p=0.492", "+3.96%, p=0.318"],
+        ["2010-2017", "-0.52%, p=0.951", "+0.09%, p=0.865"],
+    ],
+    col_widths=[1.5*inch, 3.2*inch, 3.2*inch],
+    small=True,
+)
+p("<b>Part A, US mirror.</b> Reversal's decade breakdown "
+  "<i>confirms, not contradicts</i>, Section 5.16's diagnosis: its one "
+  "significant decade (1970-1979) directly contains the exact "
+  "1972-1977 thin-universe window Section 5.16 traced the entire "
+  "&quot;edge&quot; to, and every later decade is null &mdash; an "
+  "independent confirmation, via a different method, that reversal's "
+  "apparent edge never existed outside that unreliable early data. "
+  "Momentum's breakdown <i>refines, without correcting</i>, its own "
+  "headline claim: the significance driving &quot;every start date "
+  "through 1990&quot; lives specifically in the 1980s and 1990s, not "
+  "the 1970s (positive but not significant, p=0.168) &mdash; unlike "
+  "reversal, momentum's pre-1994 edge does not depend on the "
+  "unreliable early window, which is if anything firmer footing than "
+  "the original cumulative sweep showed on its own.")
+p("<b>Part B, ASX.</b> ASX momentum's long leg (63 rebalances): RHC "
+  "(Ramsay Health Care) present in 49/63 months (78%); dropping it "
+  "entirely, the result stays highly significant (daily ann.ret "
+  "+10.99%, p=0.0082; monthly ann.ret +9.88%, p=0.0124). ASX "
+  "low-volatility's long leg (69 rebalances): three names &mdash; CBA, "
+  "CSL, TLS &mdash; present in <b>100%</b> of months; dropping CBA, "
+  "the result stays significant (daily ann.ret +7.51%, p=0.092; "
+  "monthly ann.ret +8.52%, p=0.0096). Neither is a single-stock "
+  "artifact &mdash; but the 100%-presence finding is itself worth "
+  "reporting: on this dataset, ASX's low-volatility long leg is "
+  "economically closer to &quot;hold the same 3-5 ultra-stable blue "
+  "chips almost permanently&quot; than a fast-rotating cross-sectional "
+  "bet.")
+box(
+    "This audit is confirmatory, not corrective &mdash; every finding "
+    "it touched survives, and momentum's pre-1994 US result comes out "
+    "on firmer ground than before, since unlike reversal its "
+    "significance was never resting on the unreliable early window. "
+    "The value of running it wasn't finding a new problem; it was "
+    "confirming that Section 5.27's own lesson, applied retroactively, "
+    "doesn't quietly undermine the conclusions built on the older, "
+    "cruder methodology it replaced.",
+    title="A CONFIRMATORY AUDIT &mdash; AND THAT IS ITSELF THE RESULT"
+)
 
 # MARKER_END_PART5
 
@@ -2881,6 +2952,19 @@ box(
     "V.26 called robust; dropping it entirely did not eliminate the "
     "result. Real, but a decade wide, not forty-seven years wide.",
     kind="fact", title="UPDATE FROM PART V.27"
+)
+box(
+    "Part V.28 turned Part V.27's own tools back on the project's "
+    "older, cumulative-sweep-validated conclusions &mdash; reversal's "
+    "null, momentum's pre-1994 significance, and ASX's two positive "
+    "findings &mdash; none checked this way before. The audit was "
+    "confirmatory throughout: reversal's one significant decade was "
+    "the exact thin 1970s window already blamed for its apparent edge; "
+    "momentum's significance concentrated in the 1980s-1990s, standing "
+    "on firmer ground than before; both ASX findings survived dropping "
+    "their most-present ticker. A confirmatory audit is itself the "
+    "result, not a wasted milestone.",
+    kind="fact", title="UPDATE FROM PART V.28"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -3224,6 +3308,23 @@ bullets([
     "windows too &mdash; a pooled effect and a persisting one look "
     "identical to a from-date sweep, and only the decade-by-decade "
     "version tells them apart.",
+    "<b>A new diagnostic tool's job isn't finished the day it fixes the "
+    "finding that motivated it &mdash; turn it on every earlier "
+    "conclusion the older, weaker method validated too.</b> Part V.28 "
+    "retroactively applied Part V.27's decade-breakdown and "
+    "ticker-concentration checks to reversal's null and momentum's "
+    "pre-1994 significance (both originally validated by a cumulative "
+    "sweep, Parts V.16-17) and to ASX's two positive findings, none of "
+    "which had ever been re-checked this way. Every one survived: "
+    "reversal's one significant decade was the exact thin 1970s window "
+    "already blamed for its apparent edge; momentum's significance "
+    "concentrated in the 1980s-1990s, standing on firmer ground than "
+    "before; both ASX findings survived dropping their most-present "
+    "ticker. A confirmatory audit is still a result, not a wasted one "
+    "&mdash; &quot;the older conclusions all survive the new "
+    "check&quot; is exactly what should be verified, not assumed, "
+    "every time a project develops a sharper diagnostic than the one "
+    "it used before.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -3688,6 +3789,25 @@ bullets([
     "episode this dataset happens to contain, not as evidence that "
     "high-volatility stocks broadly outperformed low-volatility ones "
     "across the full 1970-2017 sample.",
+    "<b>A retroactive audit of the project's older, cumulative-sweep-"
+    "validated conclusions found no correction was needed, but "
+    "surfaced one structural nuance worth keeping (Part V.28).</b> "
+    "Reversal's full retraction and momentum's pre-1994 significance "
+    "(both validated via a cumulative sweep, Parts V.16-17) and ASX's "
+    "two positive findings (momentum, low-volatility long leg) had "
+    "never been checked with Part V.27's own tools. All four survive: "
+    "reversal's one significant decade (1970-1979) is exactly the "
+    "thin, unreliable window Part V.16 already traced its apparent "
+    "edge to; momentum's significance concentrates in the "
+    "1980s-1990s, not the unreliable 1970s, standing on firmer ground "
+    "than the original sweep showed; and both ASX findings survive "
+    "dropping their single most-present ticker. One observation worth "
+    "flagging going forward: ASX's low-volatility long leg holds the "
+    "same three names (CBA, CSL, TLS) in 100% of the 69 monthly "
+    "rebalances &mdash; statistically real (survives leave-one-out), "
+    "but economically this signal, on this dataset, is closer to "
+    "&quot;hold the same 3-5 ultra-stable blue chips almost "
+    "permanently&quot; than a rotating cross-sectional bet.",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -3822,7 +3942,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 26 then ran the India findings through "
+  "needed. Milestones 3 through 27 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -3938,7 +4058,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, twenty-three times in a row "
+  "most recent, best-supported-looking result, twenty-four times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -4022,7 +4142,17 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "breakdown of the twenty-second's own inversion found it significant "
   "in exactly one decade, not the forty-seven years its cumulative "
   "sweep had implied, with a single ticker behind ninety percent of the "
-  "short leg in the years that mattered most. "
+  "short leg in the years that mattered most, and finally ran a "
+  "twenty-fourth check (Part V.28) that didn't touch the twenty-third's "
+  "own result at all: it turned the same two tools on every older "
+  "conclusion the project's original, cruder cumulative sweep had ever "
+  "validated &mdash; reversal's retraction, momentum's pre-1994 "
+  "significance, both ASX findings &mdash; and for the first time in "
+  "twenty-four checks, found nothing to correct. Reversal's one "
+  "significant decade turned out to be the exact unreliable window "
+  "already blamed for it; momentum came out standing on firmer ground "
+  "than before; both ASX findings survived losing their single "
+  "most-present name. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -4030,8 +4160,11 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "trusted, discovering that the entire multi-milestone "
   "argument about reversal had been conducted on three stocks, "
   "discovering a real reason behind the one number that survived all of "
-  "it, and finally discovering that a market believed fully closed still "
-  "had something left to find, are all findings: the project never "
+  "it, discovering that a market believed fully closed still "
+  "had something left to find, and finally discovering that turning a "
+  "sharper instrument on the project's own older, cruder-method "
+  "conclusions was itself worth doing even when nothing broke, are all "
+  "findings: the project never "
   "found a result, an explanation, or even a way of testing an "
   "explanation, durable enough to stop re-checking. What survives is "
   "smaller and more precisely qualified "
@@ -4134,7 +4267,15 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "had cleared it, and found a real effect confined to a single decade "
   "(the 1990s) rather than the forty-seven-year phenomenon the pooled "
   "number implied, substantially but not entirely carried by one "
-  "ticker's own history. What remains open is not a specific "
+  "ticker's own history. Part V.28 then turned that same pair of tools "
+  "on the project's own older conclusions, the ones the original, "
+  "cruder cumulative sweep had validated back when this project still "
+  "trusted that method &mdash; reversal's retraction, momentum's "
+  "pre-1994 significance, both ASX findings &mdash; and for the first "
+  "time in twenty-four checks, changed nothing: every one survived, "
+  "momentum's pre-1994 case if anything strengthened by no longer "
+  "resting on the unreliable early window reversal's did. None of the "
+  "six settled conclusions moved. What remains open is not a specific "
   "finding but two honest limits of the data itself: whether the crash "
   "mechanism would reactivate in a genuinely severe future crisis, as "
   "opposed to the milder episodes this sample happens to contain, is a "

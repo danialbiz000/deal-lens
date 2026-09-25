@@ -410,6 +410,20 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   already corrected once for the momentum-crash mechanism (Milestones 19-21) applies to any
   new finding tested only that way; run the non-overlapping-window version before calling a
   result either "robust" or "an artifact."**
+- **Milestone 27 retroactively applied Milestone 26's own tools to the project's older,
+  cumulative-sweep-validated conclusions, and found the audit confirmatory, not
+  corrective — which is itself worth knowing, not assumed.** Reversal's null and momentum's
+  pre-1994 significance (both validated by the original cumulative sweep, Milestones 15-16)
+  and ASX's two positive findings had never been re-checked with a non-overlapping decade
+  breakdown or a ticker-concentration/leave-one-out test. All four survived: reversal's one
+  significant decade turned out to be the exact thin 1970s window already blamed for its
+  apparent edge (an independent confirmation, not a new problem); momentum's significance
+  concentrated in the 1980s-1990s, not the unreliable 1970s, actually strengthening
+  confidence; and both ASX findings survived dropping their single most-present ticker.
+  **Rule: when a new diagnostic tool exposes a flaw in one finding, check whether any
+  earlier conclusion validated by the older, weaker method is quietly resting on the same
+  flaw — the audit itself is cheap, and "the older conclusions all survived" is a real,
+  reportable result, not a wasted milestone.**
 
 ## 2. Risk-management lessons
 
@@ -692,6 +706,18 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     result. **Rule: before calling a cumulative-window result "robust to start date,"
     re-test it with non-overlapping windows too — a pooled effect and a persisting one look
     identical to a from-date sweep, and only the decade-by-decade version tells them apart.**
+27. **A new diagnostic tool's job isn't finished the day it fixes the finding that motivated
+    it — turn it on every earlier conclusion the older, weaker method validated too.**
+    Milestone 27 retroactively applied Milestone 26's decade-breakdown and
+    ticker-concentration checks to reversal's null and momentum's pre-1994 significance
+    (both originally validated by a cumulative sweep, Milestones 15-16) and to ASX's two
+    positive findings, none of which had ever been re-checked this way. Every one survived:
+    reversal's one significant decade was the exact thin 1970s window already blamed for its
+    apparent edge; momentum's significance concentrated in the 1980s-1990s, standing on
+    firmer ground than before; both ASX findings survived dropping their most-present
+    ticker. **Rule: a confirmatory audit is still a result, not a wasted one — "the older
+    conclusions all survive the new check" is exactly what should be verified, not assumed,
+    every time a project develops a sharper diagnostic than the one it used before.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

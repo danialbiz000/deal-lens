@@ -1430,6 +1430,62 @@ century" — the latter claim does not survive being checked decade by decade.
 
 **Reproduce this**: `python investigations/low_volatility_us_mechanism.py`.
 
+## A retroactive audit: does the pooled-window lesson change any earlier conclusion? (Milestone 27)
+
+Milestone 26 used two tools — a non-overlapping decade breakdown, and a ticker-concentration
+/ leave-one-out check — on the low-volatility inversion. But the cumulative "from-date-X-
+onward" sweep methodology those tools replaced was used *first*, back in Milestones 15-16,
+to validate the two conclusions this project has rested on ever since: reversal's edge is
+null "from every start date," and momentum's pre-1994 edge is significant "from every start
+date through 1990." Neither had ever been re-checked with Milestone 26's own tools. Nor had
+ASX's two positive findings (momentum's "cleanest replication yet," and low-volatility's
+long-leg signal) ever had the ticker-concentration check, even though the underlying
+methodology is identical to the US mirror's. This milestone runs both audits.
+
+**Part A — non-overlapping decade breakdown, US mirror, reversal and momentum (control):**
+
+| Decade | Reversal ann.ret / p | Momentum ann.ret / p |
+|---|---|---|
+| 1970-1979 | +21.38%, **p=0.0022** | +5.91%, p=0.168 |
+| 1980-1989 | -1.25%, p=0.937 | +8.48%, **p=0.045** |
+| 1990-1999 | -3.48%, p=0.539 | +11.47%, **p=0.014** |
+| 2000-2009 | +1.95%, p=0.492 | +3.96%, p=0.318 |
+| 2010-2017 | -0.52%, p=0.951 | +0.09%, p=0.865 |
+
+Reversal's decade breakdown **confirms, not contradicts, Milestone 16's diagnosis**: its one
+significant decade (1970-1979) directly contains the exact 1972-1977 thin-universe window
+Milestone 16 traced the entire "edge" to, and every decade after it is null — an independent
+confirmation, via a different method, that reversal's apparent edge never existed outside
+that unreliable early data. Momentum's breakdown **refines, without correcting**, its own
+headline claim: the significance driving "every start date through 1990" turns out to live
+specifically in the 1980s and 1990s, not the 1970s (positive but not significant, p=0.168) —
+unlike reversal, momentum's pre-1994 edge does *not* depend on the unreliable early window,
+which is if anything a stronger footing for the claim than the original cumulative sweep
+showed on its own.
+
+**Part B — ticker concentration / leave-one-out, ASX's two positive findings:**
+
+- **ASX momentum, long leg** (63 rebalances): RHC (Ramsay Health Care) present in 49/63
+  months (78%). Dropping it entirely: still highly significant (daily ann.ret +10.99%,
+  p=0.0082; monthly ann.ret +9.88%, p=0.0124) — not a single-stock artifact.
+- **ASX low-volatility, long leg** (69 rebalances): three names — CBA, CSL, TLS — present in
+  **100%** of months, with WES and SGT close behind (99%, 97%). Dropping CBA entirely: still
+  significant (daily ann.ret +7.51%, p=0.092; monthly ann.ret +8.52%, p=0.0096) — also not a
+  single-stock artifact. But the 100%-presence finding is itself worth reporting: on this
+  dataset, ASX's low-volatility long leg is economically closer to "hold the same 3-5 ultra-
+  stable blue chips almost permanently" than a fast-rotating cross-sectional bet — a
+  characterization worth keeping in mind, distinct from whether the number is statistically
+  real.
+
+**Updated conclusion**: this audit is confirmatory, not corrective — every finding it
+touched survives, and momentum's pre-1994 US result comes out on firmer ground than before
+(unlike reversal, its significance was never resting on the unreliable early window). The
+value of running it wasn't finding a new problem; it was confirming that Milestone 26's own
+lesson, applied retroactively, doesn't quietly undermine the conclusions built on the older,
+cruder methodology it replaced.
+
+**Reproduce this**: `python investigations/pooled_window_audit.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -1774,6 +1830,15 @@ python investigations/low_volatility_all_markets.py
 # survive scrutiny of its own mechanism?" above)
 python investigations/low_volatility_us_mechanism.py
 
+# Retroactive audit -- does Milestone 26's own methodology (decade breakdown, ticker
+# concentration + leave-one-out) change any conclusion it wasn't originally used to reach?
+# (no -- confirmatory throughout: reversal's null is independently reconfirmed (its one
+# significant decade is the exact thin 1970s window Milestone 16 already traced it to),
+# momentum's pre-1994 edge is refined (lives in the 1980s/90s, not the unreliable 1970s --
+# firmer footing than before), and ASX's two positive findings both survive dropping their
+# most-present ticker; see "A retroactive audit" above)
+python investigations/pooled_window_audit.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1846,7 +1911,16 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    2000s, or 2010s, with a single ticker (INTC) present in the high-vol leg 90% of the
    1978-1995 window — a real, concentrated 1990s-specific effect that survives dropping that
    ticker, not the persisting 47-year phenomenon the pooled full-sample number implied.
-   Momentum's
+   Milestone 26's own two tools were then turned on the project's own older, cumulative-
+   sweep-validated conclusions (Milestone 27) — reversal's full retraction and momentum's
+   pre-1994 significance on the US mirror, plus ASX's two positive findings, none of which
+   had been checked this way before. The audit was confirmatory throughout: reversal's one
+   significant decade turned out to be the exact thin 1970s window Milestone 16 had already
+   traced its "edge" to (independent confirmation via a different method, not a new
+   problem); momentum's pre-1994 significance was refined to the 1980s and 1990s
+   specifically, standing on firmer ground than the original sweep showed since it doesn't
+   depend on the unreliable early years the way reversal's did; and both ASX findings
+   survived dropping their single most-present ticker. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -2180,3 +2254,18 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   single-stock artifact. **Read this as a genuine, concentrated 1990s-specific episode this
   dataset happens to contain, not as evidence that high-volatility stocks broadly
   outperformed low-volatility ones across the full 1970-2017 sample.**
+- **A retroactive audit of the project's older, cumulative-sweep-validated conclusions found
+  no correction was needed, but surfaced one structural nuance worth keeping (Milestone
+  27).** Reversal's full retraction and momentum's pre-1994 significance (both validated via
+  a cumulative from-date sweep back in Milestones 15-16) and ASX's two positive findings
+  (momentum, low-volatility long leg) had never been checked with Milestone 26's own tools
+  (non-overlapping decade breakdown; ticker concentration + leave-one-out). All four survive:
+  reversal's one significant decade (1970-1979) is exactly the thin, unreliable window
+  Milestone 16 already traced its apparent edge to; momentum's significance concentrates in
+  the 1980s-1990s, not the unreliable 1970s, standing on firmer ground than the original
+  sweep showed; and both ASX findings survive dropping their single most-present ticker. One
+  observation worth flagging going forward: ASX's low-volatility long leg holds the same
+  three names (CBA, CSL, TLS) in **100% of the 69 monthly rebalances** — statistically real
+  (survives leave-one-out), but economically this signal, on this dataset, is closer to
+  "hold the same 3-5 ultra-stable blue chips almost permanently" than a rotating
+  cross-sectional bet.
