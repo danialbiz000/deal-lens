@@ -1864,6 +1864,52 @@ any working source; that remains an explicit limitation, not a silently closed q
 
 **Reproduce this**: `python investigations/transaction_cost_realism.py`.
 
+## Why is the US mirror's cost breakeven so much lower than ASX's? (Milestone 36)
+
+Milestone 35 found a striking asymmetry it didn't explain: ASX momentum shrugged off costs
+20x its baseline while the US mirror's pre-2008-09 edge broke down between 50-75bps. Monthly
+turnover differs by only ~1.3x (US 49.6% vs. ASX 38.4%) — nowhere near enough to explain a gap
+that large on its own. This milestone decomposes the gap and finds the exact breakeven via
+bisection (walking up from 0bps to find the first cost level where the compounded annualized
+return, or the HAC p-value, crosses its threshold — more precise than the coarse 10-200bps
+sweep), then checks the cost model itself for a hidden bias.
+
+| Market (window) | Gross hedged ann.return | Ann. turnover | Closed-form breakeven | Exact return-zero breakeven | Exact significance breakeven |
+|---|---|---|---|---|---|
+| US mirror, pre-2008-09 | +6.60% | 593% | 111bps | 108bps | 67bps |
+| ASX mirror, full sample | +35.45% | 460% | 770bps | not reached ≤500bps | 357bps |
+
+**The closed-form estimate (gross annualized return ÷ annualized turnover) tracks the exact
+bisected breakeven closely** (111bps vs. 108bps for the US mirror), confirming a flat-cost
+model's breakeven is well-approximated by this simple ratio. **Decomposing the ~7x breakeven
+gap**: the edge-magnitude ratio (ASX's +35.45% vs. the US mirror's +6.60% — a 5.4x difference)
+multiplied by the turnover ratio (US turnover 1.3x ASX's, which by itself raises ASX's
+breakeven 1.3x) gives 5.4 × 1.3 ≈ 7.0x — matching the observed ~7.1x closed-form breakeven
+ratio almost exactly. **The gap is overwhelmingly an edge-size story, not a turnover story**:
+ASX's momentum edge is simply much larger in annualized-return terms than the US mirror's
+established pre-2008-09 edge, and that size difference — not any meaningful difference in how
+often the portfolio trades — is what drives most of the cost-robustness asymmetry.
+
+**A necessary self-check on the model itself**: Milestone 35's flat `cost_bps` applies
+*identically* to both markets, implicitly assuming ASX trades exactly as cheaply as 30 US
+mega-caps. A real trading desk would expect the opposite — a ~200-300-constituent
+mid/large-cap Australian universe should, if anything, face wider spreads and thinner order
+books than mega-cap US names, not equal ones. This project cannot quantify that gap without
+real bid-ask/ADV data it has already confirmed it doesn't have for either market (Milestone
+35) — but naming the *direction* of the bias is still honest and necessary: **ASX's apparent
+cost-robustness is partly an artifact of an assumption that almost certainly favors it**, not
+proof a real ASX deployment would be this cheap to trade.
+
+**Updated conclusion**: the breakeven asymmetry Milestone 35 found is real and well-explained
+by simple arithmetic — ASX's edge is just bigger, not more efficiently traded — but the
+underlying flat-cost model's shared-rate assumption likely flatters ASX specifically, since a
+smaller, less liquid market would realistically cost more per unit of turnover than a US
+mega-cap universe, not the same amount. Treat ASX's cost-robustness as directionally real but
+probably overstated in absolute terms, and the US pre-2008-09 edge's fragility as, if anything,
+a conservative (not overstated) estimate under the same shared assumption.
+
+**Reproduce this**: `python investigations/cost_breakeven_decomposition.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2279,6 +2325,13 @@ python investigations/momentum_asx_subperiod_stability.py
 # see "Does momentum's edge survive more realistic transaction cost assumptions" above)
 python investigations/transaction_cost_realism.py
 
+# Investigation -- why is the US mirror's cost breakeven so much lower than ASX's? (bisected
+# exact breakevens + a decomposition into edge-magnitude vs. turnover-rate contributions --
+# ~7x of the ~7.1x gap is edge size, not turnover; plus a self-check flagging that the flat
+# cost model's shared rate likely flatters ASX relative to a real deployment; see "Why is the
+# US mirror's cost breakeven so much lower than ASX's" above)
+python investigations/cost_breakeven_decomposition.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -2408,7 +2461,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    significance suggests; an illustrative square-root-law-shaped convex overlay, calibrated to
    this project's own turnover rather than an assumed trading-volume number this project
    confirmed it doesn't have, changed the picture only modestly at either market's actual
-   turnover levels. Momentum's
+   turnover levels. That asymmetry was then decomposed directly (Milestone 36): the ~7x gap
+   between the two markets' cost breakevens is overwhelmingly an edge-magnitude story (ASX's
+   edge is simply ~5.4x larger in annualized-return terms) rather than a turnover-rate one
+   (only a ~1.3x contributor), and a self-check on the cost model itself flagged that its
+   shared flat rate likely flatters ASX relative to a real deployment, since a smaller,
+   less liquid market should realistically cost more per unit of turnover than a US
+   mega-cap universe, not the same amount. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -2868,3 +2927,20 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   and 6% (ASX) relative to the flat model, moving baseline significance only slightly. This
   narrows, but does not remove, the project's oldest-acknowledged modeling simplification: a
   precise dollar-cost answer still needs real ADV data this project doesn't have.
+- **The ~7x gap between the US and ASX mirrors' cost breakevens is overwhelmingly an
+  edge-magnitude story, not a turnover-rate one — and the shared flat-cost assumption behind
+  both numbers likely flatters ASX specifically (Milestone 36).** Bisecting for the exact
+  breakeven (rather than the coarse 10-200bps sweep) finds the US mirror's pre-2008-09 edge
+  crosses zero at 108bps and loses significance at 67bps, while ASX's full-sample edge remains
+  significant past 357bps and its point estimate doesn't cross zero within 500bps. Decomposing
+  the gap: ASX's gross hedged edge (+35.45%/yr) is ~5.4x the US mirror's pre-2008-09 edge
+  (+6.60%/yr), while turnover differs by only ~1.3x (US higher) — multiplying the two
+  (5.4 × 1.3 ≈ 7.0x) matches the observed ~7.1x closed-form breakeven ratio almost exactly.
+  Separately, since the flat cost model applies the *same* rate to both markets, it implicitly
+  assumes ASX's ~200-300-constituent mid/large-cap universe trades exactly as cheaply as 30 US
+  mega-caps — the opposite of what a real trading desk would expect (a smaller, less liquid
+  market should cost *more* per unit of turnover, not the same). This project cannot quantify
+  that bias without real bid-ask/ADV data it has already confirmed it doesn't have for either
+  market — but the direction is clear: ASX's cost-robustness is real but likely overstated in
+  absolute terms, while the US mirror's fragility is, if anything, not overstated by the same
+  shared assumption.

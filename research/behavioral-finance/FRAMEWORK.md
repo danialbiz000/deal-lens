@@ -887,6 +887,22 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     doesn't need it, rather than leaving an old limitation unexamined indefinitely — a
     breakeven sweep and an illustratively-calibrated overlay can answer a real question even
     when a precise dollar-cost number can't be produced.**
+36. **A striking cross-market asymmetry deserves decomposition before it gets filed as a
+    conclusion — and the model that produced it deserves the same scrutiny as the result.**
+    Milestone 35 found ASX momentum's edge cost-robust to 200bps+ while the US mirror's
+    pre-2008-09 edge broke down between 50-75bps, a ~7x gap that a 1.3x turnover difference
+    couldn't plausibly explain on its own. Milestone 36 decomposed it: the edge-magnitude ratio
+    (ASX's ~5.4x larger annualized return) accounted for almost all of it, turnover only a
+    modest ~1.3x contributor — multiplying the two reproduced the observed breakeven ratio
+    almost exactly. It then turned the same scrutiny on the model itself: a flat cost rate
+    applied identically to both markets implicitly assumes a mid/large-cap Australian universe
+    trades as cheaply as 30 US mega-caps, the opposite of what a real desk would expect, meaning
+    ASX's apparent cost-robustness is probably overstated even though the underlying arithmetic
+    decomposition is sound. **Rule: a surprising cross-market or cross-signal gap should be
+    decomposed into its component drivers before being reported as a finding on its own, and a
+    shared modeling assumption behind a comparison should be checked for which side it favors —
+    an asymmetric result built on a symmetric-looking assumption can still be biased in a
+    predictable direction.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
