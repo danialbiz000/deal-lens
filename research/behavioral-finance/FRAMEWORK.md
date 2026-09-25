@@ -424,6 +424,18 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   earlier conclusion validated by the older, weaker method is quietly resting on the same
   flaw — the audit itself is cheap, and "the older conclusions all survived" is a real,
   reportable result, not a wasted milestone.**
+- **Milestone 28 tested a second new signal (the MAX effect / lottery demand) with this
+  project's full current-best-practice toolkit applied from the start, and got a genuinely
+  different failure mode from Milestone 25's low-volatility signal, not a repeat of it.**
+  Neither replicated positively on any market, and both showed some degree of US inversion —
+  but low-volatility's concentrated cleanly and decisively in one decade (the 1990s,
+  p=0.0244) while MAX's pooled US significance (p=0.079 daily) does not survive decomposition
+  at all: no single decade reaches conventional 5% significance. **Rule: two signals from the
+  same behavioral-finance family (here, "lottery demand") can fail in structurally different
+  ways — a superficially similar headline number (both negative, both on the US mirror)
+  can hide very different underlying robustness once decomposed, so run the same
+  decomposition on a new signal immediately rather than assuming an earlier signal's
+  diagnosis transfers.**
 
 ## 2. Risk-management lessons
 
@@ -718,6 +730,19 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     ticker. **Rule: a confirmatory audit is still a result, not a wasted one — "the older
     conclusions all survive the new check" is exactly what should be verified, not assumed,
     every time a project develops a sharper diagnostic than the one it used before.**
+28. **Two signals from the same behavioral family can fail in structurally different ways —
+    a superficially similar headline number can hide very different underlying robustness.**
+    Milestone 28 tested the MAX effect (lottery demand) with the full current-best-practice
+    toolkit applied from the start, including an immediate decade breakdown of any
+    significant US result rather than waiting for a later milestone to run it. Both MAX and
+    Milestone 25's low-volatility signal failed to replicate positively anywhere and both
+    showed a US inversion — but low-volatility's concentrated cleanly and decisively in one
+    decade (p=0.0244) while MAX's pooled US significance (p=0.079 daily) doesn't survive
+    decomposition at all, with no single decade reaching conventional 5% significance.
+    **Rule: don't assume one signal's diagnosis (mechanism, robustness, failure mode)
+    transfers to a second, related signal just because the headline direction matches — run
+    the same decomposition immediately, since the underlying robustness can differ sharply
+    even when the top-line number looks similar.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

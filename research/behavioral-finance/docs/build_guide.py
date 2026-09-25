@@ -2652,6 +2652,83 @@ box(
     "cruder methodology it replaced.",
     title="A CONFIRMATORY AUDIT &mdash; AND THAT IS ITSELF THE RESULT"
 )
+box(
+    "Section 5.29 introduces this project's second genuinely new signal "
+    "&mdash; the MAX effect (lottery demand) &mdash; tested on all three "
+    "markets with the full current-best-practice toolkit applied from "
+    "the start, including an immediate decade breakdown of any "
+    "significant US result.",
+    kind="fact", title="UPDATE FROM SECTION 5.29"
+)
+
+h1("5.29  Milestone 28 &mdash; A second new signal: does the MAX effect (lottery demand) replicate anywhere?")
+p("Section 5.26 introduced this project's first genuinely new signal "
+  "type (low-volatility). This milestone adds a second, deliberately "
+  "different construction: the MAX effect (Bali, Cakici &amp; Whitelaw "
+  "2011) ranks names by the single most extreme daily return over the "
+  "trailing month &mdash; a direct &quot;lottery ticket&quot; proxy "
+  "&mdash; rather than low-volatility's average dispersion over a "
+  "year. Both are &quot;lottery demand&quot; stories in the "
+  "literature, but the two signals do not fully subsume one another in "
+  "the original research, so this milestone tests MAX separately "
+  "rather than assuming Section 5.26's result predicts this one. Given "
+  "Section 5.27's lesson, a non-overlapping decade breakdown of the US "
+  "mirror's combined book is run immediately, not left as a pooled "
+  "number to correct in a later milestone.")
+data_table(
+    ["Long leg", "NSE (daily/monthly)", "US (daily/monthly)", "ASX (daily/monthly)"],
+    [
+        ["Hedged ann. ret / p", "+2.26%, p=.216 / +2.70%, p=.222", "+2.09%, p=.084 / +2.80%, p=.097", "+2.68%, p=.294 / +3.63%, p=.078"],
+    ],
+    col_widths=[1.4*inch, 2.35*inch, 2.35*inch, 2.35*inch], small=True,
+)
+data_table(
+    ["Combined", "NSE (daily/monthly)", "US (daily/monthly)", "ASX (daily/monthly)"],
+    [
+        ["Hedged ann. ret / p", "-6.61%, p=.325 / -4.24%, p=.369", "-12.56%, p=.079 / -9.47%, p=.0143", "+4.29%, p=.465 / +6.16%, p=.336"],
+    ],
+    col_widths=[1.4*inch, 2.35*inch, 2.35*inch, 2.35*inch], small=True,
+)
+p("<b>A weaker echo of Section 5.26's pattern, not a clean replication "
+  "or a clean retraction.</b> NSE and ASX show nothing significant at "
+  "conventional levels. The US mirror again shows the most interesting "
+  "result, running the same direction as low-volatility's: the hedged "
+  "combined book is negative (daily -12.56%, p=0.079; monthly -9.47%, "
+  "p=0.0143) &mdash; high-MAX &quot;lottery&quot; names outperformed "
+  "low-MAX ones, echoing Section 5.26's US inversion in direction "
+  "though considerably weaker.")
+data_table(
+    ["Decade", "n (days)", "Hedged ann. return", "daily alpha p"],
+    [
+        ["1970-1979", "1,979", "-32.13%", "0.2728 (n.s.)"],
+        ["1980-1989", "2,529", "-8.98%", "0.4336 (n.s.)"],
+        ["1990-1999", "2,528", "-15.00%", "0.0534 (borderline)"],
+        ["2000-2009", "2,515", "-8.89%", "0.5504 (n.s.)"],
+        ["2010-2017", "1,972", "+5.36%", "0.2620 (n.s.)"],
+    ],
+    col_widths=[1.3*inch, 1.3*inch, 2.1*inch, 2.7*inch], small=True,
+)
+p("<b>Unlike low-volatility's US inversion, MAX's pooled significance "
+  "does not cleanly survive decomposition.</b> No single decade "
+  "reaches conventional 5% significance (the closest, the 1990s, sits "
+  "at p=0.0534) &mdash; a more diffuse, fragile failure mode than "
+  "low-volatility's cleanly-concentrated 1990s effect (p=0.0244) with "
+  "its strong pre-1980 echo (p=0.0002). This project has now tested "
+  "two distinct &quot;lottery demand&quot; signals, and both fail to "
+  "replicate positively while both show some degree of inversion on "
+  "the same US mega-cap-survivor dataset.")
+box(
+    "MAX does not replicate positively on any market, and its US "
+    "result &mdash; while directionally consistent with "
+    "low-volatility's inversion &mdash; is weaker and does not cleanly "
+    "localize to one decade the way low-volatility's did. Whether this "
+    "reflects something structural about this particular universe "
+    "(Section 5.16's own survivorship diagnosis) or is coincidence "
+    "between two related but distinct signals is not resolved by this "
+    "milestone, and is flagged here as genuinely open rather than "
+    "explained away.",
+    title="A SECOND LOTTERY SIGNAL, A DIFFERENT AND MORE FRAGILE FAILURE"
+)
 
 # MARKER_END_PART5
 
@@ -2965,6 +3042,17 @@ box(
     "their most-present ticker. A confirmatory audit is itself the "
     "result, not a wasted milestone.",
     kind="fact", title="UPDATE FROM PART V.28"
+)
+box(
+    "Part V.29 tested a second new signal (the MAX effect / lottery "
+    "demand) with the full toolkit applied from the start. Like "
+    "low-volatility, it failed to replicate positively anywhere and "
+    "showed a US inversion &mdash; but unlike low-volatility's cleanly "
+    "decade-concentrated effect, MAX's pooled US significance "
+    "(p=0.079 daily) doesn't survive decomposition: no single decade "
+    "reaches conventional 5% significance. Two lottery-demand signals, "
+    "two structurally different failure modes.",
+    kind="fact", title="UPDATE FROM PART V.29"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -3325,6 +3413,23 @@ bullets([
     "check&quot; is exactly what should be verified, not assumed, "
     "every time a project develops a sharper diagnostic than the one "
     "it used before.",
+    "<b>Two signals from the same behavioral family can fail in "
+    "structurally different ways &mdash; a superficially similar "
+    "headline number can hide very different underlying robustness.</b> "
+    "Part V.29 tested the MAX effect (lottery demand) with the full "
+    "current-best-practice toolkit applied from the start, including an "
+    "immediate decade breakdown of any significant US result rather "
+    "than waiting for a later milestone. Both MAX and Part V.26's "
+    "low-volatility signal failed to replicate positively anywhere and "
+    "both showed a US inversion &mdash; but low-volatility's "
+    "concentrated cleanly and decisively in one decade (p=0.0244) while "
+    "MAX's pooled US significance (p=0.079 daily) doesn't survive "
+    "decomposition at all, with no single decade reaching conventional "
+    "5% significance. Don't assume one signal's diagnosis (mechanism, "
+    "robustness, failure mode) transfers to a second, related signal "
+    "just because the headline direction matches &mdash; run the same "
+    "decomposition immediately, since the underlying robustness can "
+    "differ sharply even when the top-line number looks similar.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -3808,6 +3913,25 @@ bullets([
     "but economically this signal, on this dataset, is closer to "
     "&quot;hold the same 3-5 ultra-stable blue chips almost "
     "permanently&quot; than a rotating cross-sectional bet.",
+    "<b>A second new signal, the MAX effect (lottery demand), does not "
+    "replicate positively anywhere, and its US result echoes "
+    "low-volatility's inversion in direction but is weaker and more "
+    "fragile (Part V.29).</b> Tested with the same out-of-sample hedge "
+    "and HAC methodology on all three markets at once: NSE and ASX show "
+    "nothing significant at conventional levels; the US mirror's hedged "
+    "combined book is negative (daily -12.56%, p=0.079; monthly "
+    "-9.47%, p=0.0143) &mdash; high-MAX &quot;lottery&quot; names "
+    "outperformed low-MAX ones, the same direction as low-volatility's "
+    "US inversion but considerably weaker. Checked immediately for "
+    "decade concentration: unlike low-volatility's cleanly-concentrated "
+    "1990s effect, no single decade of MAX's US result reaches "
+    "conventional 5% significance (the closest, the 1990s, sits at "
+    "p=0.0534) &mdash; a more diffuse, fragile pattern than a genuine "
+    "concentrated episode. This project has now tested two distinct "
+    "&quot;lottery demand&quot; signals, and both fail to replicate "
+    "positively while both show some degree of inversion on the same "
+    "US mega-cap-survivor dataset &mdash; flagged here as a genuinely "
+    "open pattern, not a resolved explanation.",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -3942,7 +4066,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 27 then ran the India findings through "
+  "needed. Milestones 3 through 28 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -4058,7 +4182,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, twenty-four times in a row "
+  "most recent, best-supported-looking result, twenty-five times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -4152,7 +4276,15 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "significant decade turned out to be the exact unreliable window "
   "already blamed for it; momentum came out standing on firmer ground "
   "than before; both ASX findings survived losing their single "
-  "most-present name. "
+  "most-present name, and ran a twenty-fifth check (Part V.29) that "
+  "built a second genuinely new signal and applied every lesson the "
+  "prior twenty-four checks had taught, from the first pass: MAX, "
+  "like the twenty-second check's low-volatility signal, replicated "
+  "nowhere and inverted on the US mirror &mdash; but where the "
+  "twenty-second's inversion held together under decomposition, this "
+  "one didn't, no single decade of it clearing even a conventional "
+  "5% bar. Two signals from the same behavioral family, tested with "
+  "identical rigor, failed in two different ways. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -4275,16 +4407,29 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "time in twenty-four checks, changed nothing: every one survived, "
   "momentum's pre-1994 case if anything strengthened by no longer "
   "resting on the unreliable early window reversal's did. None of the "
-  "six settled conclusions moved. What remains open is not a specific "
-  "finding but two honest limits of the data itself: whether the crash "
+  "six settled conclusions moved. Part V.29 then built a second "
+  "genuinely new signal, the MAX effect, and applied every lesson the "
+  "prior checks had taught from the very first pass: it replicated "
+  "nowhere, like Part V.26's low-volatility signal, and inverted on "
+  "the US mirror in the same direction &mdash; but where Part V.26's "
+  "inversion held together as a real, concentrated 1990s effect under "
+  "decomposition, Part V.29's did not, no single decade of it clearing "
+  "even a conventional 5% bar. Two signals from the same behavioral "
+  "family, tested with identical rigor from the outset, failed in two "
+  "different ways &mdash; left flagged as a genuinely open pattern, "
+  "not a resolved explanation. What remains open is not one specific "
+  "finding but three honest limits of the data itself: whether the crash "
   "mechanism would reactivate in a genuinely severe future crisis, as "
   "opposed to the milder episodes this sample happens to contain, is a "
   "question no amount of further re-testing of this history can answer "
   "&mdash; the most recent decade, for momentum, to size nothing against "
-  "&mdash; and whether ASX momentum's own edge is stable across "
+  "&mdash; whether ASX momentum's own edge is stable across "
   "sub-periods the way the US finding eventually was shown to be, a "
   "check this project's newest market hasn't had enough history yet to "
-  "run. Both are what a research process built to "
+  "run, and whether the two lottery-demand signals' shared US inversion "
+  "reflects something structural about this specific mega-cap-survivor "
+  "universe or is coincidence between related constructions. All three are "
+  "what a research process built to "
   "distrust its own best-looking result eventually converges on.")
 
 # ============================================================ GLOSSARY

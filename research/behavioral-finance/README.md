@@ -1486,6 +1486,67 @@ cruder methodology it replaced.
 
 **Reproduce this**: `python investigations/pooled_window_audit.py`.
 
+## A second new signal: does the MAX effect (lottery demand) replicate anywhere? (Milestone 28)
+
+Milestone 25 introduced this project's first genuinely new signal type (low-volatility).
+This milestone adds a second, deliberately different construction: the MAX effect (Bali,
+Cakici & Whitelaw 2011) ranks names by the single most extreme daily return over the
+trailing month — a direct "lottery ticket" proxy — rather than low-volatility's average
+dispersion over a year. Both are "lottery demand" stories in the behavioral-finance
+literature, but the two signals do not fully subsume one another in the original research,
+so this milestone tests MAX separately on all three markets rather than assuming
+Milestone 25's result predicts this one. Given Milestone 26's lesson, a non-overlapping
+decade breakdown of the US mirror's combined book is run immediately if a significant
+result appears, rather than reported as a pooled number to correct in a later milestone.
+
+| | NSE, long leg (daily/monthly) | US, long leg (daily/monthly) | ASX, long leg (daily/monthly) |
+|---|---|---|---|
+| Hedged ann. return / p | +2.26%, p=.216 / +2.70%, p=.222 | +2.09%, p=.084 / +2.80%, p=.097 | +2.68%, p=.294 / +3.63%, p=.078 |
+
+| | NSE, combined (daily/monthly) | US, combined (daily/monthly) | ASX, combined (daily/monthly) |
+|---|---|---|---|
+| Hedged ann. return / p | -6.61%, p=.325 / -4.24%, p=.369 | **-12.56%, p=.079 / -9.47%, p=.0143** | +4.29%, p=.465 / +6.16%, p=.336 |
+
+**A weaker echo of Milestone 25's pattern, not a clean replication or a clean retraction.**
+NSE: nothing significant, either leg, either frequency. ASX: nothing significant at
+conventional levels (the long leg's monthly p=0.078 is the closest to significance, and the
+combined book is nowhere close). The US mirror again shows the most interesting result, and
+it runs the same direction as low-volatility's: the hedged combined book is *negative*
+(daily -12.56%, p=0.079; monthly -9.47%, p=0.0143) — high-MAX "lottery" names outperformed
+low-MAX ones, the opposite of what the anomaly predicts, echoing Milestone 25's US inversion
+in direction though considerably weaker in magnitude and significance.
+
+**Checked immediately for decade concentration, given Milestone 26's lesson on this exact
+dataset:**
+
+| Decade | n (days) | Hedged ann. return | daily alpha p |
+|---|---|---|---|
+| 1970-1979 | 1,979 | -32.13% | 0.2728 (n.s.) |
+| 1980-1989 | 2,529 | -8.98% | 0.4336 (n.s.) |
+| 1990-1999 | 2,528 | -15.00% | 0.0534 (borderline) |
+| 2000-2009 | 2,515 | -8.89% | 0.5504 (n.s.) |
+| 2010-2017 | 1,972 | +5.36% | 0.2620 (n.s.) |
+
+Unlike low-volatility's US inversion (Milestone 25/26), which concentrated cleanly and
+decisively in the 1990s (p=0.0244) with a very strong pre-1980 echo (p=0.0002), **MAX's
+pooled significance doesn't cleanly survive decomposition** — no single decade reaches
+conventional 5% significance (the closest, the 1990s, sits at p=0.0534). This is a different
+and more fragile failure mode than low-volatility's: MAX's weak pooled US inversion looks
+more like several individually-insignificant decades pointing the same direction than one
+real, concentrated episode.
+
+**Updated conclusion**: MAX does not replicate positively on any market, and its US result —
+while directionally consistent with low-volatility's inversion — is weaker and does not
+cleanly localize to one decade the way low-volatility's did. Worth flagging as an open
+pattern, not a settled explanation: this project has now tested two distinct "lottery
+demand" signals, and both fail to replicate positively while both show a (differently
+strong) inversion specifically on the same US mega-cap-survivor dataset. Whether that
+reflects something structural about this particular universe (Milestone 16's own
+survivorship diagnosis) or is coincidence between two related but distinct signals is not
+resolved by this milestone, and is flagged here as genuinely open rather than explained away.
+
+**Reproduce this**: `python investigations/max_effect_all_markets.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -1839,6 +1900,15 @@ python investigations/low_volatility_us_mechanism.py
 # most-present ticker; see "A retroactive audit" above)
 python investigations/pooled_window_audit.py
 
+# Investigation -- a second new signal (MAX effect / lottery demand, deliberately a
+# different construction from low-volatility) on all three markets, decade breakdown
+# checked immediately for the US market? (no clean replication anywhere; NSE and ASX null
+# at conventional levels, US combined book weakly negative (p=.079 daily/.0143 monthly) --
+# same direction as low-volatility's inversion but weaker, and unlike low-volatility's,
+# doesn't cleanly localize to one decade (closest is the 1990s at p=.053, borderline); see
+# "A second new signal" above)
+python investigations/max_effect_all_markets.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1920,7 +1990,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    problem); momentum's pre-1994 significance was refined to the 1980s and 1990s
    specifically, standing on firmer ground than the original sweep showed since it doesn't
    depend on the unreliable early years the way reversal's did; and both ASX findings
-   survived dropping their single most-present ticker. Momentum's
+   survived dropping their single most-present ticker. A second new signal, the MAX effect
+   (lottery demand, Milestone 28), was then tested on all three markets with the same
+   immediate rigor: no clean replication anywhere, and a US combined-book inversion that
+   echoes low-volatility's in direction but is weaker and, unlike low-volatility's, does not
+   cleanly localize to one decade — left flagged as a genuinely open pattern (two distinct
+   lottery-demand signals both inverting on the same dataset) rather than explained away.
+   Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -2269,3 +2345,17 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   (survives leave-one-out), but economically this signal, on this dataset, is closer to
   "hold the same 3-5 ultra-stable blue chips almost permanently" than a rotating
   cross-sectional bet.
+- **A second new signal, the MAX effect (lottery demand), does not replicate positively
+  anywhere, and its US result echoes low-volatility's inversion in direction but is weaker
+  and more fragile (Milestone 28).** Tested with the same out-of-sample hedge and HAC
+  methodology on all three markets at once: NSE and ASX show nothing significant at
+  conventional levels; the US mirror's hedged combined book is negative (daily -12.56%,
+  p=0.079; monthly -9.47%, p=0.0143) — high-MAX "lottery" names outperformed low-MAX ones,
+  the same direction as low-volatility's US inversion but considerably weaker. Checked
+  immediately for decade concentration (the lesson from Milestone 26, applied from the
+  start this time): unlike low-volatility's cleanly-concentrated 1990s effect, no single
+  decade of MAX's US result reaches conventional 5% significance (the closest, the 1990s,
+  sits at p=0.0534) — a more diffuse, fragile pattern than a genuine concentrated episode.
+  **This project has now tested two distinct "lottery demand" signals, and both fail to
+  replicate positively while both show some degree of inversion on the same US mega-cap-
+  survivor dataset — flagged here as a genuinely open pattern, not a resolved explanation.**
