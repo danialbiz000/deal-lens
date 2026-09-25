@@ -494,6 +494,21 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   explicitly even on a sample too short for the finer decade-level treatment used elsewhere,
   since a coarse split still distinguishes "stable, low individual power" from "one window
   carrying the whole result."**
+- **Milestone 38 tested a fourth new signal, deliberately chosen from a genuinely different
+  family than any tested before it — not cross-sectional stock selection but a time-series
+  calendar anomaly, the turn-of-month effect.** Tested directly on the equal-weighted market
+  proxy (no decile backtest or beta hedge needed, since this is a long-only market-timing
+  question), it became the first new signal since momentum itself to positively replicate on
+  more than one market: highly significant on NSE and the US mirror (p<0.01 both, full
+  sample), not significant on ASX. A sub-period breakdown found the same publication-era decay
+  already documented for momentum — strong early, insignificant in both markets' most recent
+  ~15-16 years — the identical decay shape now found independently in an unrelated signal
+  family. **Rule: breadth-testing across genuinely different behavioral mechanisms
+  (Milestone 30's lesson) should include different signal CONSTRUCTIONS too, not just
+  different cross-sectional rankings — a time-series calendar effect tests this project's
+  entire toolkit (data, HAC regression, sub-period discipline) against a question its
+  decile-backtest engine was never built for, and a positive replication still needs the same
+  decay-checking discipline as every cross-sectional one.**
 
 ## 2. Risk-management lessons
 

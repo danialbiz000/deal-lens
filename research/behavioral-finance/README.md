@@ -1966,6 +1966,53 @@ selection rule.
 
 **Reproduce this**: `python investigations/walkforward_signal_selection.py`.
 
+## A fourth new signal, a genuinely different family: does the turn-of-month effect replicate? (Milestone 38)
+
+Every signal tested so far — momentum/52-week-high (underreaction), short-term/long-term
+reversal (overreaction), low-volatility/MAX (lottery demand) — is **cross-sectional**: rank
+stocks against each other, go long/short the extremes. This milestone tests a **time-series**
+calendar anomaly instead — the turn-of-month effect (Ariel 1987; Lakonishok & Smidt 1988) —
+which doesn't rank stocks at all: it asks whether the market *as a whole* returns more on a
+small, well-defined window of trading days than the rest of the month. Definition (the
+standard one in the literature): the last trading day of a calendar month and the first three
+trading days of the next — a 4-day window per month boundary. Mechanism, genuinely distinct
+from every signal above: month-end/month-start concentrate real institutional cash flows
+(payroll-driven retirement contributions, mutual-fund inflows, pension rebalancing) and
+portfolio-manager window-dressing, creating buying pressure independent of any individual
+stock's characteristics. Tested directly on the project's equal-weighted market proxy with a
+HAC-regression turn-of-month dummy — no decile backtest, no beta hedge, no turnover, since
+this is a long-only market-timing question, not a cross-sectional long-short sort.
+
+| Market | Full sample add-on | Sub-period 1 | Sub-period 2 | Sub-period 3 (most recent) |
+|---|---|---|---|---|
+| NSE | +0.242%/day, p<0.0001*** | +0.359%/day, p<0.0001*** | +0.266%/day, p=0.0048*** | +0.103%/day, p=0.1250 |
+| US mirror | +0.084%/day, p=0.0020*** | +0.112%/day, p=0.0270** | +0.123%/day, p=0.0109** | +0.018%/day, p=0.6662 |
+| ASX | -0.043%/day, p=0.5548 | — | — | — |
+
+**The turn-of-month effect replicates strongly on two of three markets — the first genuinely
+new, positively-replicating cross-market finding since momentum itself.** Both NSE and the US
+mirror show a highly significant turn-of-month premium over the full sample (p<0.01 on both).
+**But this project's own hard-learned lesson — never trust a pooled result without checking
+non-overlapping sub-periods — applies here too, and finds the same decay pattern already
+established for momentum**: the effect is strong and significant in both markets' earlier
+eras, then weakens to statistical insignificance in the most recent ~15-16 year sub-period on
+*both* NSE (p=0.125) and the US mirror (p=0.666). ASX shows no effect at all, but its entire
+2009-2015 sample falls inside the era where NSE and the US mirror had already decayed —
+consistent with, not contradicting, the decay story. This mirrors momentum's own
+publication-era decay (Milestones 9-14), now found independently in a signal from a completely
+different behavioral family and an earlier academic-publication date (1988 vs. momentum's
+1993).
+
+**Updated conclusion**: the turn-of-month effect was real and economically large in earlier
+decades on two independent markets, but — like momentum — has weakened toward insignificance
+in the most recent era, plausibly as the pattern became widely known and arbitraged away. Treat
+it as a genuine historical anomaly with a documented decay trajectory, not a currently tradable
+edge; the implied annualized premiums (as high as +61%/yr on NSE) are illustrative only — no
+real strategy can be "long only turn-of-month days" without incurring the switching costs of
+being in and out of the market roughly twelve times a year.
+
+**Reproduce this**: `python investigations/turn_of_month_effect.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2395,6 +2442,14 @@ python investigations/cost_breakeven_decomposition.py
 # backtest-and-pick; see "Would a naive walk-forward selection have picked momentum" above)
 python investigations/walkforward_signal_selection.py
 
+# Investigation -- a fourth new signal, a genuinely different (time-series, not
+# cross-sectional) family: does the turn-of-month effect replicate? (replicates strongly on
+# NSE and the US mirror full-sample, p<0.01 both; but a sub-period check finds the same
+# publication-era decay pattern already established for momentum -- significant early,
+# insignificant in the most recent ~15-16 years on both markets; no effect on ASX; see "A
+# fourth new signal, a genuinely different family" above)
+python investigations/turn_of_month_effect.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -2535,7 +2590,14 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    pre-1994 significance on the US mirror, a naive selection process would have picked
    low-volatility's inverted result over momentum, and momentum's own post-1994 result would
    have looked like a bust — a sobering result that validates this project's actual
-   mechanism-aware methodology over a single naive backtest-and-pick rule. Momentum's
+   mechanism-aware methodology over a single naive backtest-and-pick rule. A fourth new signal
+   was then tested, this time from a genuinely different family than any before it — not
+   cross-sectional stock selection but a time-series calendar anomaly, the turn-of-month effect
+   (Milestone 38) — and it became the first new signal since momentum itself to *positively*
+   replicate on more than one market (NSE and the US mirror, both p<0.01 full-sample), though a
+   sub-period check found the same publication-era decay already established for momentum:
+   strong and significant early, insignificant in both markets' most recent ~15-16 years.
+   Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -3037,3 +3099,20 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   data; this project's actual mechanism-aware methodology (beta-hedging, decade decomposition,
   crash-mechanism testing, sector/cost/sub-period checks) is what correctly separated a real
   edge from a decaying, inverted anomaly, not a single walk-forward ranking rule.**
+- **A fourth new signal, deliberately chosen from a genuinely different (time-series, not
+  cross-sectional) family, is the first since momentum itself to positively replicate on more
+  than one market — but it carries the same publication-era decay already found for momentum
+  (Milestone 38).** The turn-of-month effect (Lakonishok & Smidt 1988: the last trading day of
+  a month plus the first three of the next) tested directly on the equal-weighted market proxy
+  via a HAC-regression dummy, no decile backtest or beta hedge needed since this is a long-only
+  market-timing question. Full sample: highly significant on NSE (+0.242%/day add-on,
+  p<0.0001) and the US mirror (+0.084%/day, p=0.0020); not significant on ASX (p=0.5548). A
+  non-overlapping sub-period breakdown (this project's own standing practice since Milestone
+  27) finds the effect strong and significant in both NSE and the US mirror's earlier eras but
+  decayed to insignificance in both markets' most recent ~15-16 years (NSE p=0.125, US
+  p=0.666) — the identical publication-decay shape already documented for momentum (Milestones
+  9-14), now found independently in an unrelated signal family. **Treat this as a genuine
+  historical anomaly with a documented decay trajectory, not a currently tradable edge**; the
+  implied annualized premiums (up to +61%/yr on NSE) are illustrative only, since no real
+  strategy can be long only a 4-day window twelve times a year without incurring real
+  switching costs this project's flat-cost model (Milestones 35-36) would need to account for.
