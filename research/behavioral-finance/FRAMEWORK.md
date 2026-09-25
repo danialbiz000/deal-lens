@@ -469,6 +469,18 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   independent alpha. **Rule: a practical deliverable's design assumptions age the same way
   a research finding does — re-examine them against the evidence that has accumulated since
   they were set, rather than treating "this is how we built it originally" as permanent.**
+- **Milestone 32 checked whether momentum's US edge is a disguised sector bet — the level
+  above the individual-ticker concentration checks Milestones 26-27 already ran.** No sector
+  exceeds a 1.5x overweight relative to its universe share in either leg; the largest
+  deviation is a modest Technology tilt (1.4x) with a corresponding Communication
+  Services/Financials underweight. ASX's independently-confirmed momentum result couldn't be
+  checked the same way — no reliable sector-classification source for its 209-ticker
+  universe is reachable from this sandbox, and this project's honesty standard treats
+  hand-classifying 209 unfamiliar codes from memory as worse than not running the check.
+  **Rule: "diversified by construction" (a decile sort across many names) is not the same
+  claim as "diversified in practice" (across the sectors those names belong to) — check the
+  second explicitly before treating a signal's diversification as given, and say plainly
+  when a market can't be checked rather than skipping it silently.**
 
 ## 2. Risk-management lessons
 
@@ -811,6 +823,29 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     each component's individual verdict — test the blend itself before pruning components
     that "shouldn't" be adding value; the intuition that a retracted signal must be dead
     weight in every context is itself a hypothesis, not a conclusion.**
+32. **"Diversified by construction" is not the same claim as "diversified in practice" —
+    check the second explicitly.** Milestone 32 tested whether momentum's decile-sorted US
+    long/short legs, diversified by construction across 30 individual names, are also
+    diversified across sectors. They are: no sector exceeds 1.5x its universe share in
+    either leg. **Rule: a signal built to rank many names still deserves an explicit
+    sector/factor concentration check before being trusted as genuinely diversified — a
+    cross-sectional rank spreads exposure across names, not automatically across whatever
+    groupings those names happen to cluster into.**
+33. **When a sample's history can't estimate a parameter a risk question depends on, simulate
+    around it rather than leaving the question open indefinitely.** This project's
+    Conclusions named an open question since Milestone 21 — how bad the momentum-crash
+    mechanism could get in a crisis more severe than 2008-09 — and never resolved it, because
+    the sample's history only contains one crisis to learn from. Milestone 33 recognized that
+    the unresolvable parameter was specifically *duration* (the worst Bear+HighVol episode in
+    the post-2008 sample ran 196 days; historical bear markets elsewhere ran years), not the
+    daily effect size (which HAC-regression pins down with real confidence, p=0.0081). Holding
+    the fitted daily drift and its residual distribution fixed and bootstrap-simulating longer
+    durations gave the risk playbook a concrete number (~44% mean loss at 2x the worst
+    historical episode, ~58% at 3x) instead of an acknowledged-but-unquantified gap. **Rule:
+    separate what a sample can and can't estimate before declaring a risk question
+    unanswerable — a parameter the data can't pin down (duration, here) can often still be
+    varied in simulation around a parameter the data *can* pin down (daily severity),
+    turning "we can't know" into "here's what it would cost if it lasted longer."**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

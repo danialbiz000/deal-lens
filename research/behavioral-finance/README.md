@@ -1677,6 +1677,93 @@ un-re-examined after 30 milestones of evidence accumulated around it.
 
 **Reproduce this**: `python investigations/composite_score_evidence_check.py`.
 
+## Does momentum's edge carry hidden sector concentration risk? (Milestone 32)
+
+Every "concentration" check this project has run (Milestones 26-27) asks whether a handful
+of individual *names* secretly drive a result. This asks the level above that: whether a
+handful of *sectors* do — a real risk-management question, distinct from whether the return
+itself is statistically genuine. Only the US mirror's fixed 30-ticker universe can be
+checked this way: GICS sector assignments for all 30 well-known names are hardcoded (public,
+static classifications, no lookup needed). **ASX's independently-confirmed momentum result
+cannot be checked the same way** — no reliable sector-classification source for its
+209-ticker universe is reachable from this sandbox, and hand-classifying 209 unfamiliar ASX
+codes from memory risks silently wrong labels, which this project's honesty standard treats
+as worse than not running the check. Flagged as an explicit limitation, not silently
+skipped.
+
+| Sector | Universe share | Long leg, pre-2008 | Short leg, pre-2008 |
+|---|---|---|---|
+| Technology | 20.0% | 28.3% | 20.2% |
+| Consumer Discretionary | 13.3% | 17.4% | 13.0% |
+| Health Care | 16.7% | 16.6% | 20.5% |
+| Consumer Staples | 13.3% | 14.3% | 16.1% |
+| Energy | 6.7% | 7.9% | 7.4% |
+| Financials | 13.3% | 7.9% | 11.0% |
+| Communication Services | 16.7% | 7.7% | 11.8% |
+
+**No sector reaches even a 1.5x overweight relative to its universe share, in either leg, in
+the pre-2008 window carrying the demonstrated edge or the full sample.** The largest
+deviation is a modest Technology tilt in the long leg (1.4x universe share) and a
+corresponding underweight in Communication Services and Financials — intuitive (telecoms and
+banks tend to be more value-like, less momentum-prone than growth tech) but not close to
+"momentum is secretly a single-sector bet." Momentum's long/short legs stay meaningfully
+diversified across at least six of the universe's seven sectors throughout.
+
+**Updated conclusion**: momentum's US edge is not a disguised sector concentration; this
+adds a genuine, checked data point to the risk playbook rather than an unexamined assumption
+that a diversified-by-construction decile sort is actually diversified in practice. The
+modest structural Technology overweight / Communication Services-Financials underweight is
+worth naming explicitly for anyone sizing this as a real position, even though it falls well
+short of a concentration red flag.
+
+**Reproduce this**: `python investigations/momentum_sector_concentration.py`.
+
+## Does the momentum-crash mechanism scale to a genuinely severe future crisis? (Milestone 33)
+
+This project's own Conclusions have named an open question since Milestone 21 and never
+resolved it: "whether the crash mechanism would reactivate in a genuinely severe future
+crisis, as opposed to the milder episodes this sample happens to contain, is a question no
+amount of further re-testing of this history can answer." That's true of re-testing — but
+this project's own Q1 methodology shows the right response to "the history doesn't contain a
+severe-enough episode" is a grounded scenario simulation, not giving up.
+
+The daily magnitude of the momentum-crash effect, once active, is pinned down with real
+statistical confidence (Milestone 17, HAC p=0.0081): on a Bear+HighVol day, momentum's long
+leg loses an extra ~0.15%/day beyond its normal drift, with ~0.67% daily residual volatility.
+What the sample can't pin down is *duration* — the worst Bear+HighVol episode in the entire
+post-2008 sample lasted 196 trading days (2008-09-03 to 2009-07-29, the 2008-09 crisis
+itself), while historical bear markets elsewhere (the 1930s) ran 2-3+ years. Rather than
+assuming a bigger daily effect than the data supports, this milestone holds the fitted daily
+drift and (bootstrap-resampled, not assumed Gaussian) residual distribution fixed and varies
+only the regime's duration — a defensible extrapolation of *how long*, not *how bad per day*.
+
+| Duration | Mean cumulative loss | 5th–95th pct | Worst 1% of paths |
+|---|---|---|---|
+| 1x worst historical (196 days, ~9.3 mo.) | -25.3% | -36.3% to -13.1% | -40.4% |
+| 2x (392 days, ~18.7 mo.) | -44.2% | -55.6% to -31.1% | -59.4% |
+| 3x (588 days, ~28.0 mo.) | -58.3% | -68.6% to -46.2% | -71.8% |
+| 4x (784 days, ~37.3 mo.) | -68.9% | -77.5% to -58.4% | -80.1% |
+
+**The 1x scenario (mean -25.3%) is a useful sanity check**: it applies the fitted model over
+the *same* duration as the actual 2008-09 crisis and lands at a plausible order of magnitude
+for what momentum's long leg actually experienced, without being fit to reproduce that number
+directly. Extending duration compounds losses roughly as expected from a persistent negative
+daily drift: a crisis twice as long as anything in this sample's history would plausibly
+produce losses in the -44% range on average, three times as long near -58%, and so on — a
+genuinely severe, multi-year regime (historically not unprecedented, just absent from this
+project's post-1970 US sample) could plausibly halve the book or worse.
+
+**Updated conclusion**: this doesn't prove a longer crisis *would* happen — duration is
+exactly the parameter this sample can't estimate, which is the whole point of simulating it
+rather than re-testing history again. It gives the risk playbook a concrete, data-grounded
+answer to "how bad could it get" instead of leaving the question as an acknowledged-but-
+unquantified gap: a multi-year Bear+HighVol regime, at the exact daily severity this
+project's own data already confirms is real, would plausibly produce losses well beyond
+anything in the historical sample. Any real deployment sizing momentum against 2008-09 alone
+as its worst case is sizing against too short a memory.
+
+**Reproduce this**: `python investigations/momentum_crash_severity_stress_test.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2061,6 +2148,22 @@ python investigations/long_term_reversal_all_markets.py
 # score still make sense" above)
 python investigations/composite_score_evidence_check.py
 
+# Investigation -- does momentum's US edge carry hidden sector concentration? (no -- no
+# sector reaches even 1.5x its universe share in either leg; modest Technology overweight /
+# Communication Services-Financials underweight in the long leg, not close to a single-sector
+# bet; ASX's 209-ticker universe explicitly flagged as not checkable with available data; see
+# "Does momentum's edge carry hidden sector concentration risk" above)
+python investigations/momentum_sector_concentration.py
+
+# Investigation -- does the momentum-crash mechanism scale to a genuinely severe future
+# crisis, beyond anything in this sample's history? (bootstrap stress simulation, daily
+# effect size and residual distribution held fixed at their fitted, statistically significant
+# post-2008 estimates, duration varied 1x-4x the worst historical episode -- a crisis twice
+# as long as 2008-09 would plausibly produce ~-44% mean cumulative loss, three times as long
+# ~-58%; see "Does the momentum-crash mechanism scale to a genuinely severe future crisis"
+# above)
+python investigations/momentum_crash_severity_stress_test.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -2167,7 +2270,15 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    52-week-high's high correlation with momentum's own ranking on ASX acts as a
    noise-reduction on the cross-sectional sort rather than independent information. The
    composite's current weighting is left as-is, now for a tested reason rather than an
-   unexamined default. Momentum's
+   unexamined default. Two risk-management questions about momentum's own edge, both
+   previously acknowledged but left unquantified, were then answered directly: whether the
+   US edge hides sector concentration (Milestone 32) — it doesn't, no sector exceeds 1.5x
+   its universe share in either leg — and how bad the momentum-crash mechanism could get in
+   a crisis longer than anything in this sample's history (Milestone 33) — a bootstrap
+   stress simulation, holding the fitted daily effect size fixed and varying only regime
+   duration, found a crisis twice as long as 2008-09 would plausibly cost ~44% on average,
+   three times as long ~58%, finally giving the risk playbook's long-acknowledged open
+   question a concrete, data-grounded number instead of leaving it unquantified. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -2571,3 +2682,23 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   cross-sectional sort rather than an independent alpha source — a modest, non-decisive
   empirical result, not a mechanism finding. `signals/composite.py`'s equal weighting is
   left as-is, now for a tested reason rather than an unexamined historical default.
+- **Momentum's US edge is not a disguised sector concentration — no sector exceeds a 1.5x
+  overweight relative to its universe share, in either leg (Milestone 32).** The largest
+  deviation is a modest Technology tilt in the long leg (1.4x universe share) with a
+  corresponding Communication Services/Financials underweight — intuitive, not alarming.
+  **ASX's independently-confirmed momentum result could not be checked the same way**: no
+  reliable sector-classification source for its 209-ticker universe is reachable from this
+  sandbox, and this project's honesty standard treats hand-classifying 209 unfamiliar codes
+  from memory as worse than not running the check — an explicit limitation, not a silent gap.
+- **The momentum-crash mechanism's "how bad in a genuinely severe crisis" question, open
+  since Milestone 21, now has a concrete, data-grounded answer instead of remaining
+  unquantified (Milestone 33).** A bootstrap stress simulation holds the fitted, statistically
+  significant post-2008 daily effect size and residual distribution fixed and varies only
+  regime duration, since duration (not daily severity) is what this sample's history can't
+  estimate — the worst Bear+HighVol episode in the entire post-2008 sample lasted 196 trading
+  days (2008-09-03 to 2009-07-29). A crisis twice that long plausibly costs ~44% on average
+  (5th-95th pct: -56% to -31%); three times as long, ~58%. **This does not prove a longer
+  crisis will happen** — duration is exactly the unobservable parameter being simulated
+  around, not estimated from data — but it replaces an acknowledged-but-unquantified gap
+  with an explicit, reproducible number for anyone sizing this strategy against "2008-09 was
+  the worst case" alone.

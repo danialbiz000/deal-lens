@@ -2924,6 +2924,126 @@ box(
     "tested reason rather than an unexamined historical default.",
     title="THE COMPOSITE'S DESIGN SURVIVES ITS OWN AUDIT"
 )
+box(
+    "Section 5.33 asks whether momentum's US edge is a disguised "
+    "sector bet, and Section 5.34 finally answers this project's "
+    "longest-standing open question: how bad the momentum-crash "
+    "mechanism could get in a crisis more severe than anything in "
+    "this sample's history.",
+    kind="fact", title="UPDATE FROM SECTIONS 5.33-5.34"
+)
+
+h1("5.33  Milestone 32 &mdash; Does momentum's edge carry hidden sector concentration risk?")
+p("Every &quot;concentration&quot; check this project has run "
+  "(Sections 5.27-5.28) asks whether a handful of individual "
+  "<i>names</i> secretly drive a result. This asks the level above "
+  "that: whether a handful of <i>sectors</i> do &mdash; a real "
+  "risk-management question, distinct from whether the return itself "
+  "is statistically genuine. Only the US mirror's fixed 30-ticker "
+  "universe can be checked this way: GICS sector assignments for all "
+  "30 well-known names are hardcoded (public, static classifications, "
+  "no lookup needed). <b>ASX's independently-confirmed momentum "
+  "result cannot be checked the same way</b> &mdash; no reliable "
+  "sector-classification source for its 209-ticker universe is "
+  "reachable from this sandbox, and hand-classifying 209 unfamiliar "
+  "ASX codes from memory risks silently wrong labels, which this "
+  "project's honesty standard treats as worse than not running the "
+  "check. Flagged as an explicit limitation, not silently skipped.")
+data_table(
+    ["Sector", "Universe share", "Long leg, pre-2008", "Short leg, pre-2008"],
+    [
+        ["Technology", "20.0%", "28.3%", "20.2%"],
+        ["Consumer Discretionary", "13.3%", "17.4%", "13.0%"],
+        ["Health Care", "16.7%", "16.6%", "20.5%"],
+        ["Consumer Staples", "13.3%", "14.3%", "16.1%"],
+        ["Energy", "6.7%", "7.9%", "7.4%"],
+        ["Financials", "13.3%", "7.9%", "11.0%"],
+        ["Communication Services", "16.7%", "7.7%", "11.8%"],
+    ],
+    col_widths=[1.9*inch, 1.35*inch, 1.7*inch, 1.7*inch], small=True,
+)
+p("<b>No sector reaches even a 1.5x overweight relative to its "
+  "universe share, in either leg</b>, in the pre-2008 window carrying "
+  "the demonstrated edge or the full sample. The largest deviation is "
+  "a modest Technology tilt in the long leg (1.4x universe share) and "
+  "a corresponding underweight in Communication Services and "
+  "Financials &mdash; intuitive (telecoms and banks tend to be more "
+  "value-like, less momentum-prone than growth tech) but not close to "
+  "&quot;momentum is secretly a single-sector bet.&quot; Momentum's "
+  "long/short legs stay meaningfully diversified across at least six "
+  "of the universe's seven sectors throughout.")
+box(
+    "Momentum's US edge is not a disguised sector concentration; this "
+    "adds a genuine, checked data point to the risk playbook rather "
+    "than an unexamined assumption that a diversified-by-construction "
+    "decile sort is actually diversified in practice. The modest "
+    "structural Technology overweight / Communication "
+    "Services-Financials underweight is worth naming explicitly for "
+    "anyone sizing this as a real position, even though it falls well "
+    "short of a concentration red flag.",
+    title="DIVERSIFIED BY CONSTRUCTION, AND CONFIRMED DIVERSIFIED IN PRACTICE"
+)
+
+h1("5.34  Milestone 33 &mdash; Does the momentum-crash mechanism scale to a genuinely severe future crisis?")
+p("This project's own Conclusions have named an open question since "
+  "Section 5.22 and never resolved it: &quot;whether the crash "
+  "mechanism would reactivate in a genuinely severe future crisis, as "
+  "opposed to the milder episodes this sample happens to contain, is "
+  "a question no amount of further re-testing of this history can "
+  "answer.&quot; That's true of re-testing &mdash; but this project's "
+  "own Q1 methodology (Part III) shows the right response to "
+  "&quot;the history doesn't contain a severe-enough episode&quot; is "
+  "a grounded scenario simulation, not giving up.")
+p("The daily magnitude of the momentum-crash effect, once active, is "
+  "pinned down with real statistical confidence (Section 5.18, HAC "
+  "p=0.0081): on a Bear+HighVol day, momentum's long leg loses an "
+  "extra ~0.15%/day beyond its normal drift, with ~0.67% daily "
+  "residual volatility. What the sample can't pin down is "
+  "<i>duration</i> &mdash; the worst Bear+HighVol episode in the "
+  "entire post-2008 sample lasted 196 trading days (2008-09-03 to "
+  "2009-07-29, the 2008-09 crisis itself), while historical bear "
+  "markets elsewhere (the 1930s) ran 2-3+ years. Rather than assuming "
+  "a bigger daily effect than the data supports, this milestone holds "
+  "the fitted daily drift and (bootstrap-resampled, not assumed "
+  "Gaussian) residual distribution fixed and varies only the regime's "
+  "duration &mdash; a defensible extrapolation of <i>how long</i>, "
+  "not <i>how bad per day</i>.")
+data_table(
+    ["Duration", "Mean cumulative loss", "5th-95th pct", "Worst 1% of paths"],
+    [
+        ["1x worst historical (196 days, ~9.3 mo.)", "-25.3%", "-36.3% to -13.1%", "-40.4%"],
+        ["2x (392 days, ~18.7 mo.)", "-44.2%", "-55.6% to -31.1%", "-59.4%"],
+        ["3x (588 days, ~28.0 mo.)", "-58.3%", "-68.6% to -46.2%", "-71.8%"],
+        ["4x (784 days, ~37.3 mo.)", "-68.9%", "-77.5% to -58.4%", "-80.1%"],
+    ],
+    col_widths=[2.3*inch, 1.5*inch, 1.7*inch, 1.2*inch], small=True,
+)
+p("<b>The 1x scenario (mean -25.3%) is a useful sanity check</b>: it "
+  "applies the fitted model over the <i>same</i> duration as the "
+  "actual 2008-09 crisis and lands at a plausible order of magnitude "
+  "for what momentum's long leg actually experienced, without being "
+  "fit to reproduce that number directly. Extending duration compounds "
+  "losses roughly as expected from a persistent negative daily drift: "
+  "a crisis twice as long as anything in this sample's history would "
+  "plausibly produce losses in the -44% range on average, three times "
+  "as long near -58%, and so on &mdash; a genuinely severe, "
+  "multi-year regime (historically not unprecedented, just absent "
+  "from this project's post-1970 US sample) could plausibly halve the "
+  "book or worse.")
+box(
+    "This doesn't prove a longer crisis <i>would</i> happen &mdash; "
+    "duration is exactly the parameter this sample can't estimate, "
+    "which is the whole point of simulating it rather than re-testing "
+    "history again. It gives the risk playbook a concrete, "
+    "data-grounded answer to &quot;how bad could it get&quot; instead "
+    "of leaving the question as an acknowledged-but-unquantified gap: "
+    "a multi-year Bear+HighVol regime, at the exact daily severity "
+    "this project's own data already confirms is real, would "
+    "plausibly produce losses well beyond anything in the historical "
+    "sample. Any real deployment sizing momentum against 2008-09 "
+    "alone as its worst case is sizing against too short a memory.",
+    title="A LONG-OPEN QUESTION, FINALLY GIVEN A NUMBER"
+)
 
 # MARKER_END_PART5
 
@@ -3281,6 +3401,26 @@ box(
     "ranking provides noise-reduction rather than independent alpha. "
     "The framework above is correct as built.",
     kind="fact", title="UPDATE FROM PART V.32"
+)
+box(
+    "Part V.33 checked momentum's US edge for hidden sector "
+    "concentration: no sector exceeds a 1.5x overweight in either "
+    "leg, a modest Technology tilt aside. ASX's result couldn't be "
+    "checked the same way (no reachable sector-classification source "
+    "for its 209-ticker universe), flagged explicitly rather than "
+    "skipped.",
+    kind="fact", title="UPDATE FROM PART V.33"
+)
+box(
+    "Part V.34 finally answered this project's longest-open question "
+    "(named since Part V.22): how bad the momentum-crash mechanism "
+    "could get in a crisis longer than anything in this sample's "
+    "history. Holding the fitted daily effect fixed and bootstrap-"
+    "simulating longer Bear+HighVol regime durations, a crisis twice "
+    "as long as 2008-09 plausibly costs ~44% on average, three times "
+    "as long ~58%. Sizing this strategy against 2008-09 alone as the "
+    "worst case is sizing against too short a memory.",
+    kind="fact", title="UPDATE FROM PART V.34"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -3708,6 +3848,39 @@ bullets([
     "adding value; the intuition that a retracted signal must be dead "
     "weight in every context is itself a hypothesis, not a "
     "conclusion.",
+    "<b>&quot;Diversified by construction&quot; is not the same claim "
+    "as &quot;diversified in practice&quot; &mdash; check the second "
+    "explicitly.</b> Part V.33 tested whether momentum's decile-sorted "
+    "US long/short legs, diversified by construction across 30 "
+    "individual names, are also diversified across sectors. They are: "
+    "no sector exceeds 1.5x its universe share in either leg. A "
+    "signal built to rank many names still deserves an explicit "
+    "sector/factor concentration check before being trusted as "
+    "genuinely diversified &mdash; a cross-sectional rank spreads "
+    "exposure across names, not automatically across whatever "
+    "groupings those names happen to cluster into.",
+    "<b>When a sample's history can't estimate a parameter a risk "
+    "question depends on, simulate around it rather than leaving the "
+    "question open indefinitely.</b> This project's Conclusions named "
+    "an open question since Part V.22 and never resolved it &mdash; "
+    "how bad the momentum-crash mechanism could get in a crisis more "
+    "severe than 2008-09 &mdash; because the sample's history only "
+    "contains one crisis to learn from. Part V.34 recognized the "
+    "unresolvable parameter was specifically <i>duration</i> (the "
+    "worst Bear+HighVol episode in the post-2008 sample ran 196 days; "
+    "historical bear markets elsewhere ran years), not the daily "
+    "effect size (which HAC-regression pins down with real "
+    "confidence, p=0.0081). Holding the fitted daily drift and its "
+    "residual distribution fixed and bootstrap-simulating longer "
+    "durations gave the risk playbook a concrete number (~44% mean "
+    "loss at 2x the worst historical episode, ~58% at 3x) instead of "
+    "an acknowledged-but-unquantified gap. Separate what a sample can "
+    "and can't estimate before declaring a risk question unanswerable "
+    "&mdash; a parameter the data can't pin down (duration, here) can "
+    "often still be varied in simulation around a parameter the data "
+    "<i>can</i> pin down (daily severity), turning &quot;we can't "
+    "know&quot; into &quot;here's what it would cost if it lasted "
+    "longer.&quot;",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -4266,6 +4439,36 @@ bullets([
     "a mechanism finding. <i>signals/composite.py</i>'s equal "
     "weighting is left as-is, now for a tested reason rather than an "
     "unexamined historical default.",
+    "<b>Momentum's US edge is not a disguised sector concentration "
+    "&mdash; no sector exceeds a 1.5x overweight relative to its "
+    "universe share, in either leg (Part V.33).</b> The largest "
+    "deviation is a modest Technology tilt in the long leg (1.4x "
+    "universe share) with a corresponding Communication "
+    "Services/Financials underweight &mdash; intuitive, not alarming. "
+    "<b>ASX's independently-confirmed momentum result could not be "
+    "checked the same way</b>: no reliable sector-classification "
+    "source for its 209-ticker universe is reachable from this "
+    "sandbox, and this project's honesty standard treats "
+    "hand-classifying 209 unfamiliar codes from memory as worse than "
+    "not running the check &mdash; an explicit limitation, not a "
+    "silent gap.",
+    "<b>The momentum-crash mechanism's &quot;how bad in a genuinely "
+    "severe crisis&quot; question, open since Part V.22, now has a "
+    "concrete, data-grounded answer instead of remaining unquantified "
+    "(Part V.34).</b> A bootstrap stress simulation holds the fitted, "
+    "statistically significant post-2008 daily effect size and "
+    "residual distribution fixed and varies only regime duration, "
+    "since duration (not daily severity) is what this sample's "
+    "history can't estimate &mdash; the worst Bear+HighVol episode in "
+    "the entire post-2008 sample lasted 196 trading days (2008-09-03 "
+    "to 2009-07-29). A crisis twice that long plausibly costs ~44% on "
+    "average (5th-95th pct: -56% to -31%); three times as long, ~58%. "
+    "<b>This does not prove a longer crisis will happen</b> &mdash; "
+    "duration is exactly the unobservable parameter being simulated "
+    "around, not estimated from data &mdash; but it replaces an "
+    "acknowledged-but-unquantified gap with an explicit, reproducible "
+    "number for anyone sizing this strategy against &quot;2008-09 was "
+    "the worst case&quot; alone.",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -4400,7 +4603,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 31 then ran the India findings through "
+  "needed. Milestones 3 through 33 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -4516,7 +4719,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, twenty-eight times in a row "
+  "most recent, best-supported-looking result, thirty times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -4637,14 +4840,24 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "artifact to untangle, just the straightforward absence the "
   "project's original two signals (52-week-high, short-term reversal) "
   "had already taught it to expect from most things it tests, and "
-  "finally ran a twenty-eighth check (Part V.32) that pointed the "
+  "ran a twenty-eighth check (Part V.32) that pointed the "
   "whole apparatus at itself in a different sense than before: not at "
   "a finding, but at the practical deliverable built on top of all the "
   "findings, unexamined since before any of them existed. The naive "
   "prediction &mdash; that pruning the two individually-retracted "
   "components should help &mdash; was wrong; the original blend "
   "tested better on both markets where the one confirmed signal "
-  "actually works. "
+  "actually works, ran a twenty-ninth check (Part V.33) that took the "
+  "individual-ticker concentration audits of Part V.26-27 up one "
+  "level, asking whether the one surviving edge was secretly a sector "
+  "bet rather than a genuine cross-sectional effect, and found it "
+  "wasn't &mdash; no sector cleared even a 1.5x overweight in either "
+  "leg &mdash; and finally ran a thirtieth check (Part V.34) that "
+  "didn't audit an existing result at all, but closed a question this "
+  "project had carried, unresolved, since Part V.22: not by re-testing "
+  "a history too short to contain the answer, but by simulating "
+  "around the exact parameter that history couldn't estimate, holding "
+  "everything the data <i>could</i> pin down fixed. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -4795,17 +5008,30 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "no correlated-signal puzzle to untangle &mdash; confirming that "
   "breadth means sampling mechanisms, not just constructions, and that "
   "a clean null is itself informative once the alternative is two "
-  "messy, entangled ones. What remains "
+  "messy, entangled ones. Part V.32 then pointed the whole apparatus "
+  "at the one piece of this project it had never touched: the "
+  "practical composite score itself, unexamined since before any of "
+  "this evidence existed. The naive prediction &mdash; that pruning "
+  "the two individually-retracted components should help &mdash; was "
+  "wrong; the original blend tested better on both markets where the "
+  "one confirmed signal actually works. Part V.33 then took the "
+  "individual-ticker concentration audits of Part V.26-27 up one "
+  "level, asking whether momentum's surviving US edge was secretly a "
+  "sector bet, and found it wasn't, no sector clearing even a 1.5x "
+  "overweight in either leg. And Part V.34 finally closed a question "
+  "this project had carried, unresolved, since Part V.22: not by "
+  "re-testing a history too short to contain the answer, but by "
+  "simulating around the exact parameter &mdash; regime duration "
+  "&mdash; that history couldn't estimate, holding the daily effect "
+  "size the data <i>could</i> pin down fixed. A crisis twice as long "
+  "as 2008-09 would plausibly cost momentum's long leg ~44% on "
+  "average; three times as long, ~58%. What remains "
   "open is not a specific "
-  "finding but two honest limits of the data itself: whether the crash "
-  "mechanism would reactivate in a genuinely severe future crisis, as "
-  "opposed to the milder episodes this sample happens to contain, is a "
-  "question no amount of further re-testing of this history can answer "
-  "&mdash; the most recent decade, for momentum, to size nothing against "
-  "&mdash; and whether ASX momentum's own edge is stable across "
+  "finding but one honest limit of the data itself: whether ASX "
+  "momentum's own edge is stable across "
   "sub-periods the way the US finding eventually was shown to be, a "
   "check this project's newest market hasn't had enough history yet to "
-  "run. Both are "
+  "run. That is "
   "what a research process built to "
   "distrust its own best-looking result eventually converges on.")
 
