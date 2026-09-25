@@ -1910,6 +1910,62 @@ a conservative (not overstated) estimate under the same shared assumption.
 
 **Reproduce this**: `python investigations/cost_breakeven_decomposition.py`.
 
+## Would a naive walk-forward selection have picked momentum? (Milestone 37)
+
+This project's own "Explicit limitations" have named a gap since the first commit: "No
+out-of-sample / walk-forward validation is wired up by default." Every out-of-sample hedge
+this project has run (Milestones 7, 10 onward) validates one signal's return against its own
+trailing history — a different question from the one a real systematic-strategy developer
+actually faces: choosing *which* signal to trade among several candidates, using only the data
+available at decision time. Picking the best-looking backtest among several candidates is
+exactly where data-snooping risk hides — on average you select noise plus signal, not signal
+alone. This milestone tests it directly: split the US mirror at 1994-01-01 (the same
+publication-era cutoff used since Milestone 9), rank all six signals this project has coded by
+their pre-1994 out-of-sample-hedged significance, and check whether the in-sample "winner"
+held up over 1994-2017.
+
+**Scope caveat, stated up front**: this is a statistical selection-bias test, not a literal
+historical-investor simulation — three of the six signal formulas (low-volatility, MAX, and to
+a lesser extent 52-week-high) were not published in the form coded here until after 1994, so a
+real 1994 investor could not have run them. What this tests is narrower and still meaningful:
+given a fixed set of candidate constructions, does picking the in-sample winner by backtested
+significance alone reliably identify what continues to work?
+
+| Signal | In-sample (pre-1994) | Out-of-sample (post-1994) |
+|---|---|---|
+| Low-volatility | -29.06%/yr, p=0.0006*** | -12.31%/yr, p=0.0802* |
+| Momentum (12-1) | +7.93%/yr, p=0.0244** | -0.31%/yr, p=0.5900 |
+| MAX effect | -19.33%/yr, p=0.0923* | -5.84%/yr, p=0.5156 |
+| Short-term reversal | -0.41%/yr, p=0.2935 | -0.57%/yr, p=0.5760 |
+| Long-term reversal | -5.69%/yr, p=0.6058 | -6.50%/yr, p=0.2707 |
+| 52-week-high | -8.46%/yr, p=0.7765 | -6.68%/yr, p=0.4013 |
+
+**A naive "pick the most significant in-sample result" process would not have picked
+momentum.** Ranked by pre-1994 p-value alone, **low-volatility wins** (p=0.0006), not momentum
+(p=0.0244, second place) — and low-volatility's in-sample "edge" is a strongly *negative*
+(inverted) result, the same US inversion this project's own Milestone 26-27 later traced to a
+1990s-specific episode, not a positive discovery a naive process would even correctly interpret
+as a real edge rather than a construction error. Its out-of-sample result stays below the 0.10
+threshold (p=0.0802) — nominally "held up" — but its magnitude decays by more than half (-29%
+to -12%). **Momentum itself, this project's actual surviving edge, would have looked like a
+worse in-sample pick than low-volatility, and its own out-of-sample result (p=0.59) would have
+looked like a bust** — the already-established Milestone 9-10 post-1994 decay finding, now
+reframed: a naive walk-forward process, applied mechanically, would have both under-rated
+momentum in-sample and then appeared to confirm abandoning it out-of-sample.
+
+**Updated conclusion**: naive walk-forward selection by raw in-sample significance is an
+unreliable process on this project's own data — it would have surfaced an inverted anomaly
+(low-volatility) as the "winner" over the signal that turned out, after extensive
+mechanism-level scrutiny (beta-hedging, decade decomposition, crash-mechanism testing, sector
+concentration, cost-realism, sub-period stability), to be this project's one genuinely
+robust finding. This is not an argument against out-of-sample testing — it's an argument that
+*which* signal a walk-forward process selects depends heavily on economic interpretation, not
+p-value ranking alone, and validates this project's own actual methodology (deep,
+mechanism-aware investigation of each candidate) over a single naive backtest-and-pick
+selection rule.
+
+**Reproduce this**: `python investigations/walkforward_signal_selection.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2332,6 +2388,13 @@ python investigations/transaction_cost_realism.py
 # US mirror's cost breakeven so much lower than ASX's" above)
 python investigations/cost_breakeven_decomposition.py
 
+# Investigation -- would a naive walk-forward selection process have picked momentum? (split
+# the US mirror at 1994-01-01, rank all six signals by pre-1994 significance -- low-volatility's
+# inverted result "wins" in-sample, not momentum; momentum's own out-of-sample p=0.59 would have
+# looked like a bust; validates this project's mechanism-aware methodology over naive
+# backtest-and-pick; see "Would a naive walk-forward selection have picked momentum" above)
+python investigations/walkforward_signal_selection.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -2467,7 +2530,12 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    (only a ~1.3x contributor), and a self-check on the cost model itself flagged that its
    shared flat rate likely flatters ASX relative to a real deployment, since a smaller,
    less liquid market should realistically cost more per unit of turnover than a US
-   mega-cap universe, not the same amount. Momentum's
+   mega-cap universe, not the same amount. Finally, this project's own long-acknowledged
+   walk-forward gap was tested directly (Milestone 37): ranking all six coded signals by
+   pre-1994 significance on the US mirror, a naive selection process would have picked
+   low-volatility's inverted result over momentum, and momentum's own post-1994 result would
+   have looked like a bust — a sobering result that validates this project's actual
+   mechanism-aware methodology over a single naive backtest-and-pick rule. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -2504,7 +2572,16 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
 - **No out-of-sample / walk-forward validation** is wired up by default — anyone extending
   this should split into a strict in-sample fit period and out-of-sample test period before
   claiming an edge, and check performance decay after each anomaly's publication date
-  (a very well-documented risk for momentum and reversal specifically).
+  (a very well-documented risk for momentum and reversal specifically). **Tested directly by
+  Milestone 37**: splitting the US mirror at 1994-01-01 and ranking all six coded signals by
+  pre-1994 significance, a naive selection-by-p-value process would have picked
+  low-volatility's inverted result (p=0.0006) over momentum (p=0.0244, second place) —
+  and momentum's own post-1994 result (p=0.59) would have looked like a bust to that same
+  process. Naive walk-forward selection by raw significance is not reliable on this project's
+  own data; this project's actual approach (deep, mechanism-level scrutiny of each candidate)
+  is what correctly separated a real edge from a decaying/inverted anomaly, not a single
+  backtest-and-pick rule. See "Would a naive walk-forward selection have picked momentum"
+  above.
 - **The Q1 simulation's regime-switching correlation and fat-tail parameters are
   illustrative, calibrated loosely to the LTCM episode's qualitative shape** (correlations
   that were low/moderate in normal times moving toward 1 in the crisis), not fit to LTCM's
@@ -2944,3 +3021,19 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   market — but the direction is clear: ASX's cost-robustness is real but likely overstated in
   absolute terms, while the US mirror's fragility is, if anything, not overstated by the same
   shared assumption.
+- **A naive walk-forward selection process, using only pre-1994 data, would not have picked
+  momentum — it would have picked low-volatility's inverted result, and momentum's own
+  out-of-sample number would have looked like a bust (Milestone 37).** Ranking all six signals
+  this project has coded by pre-1994 out-of-sample-hedged significance on the US mirror,
+  low-volatility "wins" (p=0.0006) with a strongly negative (inverted) result over momentum's
+  p=0.0244 — and low-volatility's post-1994 result stays nominally significant (p=0.0802) but
+  with its magnitude cut by more than half. Momentum, this project's actual surviving edge,
+  would have ranked second in-sample and shown a p=0.59 out-of-sample, indistinguishable from
+  noise to a process using only significance ranking — the already-established Milestone 9-10
+  decay finding, reframed as a walk-forward selection failure. A stated scope caveat: three of
+  the six signal formulas postdate 1994's publication era, so this is a statistical
+  selection-bias test on a fixed candidate set, not a literal historical-investor simulation.
+  **Naive backtest-and-pick selection by raw significance is unreliable on this project's own
+  data; this project's actual mechanism-aware methodology (beta-hedging, decade decomposition,
+  crash-mechanism testing, sector/cost/sub-period checks) is what correctly separated a real
+  edge from a decaying, inverted anomaly, not a single walk-forward ranking rule.**

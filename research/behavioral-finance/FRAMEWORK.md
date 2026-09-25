@@ -903,6 +903,21 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     shared modeling assumption behind a comparison should be checked for which side it favors —
     an asymmetric result built on a symmetric-looking assumption can still be biased in a
     predictable direction.**
+37. **A naive walk-forward selection process — pick the best-looking in-sample backtest among
+    several candidates — is not a safe substitute for mechanism-level scrutiny of each
+    candidate, and this project's own data proves it wasn't just a theoretical risk.**
+    Milestone 37 split the US mirror at 1994-01-01 and ranked all six signals this project has
+    coded by pre-1994 out-of-sample-hedged significance. The "winner" was low-volatility's
+    strongly negative (inverted) result (p=0.0006), not momentum (p=0.0244, second place) — and
+    a process using only that ranking would have judged momentum's own post-1994 result
+    (p=0.59) a bust, exactly the already-known Milestone 9-10 decay finding, now reframed as a
+    selection failure rather than a single-signal one. **Rule: when validating a strategy
+    selection process, don't just check whether the SELECTED signal's return survives
+    out-of-sample — check whether the SELECTION RULE ITSELF would have chosen the signal that
+    later proved out to be real. A rule that ranks candidates by raw significance alone can
+    reliably prefer a decaying or inverted anomaly over a genuine, if less flashy, edge; the
+    economic interpretation this project applied to each candidate (not the p-value alone) is
+    what actually separated the two.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
