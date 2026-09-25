@@ -3411,6 +3411,71 @@ box(
     "being in and out of the market roughly twelve times a year.",
     title="A REAL HISTORICAL PATTERN, NOT A CURRENTLY TRADABLE ONE"
 )
+box(
+    "Section 5.40 closes the loop between two findings that had never "
+    "been tested together: Section 5.32's gross-return composite-vs-"
+    "momentum comparison and Section 5.36's cost-realism methodology.",
+    kind="fact", title="UPDATE FROM SECTION 5.40"
+)
+
+h1("5.40  Milestone 39 &mdash; Does the composite score still beat momentum-alone once realistic costs apply?")
+p("Section 5.32 compared the current equal-weighted three-signal "
+  "composite against a momentum-only variant and found the full "
+  "composite scored better on <b>gross</b>, out-of-sample-hedged "
+  "returns on both markets where momentum is confirmed &mdash; but "
+  "that comparison predates Section 5.36's transaction-cost work "
+  "entirely: it used <i>daily_returns_gross</i>, applied no cost "
+  "model, and never looked at turnover. This section closes that gap "
+  "directly, re-running the same three variants (equal-weighted "
+  "composite; momentum-only via the composite's z-score machinery; "
+  "momentum alone directly) through Section 5.36's exact linear-cost "
+  "sweep, and checking each variant's own turnover.")
+data_table(
+    ["Market", "Variant", "Turnover", "10bps ret (p)", "50bps ret (p)", "200bps ret (p)"],
+    [
+        ["US", "Composite", "92.6%", "+2.88% (.0547*)", "-1.61% (.4606)", "-16.90% (.0002***)"],
+        ["US", "Momentum alone", "49.6%", "+2.85% (.0609*)", "+0.43% (.1988)", "-8.22% (.3562)"],
+        ["ASX", "Composite", "89.7%", "+38.18% (<.0001***)", "+32.09% (.0003***)", "+11.38% (.1204)"],
+        ["ASX", "Momentum alone", "38.4%", "+34.82% (.0007***)", "+32.31% (.0014***)", "+23.29% (.0148**)"],
+    ],
+    col_widths=[0.7*inch, 1.0*inch, 0.85*inch, 1.15*inch, 1.15*inch, 1.15*inch], small=True,
+)
+p("<b>The composite's monthly turnover is roughly double "
+  "momentum-alone's on both markets</b> (US: 92.6% vs. 49.6%; ASX: "
+  "89.7% vs. 38.4%) &mdash; blending in two components with no "
+  "individually demonstrated skill (52-week-high, reversal) doesn't "
+  "just add noise to the ranking, it materially increases how often "
+  "the portfolio trades. <b>At the 10bps baseline, Section 5.32's "
+  "finding holds</b>: the composite's point estimate edges out "
+  "momentum-alone on both markets. <b>But that edge evaporates fast "
+  "once realistic costs are applied</b>: on the US mirror, the "
+  "composite's point estimate turns negative by 50bps while "
+  "momentum-alone stays positive through 100bps; on ASX, the "
+  "composite loses conventional significance by 200bps (p=0.12) while "
+  "momentum-alone stays significant at the same cost level "
+  "(p=0.0148). The composite's late-stage &quot;significant&quot; "
+  "results at 150-200bps on the US mirror are significant in the "
+  "<b>wrong direction</b> &mdash; a strongly negative return, not a "
+  "real edge, the same non-monotonic p-value pattern already flagged "
+  "in Section 5.36.")
+box(
+    "Section 5.32's conclusion was correct as stated &mdash; on a "
+    "gross-return basis, the full composite does score better than "
+    "momentum alone &mdash; but it was drawn on exactly the cost-free "
+    "basis this project's own subsequent work (Section 5.36) found is "
+    "not a safe assumption for momentum's own edge, and the composite "
+    "turns out to be even more turnover-exposed than momentum alone. "
+    "<b>Once realistic transaction costs are assumed, momentum alone "
+    "is the more cost-robust practical choice on both confirmed "
+    "markets</b> &mdash; a genuine refinement of the project's own "
+    "practical recommendation, not a reversal of Section 5.32's "
+    "technically-accurate but cost-blind finding. This is exactly the "
+    "kind of result this project's own retroactive-audit discipline "
+    "(Section 5.28) exists to catch: an earlier conclusion, correct "
+    "under the lens available at the time, revisited once a sharper "
+    "lens (Section 5.36's cost methodology) exists.",
+    title="CORRECT ON A GROSS BASIS, REVISED ON A REALISTIC ONE"
+)
 
 # MARKER_END_PART5
 
@@ -3766,7 +3831,9 @@ box(
     "composite performed marginally better on both, most likely "
     "because 52-week-high's high correlation with momentum's own "
     "ranking provides noise-reduction rather than independent alpha. "
-    "The framework above is correct as built.",
+    "The framework above is correct as built on a gross-return basis "
+    "&mdash; qualified by Part V.40 once realistic transaction costs "
+    "are applied (see below).",
     kind="fact", title="UPDATE FROM PART V.32"
 )
 box(
@@ -3852,6 +3919,19 @@ box(
     "strong early, insignificant in both markets' most recent ~15-16 "
     "years.",
     kind="fact", title="UPDATE FROM PART V.39"
+)
+box(
+    "Part V.40 closed the loop between Part V.32's gross-return "
+    "composite-vs-momentum comparison and Part V.36's cost-realism "
+    "methodology. The composite trades roughly twice momentum-alone's "
+    "turnover on both confirmed markets; its baseline gross edge over "
+    "momentum-alone holds at 10bps, confirming Part V.32, but "
+    "evaporates fast under realistic costs &mdash; turning negative by "
+    "50bps on the US mirror and losing significance by 200bps on ASX "
+    "while momentum-alone stays significant. A genuine refinement of "
+    "the project's practical recommendation, not a reversal of an "
+    "earlier wrong finding.",
+    kind="fact", title="UPDATE FROM PART V.40"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -4411,6 +4491,28 @@ bullets([
     "different construction can still fail (or succeed, and then "
     "decay) for the same underlying reason as a signal built a "
     "completely different way.",
+    "<b>Two of a project's own correct conclusions, drawn under "
+    "different methodological lenses at different points in time, can "
+    "still combine into a result neither one alone would have "
+    "shown.</b> Part V.40 closed the loop between Part V.32's "
+    "gross-return composite-vs-momentum comparison and Part V.36's "
+    "cost-realism methodology, finding the composite trades roughly "
+    "twice momentum-alone's monthly turnover on both confirmed markets "
+    "&mdash; blending in two components with no individually "
+    "demonstrated skill doesn't just add ranking noise, it materially "
+    "increases trading frequency. At the 10bps baseline the "
+    "composite's point estimate does edge out momentum-alone, "
+    "confirming Part V.32 &mdash; but that edge evaporates fast: "
+    "turning negative by 50bps on the US mirror while momentum-alone "
+    "stays positive through 100bps, and losing significance by 200bps "
+    "on ASX while momentum-alone stays significant at the same cost "
+    "level. A gross-return comparison and a cost-realism finding, each "
+    "individually valid, together revise the project's practical "
+    "recommendation without either one being wrong on its own terms. "
+    "When a project develops a sharper lens for one question "
+    "(transaction costs), it's worth explicitly re-running that lens "
+    "over every earlier comparison the sharper lens could affect, not "
+    "just the finding that originally motivated building it.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -4986,7 +5088,9 @@ bullets([
     "alpha source &mdash; a modest, non-decisive empirical result, not "
     "a mechanism finding. <i>signals/composite.py</i>'s equal "
     "weighting is left as-is, now for a tested reason rather than an "
-    "unexamined historical default.",
+    "unexamined historical default &mdash; on a gross-return basis; "
+    "<b>qualified by Part V.40</b> once realistic transaction costs "
+    "are applied (see below).",
     "<b>Momentum's US edge is not a disguised sector concentration "
     "&mdash; no sector exceeds a 1.5x overweight relative to its "
     "universe share, in either leg (Part V.33).</b> The largest "
@@ -5127,6 +5231,23 @@ bullets([
     "be long only a 4-day window twelve times a year without incurring "
     "real switching costs this project's flat-cost model (Parts "
     "V.36-37) would need to account for.",
+    "<b>Part V.32's finding that the full equal-weighted composite beats a momentum-only "
+    "variant on gross returns was correct as stated, but was drawn on exactly the cost-free "
+    "basis Part V.36 later found is not a safe assumption &mdash; and once realistic costs "
+    "are applied, momentum alone is the more cost-robust practical choice on both confirmed "
+    "markets (Part V.40).</b> The composite's monthly turnover is roughly double "
+    "momentum-alone's on both markets (US: 92.6% vs. 49.6%; ASX: 89.7% vs. 38.4%) &mdash; "
+    "blending in two components with no individually demonstrated skill doesn't just add "
+    "ranking noise, it materially increases how often the portfolio trades. At the 10bps "
+    "baseline the composite's point estimate does edge out momentum-alone (confirming Part "
+    "V.32), but that edge evaporates fast: on the US mirror the composite's point estimate "
+    "turns negative by 50bps while momentum-alone stays positive through 100bps; on ASX the "
+    "composite loses conventional significance by 200bps (p=0.12) while momentum-alone stays "
+    "significant at the same cost level (p=0.0148). This is a genuine refinement of the "
+    "project's practical recommendation, not a reversal of a wrong earlier finding &mdash; "
+    "exactly the kind of result this project's own retroactive-audit discipline (Part V.28) "
+    "exists to catch: a conclusion correct under the lens available at the time, revisited "
+    "once a sharper lens (Part V.36's cost methodology) exists.",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -5261,7 +5382,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 38 then ran the India findings through "
+  "needed. Milestones 3 through 39 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -5377,7 +5498,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, thirty-five times in a row "
+  "most recent, best-supported-looking result, thirty-six times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -5556,7 +5677,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "naive process crown an inverted, decaying anomaly as the winner "
   "while ranking the one signal that actually survived a distant "
   "second, then judging that survivor's real post-1994 performance a "
-  "failure it never was, and finally ran a thirty-fifth check (Part "
+  "failure it never was, ran a thirty-fifth check (Part "
   "V.39) that, for once, wasn't a correction, an audit, or a "
   "reckoning with a limitation, but a genuinely new signal from a "
   "family this project had never touched: not another cross-sectional "
@@ -5566,7 +5687,19 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "momentum itself &mdash; and then, checked the only way this project "
   "ever checks a pooled number, turned out to be carrying the same "
   "decay signature momentum had carried all along, discovered "
-  "independently in a signal built a completely different way. "
+  "independently in a signal built a completely different way, and "
+  "finally ran a thirty-sixth check (Part V.40) that took two of its "
+  "own conclusions, each correct when it was written, and asked "
+  "whether they still agreed with each other: a gross-return "
+  "comparison from months earlier that had crowned the full composite "
+  "over momentum alone, and a cost methodology built afterward that "
+  "had never been pointed back at that comparison. It turned out the "
+  "composite traded twice as often for barely any extra edge, and the "
+  "extra trading was exactly what a realistic cost assumption "
+  "punished hardest &mdash; not a wrong answer revealed, but a right "
+  "answer that stopped being the right answer once the question was "
+  "asked under a lens that didn't exist yet when it was first "
+  "answered. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -5598,11 +5731,15 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "better, discovering that the project's own selection "
   "process, not just its results, needed checking: a ranking rule "
   "built on nothing but in-sample significance would have crowned the "
-  "wrong signal and buried the right one, and finally discovering that "
+  "wrong signal and buried the right one, discovering that "
   "a brand-new signal, built nothing like any before it, could still "
   "replicate cleanly on two markets and still turn out to be quietly "
   "carrying the exact same decay this project had already spent a "
-  "dozen milestones understanding in a completely different one, are "
+  "dozen milestones understanding in a completely different one, and "
+  "finally discovering that two of its own past conclusions, each "
+  "defended in its own turn, could quietly stop agreeing with each "
+  "other the moment a later, sharper lens was pointed back at an "
+  "earlier one, are "
   "all "
   "findings: the project never "
   "found a result, an explanation, or even a way of testing an "
@@ -5800,7 +5937,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "the naive answer crowned a decaying, inverted anomaly and nearly "
   "buried the one signal that actually held up, misreading that "
   "survivor's real post-1994 performance as a failure along the way. "
-  "And Part V.39 finally turned to the one place this whole run of "
+  "Part V.39 then turned to the one place this whole run of "
   "self-scrutiny hadn't looked: not another audit of an old finding, "
   "but a fifth signal from a family this project had never coded, a "
   "calendar window applied to the market itself rather than a ranking "
@@ -5809,8 +5946,15 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "managed &mdash; and then, checked the only way this project ever checks "
   "a pooled number, turned out to be carrying momentum's own decay "
   "signature, discovered independently in a signal built nothing like "
-  "it. What "
-  "remains open, after thirty-five checks, is not a "
+  "it. And Part V.40 finally looked backward instead of outward: not "
+  "at a new signal or an unexamined limitation, but at whether two of "
+  "this project's own past verdicts, each sound when it was reached, "
+  "still agreed with each other. A composite that beat momentum alone "
+  "on gross returns turned out to trade twice as often for that "
+  "advantage, and the cost lens built months later for an unrelated "
+  "question was exactly the instrument needed to find that the extra "
+  "trading, not the extra insight, was what had been winning. What "
+  "remains open, after thirty-six checks, is not a "
   "specific finding still standing untested, but the same standing "
   "posture the project started with: no result here is treated as "
   "more final than the next check would find it to be, no comparison "
@@ -5818,8 +5962,10 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "comparison has itself been checked, no selection rule is trusted "
   "until it has itself been asked whether it would have chosen "
   "correctly, no new signal is trusted on a headline replication "
-  "before the same sub-period discipline applied to every old one, "
-  "and the "
+  "before the same sub-period discipline applied to every old one, no "
+  "two of the project's own conclusions are assumed to still agree "
+  "with each other just because neither has been individually "
+  "overturned, and the "
   "project's one surviving edge is exactly as well-supported, and "
   "exactly as fragile, as its "
   "most recent, most adversarial test says it is &mdash; no more, no "

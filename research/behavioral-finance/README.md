@@ -2013,6 +2013,51 @@ being in and out of the market roughly twelve times a year.
 
 **Reproduce this**: `python investigations/turn_of_month_effect.py`.
 
+## Does the composite score still beat momentum-alone once realistic costs apply? (Milestone 39)
+
+Milestone 31 compared the current equal-weighted three-signal composite against a
+momentum-only variant and found the full composite scored better on **gross**,
+out-of-sample-hedged returns on both markets where momentum is confirmed — but that comparison
+predates Milestone 35's transaction-cost work entirely: it used `daily_returns_gross`, applied
+no cost model, and never looked at turnover. This milestone closes that gap directly, re-running
+the same three variants (equal-weighted composite; momentum-only via the composite's z-score
+machinery; momentum alone directly) through Milestone 35's exact linear-cost sweep, and checking
+each variant's own turnover.
+
+| Market | Variant | Monthly turnover | 10bps ann.ret (p) | 50bps ann.ret (p) | 200bps ann.ret (p) |
+|---|---|---|---|---|---|
+| US | Equal-weighted composite | 92.6% | +2.88% (p=0.0547*) | -1.61% (p=0.4606) | -16.90% (p=0.0002***, wrong direction) |
+| US | Momentum alone | 49.6% | +2.85% (p=0.0609*) | +0.43% (p=0.1988) | -8.22% (p=0.3562) |
+| ASX | Equal-weighted composite | 89.7% | +38.18% (p<0.0001***) | +32.09% (p=0.0003***) | +11.38% (p=0.1204) |
+| ASX | Momentum alone | 38.4% | +34.82% (p=0.0007***) | +32.31% (p=0.0014***) | +23.29% (p=0.0148**) |
+
+**The composite's monthly turnover is roughly double momentum-alone's on both markets** (US:
+92.6% vs. 49.6%; ASX: 89.7% vs. 38.4%) — blending in two components with no individually
+demonstrated skill (52-week-high, reversal) doesn't just add noise to the ranking, it
+materially increases how often the portfolio trades. **At the 10bps baseline, Milestone 31's
+finding holds**: the composite's point estimate edges out momentum-alone on both markets. **But
+that edge evaporates fast once realistic costs are applied**: on the US mirror, the composite's
+point estimate turns negative by 50bps while momentum-alone stays positive through 100bps; on
+ASX, the composite loses conventional significance by 200bps (p=0.12) while momentum-alone
+stays significant at the same cost level (p=0.0148). The composite's late-stage "significant"
+results at 150-200bps on the US mirror (p=0.0243, p=0.0002) are significant in the **wrong
+direction** — a strongly negative return, not a real edge, the same non-monotonic p-value
+pattern already flagged in Milestone 35.
+
+**Updated conclusion**: Milestone 31's conclusion was correct as stated — on a gross-return
+basis, the full composite does score better than momentum alone — but it was drawn on exactly
+the cost-free basis this project's own subsequent work (Milestone 35) found is not a safe
+assumption for momentum's own edge, and the composite turns out to be even more
+turnover-exposed than momentum alone. **Once realistic transaction costs are assumed, momentum
+alone is the more cost-robust practical choice on both confirmed markets** — a genuine
+refinement of the project's own practical recommendation, not a reversal of Milestone 31's
+technically-accurate but cost-blind finding. This is exactly the kind of result this project's
+own retroactive-audit discipline (Milestone 27) exists to catch: an earlier conclusion, correct
+under the lens available at the time, revisited once a sharper lens (Milestone 35's cost
+methodology) exists.
+
+**Reproduce this**: `python investigations/composite_cost_realism_check.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2450,6 +2495,14 @@ python investigations/walkforward_signal_selection.py
 # fourth new signal, a genuinely different family" above)
 python investigations/turn_of_month_effect.py
 
+# Investigation -- does the composite score still beat momentum-alone once realistic costs
+# apply? (re-runs Milestone 31's comparison through Milestone 35's cost sweep -- the composite
+# trades ~2x momentum-alone's turnover on both markets; its baseline gross-return edge
+# evaporates by 50bps on the US mirror and loses significance by 200bps on ASX while
+# momentum-alone stays significant; see "Does the composite score still beat momentum-alone
+# once realistic costs apply" above)
+python investigations/composite_cost_realism_check.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -2555,8 +2608,10 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    confirmed — the current composite performs marginally better, most likely because
    52-week-high's high correlation with momentum's own ranking on ASX acts as a
    noise-reduction on the cross-sectional sort rather than independent information. The
-   composite's current weighting is left as-is, now for a tested reason rather than an
-   unexamined default. Two risk-management questions about momentum's own edge, both
+   composite's current weighting was left as-is on that gross-return basis — since qualified
+   by Milestone 39 once realistic transaction costs are applied (see below): the composite's
+   ~2x higher turnover erodes its baseline edge quickly, and momentum alone becomes the more
+   cost-robust practical choice. Two risk-management questions about momentum's own edge, both
    previously acknowledged but left unquantified, were then answered directly: whether the
    US edge hides sector concentration (Milestone 32) — it doesn't, no sector exceeds 1.5x
    its universe share in either leg — and how bad the momentum-crash mechanism could get in
@@ -2597,7 +2652,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    replicate on more than one market (NSE and the US mirror, both p<0.01 full-sample), though a
    sub-period check found the same publication-era decay already established for momentum:
    strong and significant early, insignificant in both markets' most recent ~15-16 years.
-   Momentum's
+   Finally, Milestone 31's own gross-return composite-vs-momentum comparison was re-run
+   through the cost lens Milestone 35 later built (Milestone 39): the composite trades roughly
+   twice momentum-alone's turnover on both markets, and while its baseline gross edge does
+   edge out momentum-alone (confirming Milestone 31), that edge evaporates by 50bps on the US
+   mirror and the composite loses significance by 200bps on ASX while momentum-alone stays
+   significant — a genuine refinement, not a reversal, of the project's practical
+   recommendation once realistic costs are assumed. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -3116,3 +3177,19 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   implied annualized premiums (up to +61%/yr on NSE) are illustrative only, since no real
   strategy can be long only a 4-day window twelve times a year without incurring real
   switching costs this project's flat-cost model (Milestones 35-36) would need to account for.
+- **Milestone 31's finding that the full equal-weighted composite beats a momentum-only
+  variant on gross returns was correct as stated, but was drawn on exactly the cost-free basis
+  Milestone 35 later found is not a safe assumption — and once realistic costs are applied,
+  momentum alone is the more cost-robust practical choice on both confirmed markets
+  (Milestone 39).** The composite's monthly turnover is roughly double momentum-alone's on
+  both markets (US: 92.6% vs. 49.6%; ASX: 89.7% vs. 38.4%) — blending in two components with
+  no individually demonstrated skill doesn't just add ranking noise, it materially increases
+  how often the portfolio trades. At the 10bps baseline the composite's point estimate does
+  edge out momentum-alone (confirming Milestone 31), but that edge evaporates fast: on the US
+  mirror the composite's point estimate turns negative by 50bps while momentum-alone stays
+  positive through 100bps; on ASX the composite loses conventional significance by 200bps
+  (p=0.12) while momentum-alone stays significant at the same cost level (p=0.0148). This is
+  a genuine refinement of the project's practical recommendation, not a reversal of a wrong
+  earlier finding — exactly the kind of result this project's own retroactive-audit discipline
+  (Milestone 27) exists to catch: a conclusion correct under the lens available at the time,
+  revisited once a sharper lens (Milestone 35's cost methodology) exists.

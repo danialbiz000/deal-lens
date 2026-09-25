@@ -469,6 +469,11 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   independent alpha. **Rule: a practical deliverable's design assumptions age the same way
   a research finding does — re-examine them against the evidence that has accumulated since
   they were set, rather than treating "this is how we built it originally" as permanent.**
+  **[Qualified by Milestone 39: this comparison was drawn on gross, cost-free returns. Once
+  realistic transaction costs are applied, the composite's ~2x higher turnover (a consequence
+  of blending in the two "no demonstrated skill" components) erodes its baseline edge fast —
+  momentum alone becomes the more cost-robust practical choice on both confirmed markets. See
+  below.]**
 - **Milestone 32 checked whether momentum's US edge is a disguised sector bet — the level
   above the individual-ticker concentration checks Milestones 26-27 already ran.** No sector
   exceeds a 1.5x overweight relative to its universe share in either leg; the largest
@@ -509,6 +514,24 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   entire toolkit (data, HAC regression, sub-period discipline) against a question its
   decile-backtest engine was never built for, and a positive replication still needs the same
   decay-checking discipline as every cross-sectional one.**
+- **Milestone 39 closed the loop between two of this project's own findings that had never
+  been tested together: Milestone 31's gross-return composite-vs-momentum comparison and
+  Milestone 35's cost-realism methodology.** Re-running Milestone 31's three variants through
+  Milestone 35's cost sweep found the composite trades roughly twice momentum-alone's monthly
+  turnover on both confirmed markets (US: 92.6% vs. 49.6%; ASX: 89.7% vs. 38.4%) — blending in
+  two components with no individually demonstrated skill doesn't just add ranking noise, it
+  materially increases trading frequency. At the 10bps baseline the composite's point estimate
+  does edge out momentum-alone, confirming Milestone 31 — but that edge evaporates fast: the
+  composite's point estimate turns negative by 50bps on the US mirror while momentum-alone
+  stays positive through 100bps, and the composite loses significance by 200bps on ASX while
+  momentum-alone stays significant at the same cost level. **Rule: two of a project's own
+  correct conclusions, drawn under different methodological lenses at different points in
+  time, can still combine into a result neither one alone would have shown — a gross-return
+  comparison and a cost-realism finding, each individually valid, together revise the
+  project's practical recommendation without either one being wrong on its own terms. When a
+  project develops a sharper lens for one question (transaction costs), it's worth explicitly
+  re-running that lens over every earlier comparison the sharper lens could affect, not just
+  the finding that originally motivated building it.**
 
 ## 2. Risk-management lessons
 
