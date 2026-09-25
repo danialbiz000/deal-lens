@@ -1545,7 +1545,51 @@ reflects something structural about this particular universe (Milestone 16's own
 survivorship diagnosis) or is coincidence between two related but distinct signals is not
 resolved by this milestone, and is flagged here as genuinely open rather than explained away.
 
+*(Closed by Milestone 29: the two signals' scores correlate ~0.61 on this dataset, and a
+direct control regression shows MAX's combined-book inversion does not survive controlling
+for low-volatility exposure — the same mechanism, not two independent discoveries. See "Is
+the MAX effect independent of low-volatility, or the same mechanism twice?" below.)*
+
 **Reproduce this**: `python investigations/max_effect_all_markets.py`.
+
+## Is the MAX effect independent of low-volatility, or the same mechanism twice? (Milestone 29)
+
+Milestone 28 flagged, but left explicitly open, a pattern: two distinct "lottery demand"
+signals (low-volatility, Milestones 25-26; MAX effect, Milestone 28) both fail to replicate
+positively and both show some degree of US inversion. Left unresolved: does that shared US
+inversion reflect something structural about this dataset that both signals happen to pick
+up independently, or are the two signals substantially picking the same names — the
+identical question this project already asked and answered directly for ASX momentum and
+52-week-high (Milestones 23-24)? A first check: the two signals' raw cross-sectional scores
+correlate at **~0.61** on the US mirror (sampled monthly, 1970-2017) — substantial, though
+below the 0.76-0.82 that triggered Milestone 24's control regression for ASX. Per this
+project's own standing rule (Milestone 24's lesson — a correlation motivates a control test,
+it isn't a substitute for one), this milestone regresses MAX's hedged US return series
+directly on low-volatility's.
+
+| | Long leg (daily/monthly) | Combined book (daily/monthly) |
+|---|---|---|
+| MAX intercept (alpha net of low-vol) | +0.013%/day, p=0.038** / +0.31%/mo, p=0.015** | +0.001%/day, p=0.906 / -0.04%/mo, p=0.861 |
+| Low-vol coefficient | 0.379, p<0.0001*** / 0.475, p<0.0001*** | 0.454, p<0.0001*** / 0.499, p<0.0001*** |
+| R² | 0.071 / 0.135 | 0.196 / 0.299 |
+
+**The combined book's alpha — the part of Milestone 28's headline result — collapses to
+indistinguishable from zero** (p=0.906 daily, p=0.861 monthly) once low-volatility exposure
+is controlled for, while low-volatility's own coefficient is highly significant throughout
+(R²=0.20-0.30 of the combined book's variance). The long leg alone retains a small,
+marginally significant residual (p=0.038 daily, p=0.015 monthly, ~3-4%/yr) — a much smaller
+and less certain effect than the combined-book number Milestone 28 reported as MAX's
+headline finding.
+
+**Updated conclusion**: MAX's US combined-book inversion — the specific number Milestone 28
+reported as its most significant result — is not an independent second discovery. It is
+substantially low-volatility's own mechanism viewed through a correlated construction, the
+same "one mechanism, two signals" pattern this project already learned to recognize for ASX
+momentum and 52-week-high. The open pattern Milestone 28 flagged is now closed, not by
+finding a shared structural cause in the data, but by finding there was only ever one
+mechanism to explain, not two.
+
+**Reproduce this**: `python investigations/max_effect_low_vol_control.py`.
 
 ## Data provenance: the NSE GitHub mirror
 
@@ -1909,6 +1953,13 @@ python investigations/pooled_window_audit.py
 # "A second new signal" above)
 python investigations/max_effect_all_markets.py
 
+# Investigation -- is MAX's US inversion independent of low-volatility's, or the same
+# mechanism twice? (the same mechanism -- the combined book's alpha collapses to p=0.906
+# daily/p=0.861 monthly once low-volatility is controlled for; only a small residual
+# survives in the long leg alone (~3-4%/yr, p=.038/.015); see "Is the MAX effect
+# independent of low-volatility" above)
+python investigations/max_effect_low_vol_control.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1996,7 +2047,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    echoes low-volatility's in direction but is weaker and, unlike low-volatility's, does not
    cleanly localize to one decade — left flagged as a genuinely open pattern (two distinct
    lottery-demand signals both inverting on the same dataset) rather than explained away.
-   Momentum's
+   That flagged pattern was then closed directly (Milestone 29), the same way ASX
+   momentum/52-week-high's correlation had been: the two signals' scores correlate ~0.61 on
+   the US mirror, and regressing MAX's hedged return on low-volatility's shows the combined
+   book's alpha collapses to indistinguishable from zero (p=0.906 daily) while
+   low-volatility's own coefficient explains up to 30% of its variance — one mechanism, not
+   two independent discoveries, resolved by a control regression rather than left as an open
+   pattern. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -2359,3 +2416,16 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   **This project has now tested two distinct "lottery demand" signals, and both fail to
   replicate positively while both show some degree of inversion on the same US mega-cap-
   survivor dataset — flagged here as a genuinely open pattern, not a resolved explanation.**
+  *(Closed by Milestone 29: not two independent inversions — see below.)*
+- **MAX's US inversion is not independent of low-volatility's — a direct control
+  regression, not just a correlation coefficient, shows it is the same mechanism counted
+  twice (Milestone 29).** The two signals' scores correlate ~0.61 on the US mirror.
+  Regressing MAX's hedged combined-book return on low-volatility's: MAX's intercept (alpha
+  net of low-volatility exposure) is indistinguishable from zero (p=0.906 daily, p=0.861
+  monthly) while low-volatility's own coefficient is highly significant, explaining up to
+  30% of the combined book's variance. Only a small, marginally significant residual
+  survives in the long leg alone (~3-4%/yr, p=0.038 daily, p=0.015 monthly) — a much
+  smaller and less certain effect than the combined-book number Milestone 28 reported as
+  MAX's headline result. **The pattern flagged in Milestone 28 is closed: not by finding a
+  shared structural cause in the data, but by finding there was only ever one mechanism to
+  explain, not two.**

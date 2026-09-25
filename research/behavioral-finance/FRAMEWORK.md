@@ -436,6 +436,16 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   can hide very different underlying robustness once decomposed, so run the same
   decomposition on a new signal immediately rather than assuming an earlier signal's
   diagnosis transfers.**
+- **Milestone 29 closed the open pattern Milestone 28 flagged (two lottery-demand signals
+  both inverting on the US mirror) with a direct control regression, the same tool that
+  resolved the identical-shaped question for ASX momentum/52-week-high.** The two signals'
+  scores correlate ~0.61 on the US mirror; regressing MAX's hedged combined-book return on
+  low-volatility's collapses MAX's intercept to indistinguishable from zero (p=0.906 daily)
+  while low-volatility's own coefficient explains up to 30% of the variance. **Rule: when a
+  new signal's result echoes an existing one in direction on the same dataset, check the
+  correlation between the two signals' scores and, if substantial, run the control
+  regression before reporting two separate findings — an "open pattern" is a research debt
+  to be paid off with a direct test, not a permanent footnote.**
 
 ## 2. Risk-management lessons
 
@@ -743,6 +753,19 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     transfers to a second, related signal just because the headline direction matches — run
     the same decomposition immediately, since the underlying robustness can differ sharply
     even when the top-line number looks similar.**
+29. **An "open pattern" flagged in one milestone is a research debt, not a permanent
+    footnote — pay it off with the same control-regression tool that already closed the
+    identical-shaped question elsewhere.** Milestone 28 left open whether MAX's and
+    low-volatility's shared US inversion was structural or coincidental. Milestone 29 found
+    the two signals' scores correlate ~0.61 and, regressing MAX's hedged combined-book
+    return on low-volatility's, found MAX's intercept collapses to indistinguishable from
+    zero (p=0.906) while low-volatility's coefficient explains up to 30% of the variance —
+    the same "one mechanism, two signals" pattern already diagnosed for ASX momentum and
+    52-week-high (Milestone 24), now recognized on sight rather than treated as a fresh
+    puzzle. **Rule: once a project has learned what a correlated-signals artifact looks
+    like, apply the same recognize-and-control-for pattern the next time two related
+    signals produce suspiciously similar results, rather than re-deriving the diagnosis
+    from scratch or leaving it as an open question.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

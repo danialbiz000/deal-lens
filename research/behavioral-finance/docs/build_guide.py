@@ -2726,8 +2726,64 @@ box(
     "(Section 5.16's own survivorship diagnosis) or is coincidence "
     "between two related but distinct signals is not resolved by this "
     "milestone, and is flagged here as genuinely open rather than "
-    "explained away.",
+    "explained away. <i>(Closed by Section 5.30: the two signals' "
+    "scores correlate ~0.61, and a direct control regression shows "
+    "MAX's combined-book inversion does not survive controlling for "
+    "low-volatility exposure. See below.)</i>",
     title="A SECOND LOTTERY SIGNAL, A DIFFERENT AND MORE FRAGILE FAILURE"
+)
+box(
+    "Section 5.30 closes the pattern Section 5.29 flagged: is MAX's US "
+    "inversion independent of low-volatility's, or the same mechanism "
+    "counted twice?",
+    kind="fact", title="UPDATE FROM SECTION 5.30"
+)
+
+h1("5.30  Milestone 29 &mdash; Is the MAX effect independent of low-volatility, or the same mechanism twice?")
+p("Section 5.29 flagged, but left explicitly open, whether MAX's and "
+  "low-volatility's shared US inversion reflects something structural "
+  "about this dataset, or the two signals substantially picking the "
+  "same names &mdash; the identical question this project already "
+  "asked and answered directly for ASX momentum and 52-week-high "
+  "(Sections 5.24-5.25). A first check: the two signals' raw "
+  "cross-sectional scores correlate at <b>~0.61</b> on the US mirror "
+  "(sampled monthly, 1970-2017) &mdash; substantial, though below the "
+  "0.76-0.82 that triggered Section 5.25's control regression for ASX. "
+  "Per this project's own standing rule (a correlation motivates a "
+  "control test, it isn't a substitute for one), this milestone "
+  "regresses MAX's hedged US return series directly on "
+  "low-volatility's.")
+data_table(
+    ["", "Long leg (daily/monthly)", "Combined book (daily/monthly)"],
+    [
+        ["MAX intercept (net of low-vol)", "+0.013%/d, p=.038** / +0.31%/mo, p=.015**", "+0.001%/d, p=.906 / -0.04%/mo, p=.861"],
+        ["Low-vol coefficient", "0.379, p<.0001*** / 0.475, p<.0001***", "0.454, p<.0001*** / 0.499, p<.0001***"],
+        ["R²", "0.071 / 0.135", "0.196 / 0.299"],
+    ],
+    col_widths=[2.1*inch, 3.35*inch, 3.35*inch], small=True,
+)
+p("<b>The combined book's alpha &mdash; the part of Section 5.29's "
+  "headline result &mdash; collapses to indistinguishable from zero</b> "
+  "(p=0.906 daily, p=0.861 monthly) once low-volatility exposure is "
+  "controlled for, while low-volatility's own coefficient is highly "
+  "significant throughout (R&sup2;=0.20-0.30 of the combined book's "
+  "variance). The long leg alone retains a small, marginally "
+  "significant residual (p=0.038 daily, p=0.015 monthly, roughly "
+  "3-4%/yr) &mdash; a much smaller and less certain effect than the "
+  "combined-book number Section 5.29 reported as MAX's headline "
+  "finding.")
+box(
+    "MAX's US combined-book inversion &mdash; the specific number "
+    "Section 5.29 reported as its most significant result &mdash; is "
+    "not an independent second discovery. It is substantially "
+    "low-volatility's own mechanism viewed through a correlated "
+    "construction, the same &quot;one mechanism, two signals&quot; "
+    "pattern this project already learned to recognize for ASX "
+    "momentum and 52-week-high. The open pattern Section 5.29 flagged "
+    "is now closed, not by finding a shared structural cause in the "
+    "data, but by finding there was only ever one mechanism to "
+    "explain, not two.",
+    title="ONE MECHANISM, TWO SIGNALS &mdash; RECOGNIZED ON SIGHT"
 )
 
 # MARKER_END_PART5
@@ -3053,6 +3109,18 @@ box(
     "reaches conventional 5% significance. Two lottery-demand signals, "
     "two structurally different failure modes.",
     kind="fact", title="UPDATE FROM PART V.29"
+)
+box(
+    "Part V.30 closed the pattern Part V.29 flagged: the two "
+    "lottery-demand signals' scores correlate ~0.61 on the US mirror, "
+    "and regressing MAX's hedged combined-book return on "
+    "low-volatility's collapses MAX's intercept to indistinguishable "
+    "from zero (p=0.906) while low-volatility's coefficient explains "
+    "up to 30% of the variance. One mechanism, not two independent "
+    "discoveries &mdash; recognized on sight using the same tool that "
+    "closed the identical-shaped question for ASX momentum and "
+    "52-week-high.",
+    kind="fact", title="UPDATE FROM PART V.30"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -3430,6 +3498,24 @@ bullets([
     "just because the headline direction matches &mdash; run the same "
     "decomposition immediately, since the underlying robustness can "
     "differ sharply even when the top-line number looks similar.",
+    "<b>An &quot;open pattern&quot; flagged in one milestone is a "
+    "research debt, not a permanent footnote &mdash; pay it off with "
+    "the same control-regression tool that already closed the "
+    "identical-shaped question elsewhere.</b> Part V.29 left open "
+    "whether MAX's and low-volatility's shared US inversion was "
+    "structural or coincidental. Part V.30 found the two signals' "
+    "scores correlate ~0.61 and, regressing MAX's hedged combined-book "
+    "return on low-volatility's, found MAX's intercept collapses to "
+    "indistinguishable from zero (p=0.906) while low-volatility's "
+    "coefficient explains up to 30% of the variance &mdash; the same "
+    "&quot;one mechanism, two signals&quot; pattern already diagnosed "
+    "for ASX momentum and 52-week-high (Part V.25), now recognized on "
+    "sight rather than treated as a fresh puzzle. Once a project has "
+    "learned what a correlated-signals artifact looks like, apply the "
+    "same recognize-and-control-for pattern the next time two related "
+    "signals produce suspiciously similar results, rather than "
+    "re-deriving the diagnosis from scratch or leaving it as an open "
+    "question.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -3931,7 +4017,24 @@ bullets([
     "&quot;lottery demand&quot; signals, and both fail to replicate "
     "positively while both show some degree of inversion on the same "
     "US mega-cap-survivor dataset &mdash; flagged here as a genuinely "
-    "open pattern, not a resolved explanation.",
+    "open pattern, not a resolved explanation. <i>(Closed by Part "
+    "V.30: not two independent inversions &mdash; see below.)</i>",
+    "<b>MAX's US inversion is not independent of low-volatility's "
+    "&mdash; a direct control regression, not just a correlation "
+    "coefficient, shows it is the same mechanism counted twice (Part "
+    "V.30).</b> The two signals' scores correlate ~0.61 on the US "
+    "mirror. Regressing MAX's hedged combined-book return on "
+    "low-volatility's: MAX's intercept (alpha net of low-volatility "
+    "exposure) is indistinguishable from zero (p=0.906 daily, p=0.861 "
+    "monthly) while low-volatility's own coefficient is highly "
+    "significant, explaining up to 30% of the combined book's "
+    "variance. Only a small, marginally significant residual survives "
+    "in the long leg alone (roughly 3-4%/yr, p=0.038 daily, p=0.015 "
+    "monthly) &mdash; a much smaller and less certain effect than the "
+    "combined-book number Part V.29 reported as MAX's headline result. "
+    "The pattern flagged in Part V.29 is closed: not by finding a "
+    "shared structural cause in the data, but by finding there was "
+    "only ever one mechanism to explain, not two.",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -4066,7 +4169,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 28 then ran the India findings through "
+  "needed. Milestones 3 through 29 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -4182,7 +4285,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, twenty-five times in a row "
+  "most recent, best-supported-looking result, twenty-six times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -4276,15 +4379,25 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "significant decade turned out to be the exact unreliable window "
   "already blamed for it; momentum came out standing on firmer ground "
   "than before; both ASX findings survived losing their single "
-  "most-present name, and ran a twenty-fifth check (Part V.29) that "
+  "most-present name, ran a twenty-fifth check (Part V.29) that "
   "built a second genuinely new signal and applied every lesson the "
   "prior twenty-four checks had taught, from the first pass: MAX, "
   "like the twenty-second check's low-volatility signal, replicated "
   "nowhere and inverted on the US mirror &mdash; but where the "
   "twenty-second's inversion held together under decomposition, this "
   "one didn't, no single decade of it clearing even a conventional "
-  "5% bar. Two signals from the same behavioral family, tested with "
-  "identical rigor, failed in two different ways. "
+  "5% bar, and finally ran a twenty-sixth check (Part V.30) that did "
+  "to the twenty-fifth's own open question what the twenty-first check "
+  "had already done to a nearly identical one on a different market: "
+  "correlated the two lottery signals' scores, found them substantial "
+  "(~0.61), and ran the control regression rather than leaving the "
+  "resemblance as a footnote. The twenty-fifth check's headline number "
+  "&mdash; the combined book's inversion &mdash; dissolved entirely "
+  "once low-volatility was held constant, the identical shape the "
+  "twenty-first check had found for a completely different pair of "
+  "signals on a completely different market. Two signals from the "
+  "same behavioral family, tested with identical rigor, turned out to "
+  "be one signal wearing two names. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -4417,18 +4530,24 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "even a conventional 5% bar. Two signals from the same behavioral "
   "family, tested with identical rigor from the outset, failed in two "
   "different ways &mdash; left flagged as a genuinely open pattern, "
-  "not a resolved explanation. What remains open is not one specific "
-  "finding but three honest limits of the data itself: whether the crash "
+  "not a resolved explanation. Part V.30 then closed it the same way "
+  "Part V.25 had closed an identically-shaped question on a different "
+  "market: the two lottery signals' scores correlate ~0.61, and "
+  "regressing MAX's hedged return on low-volatility's collapsed MAX's "
+  "combined-book intercept to indistinguishable from zero while "
+  "low-volatility's own coefficient explained up to 30% of the "
+  "variance &mdash; one mechanism, not two, the pattern recognized on "
+  "sight this time rather than rediscovered from scratch. What remains "
+  "open is not a specific "
+  "finding but two honest limits of the data itself: whether the crash "
   "mechanism would reactivate in a genuinely severe future crisis, as "
   "opposed to the milder episodes this sample happens to contain, is a "
   "question no amount of further re-testing of this history can answer "
   "&mdash; the most recent decade, for momentum, to size nothing against "
-  "&mdash; whether ASX momentum's own edge is stable across "
+  "&mdash; and whether ASX momentum's own edge is stable across "
   "sub-periods the way the US finding eventually was shown to be, a "
   "check this project's newest market hasn't had enough history yet to "
-  "run, and whether the two lottery-demand signals' shared US inversion "
-  "reflects something structural about this specific mega-cap-survivor "
-  "universe or is coincidence between related constructions. All three are "
+  "run. Both are "
   "what a research process built to "
   "distrust its own best-looking result eventually converges on.")
 
