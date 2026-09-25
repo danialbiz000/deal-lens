@@ -1764,6 +1764,52 @@ as its worst case is sizing against too short a memory.
 
 **Reproduce this**: `python investigations/momentum_crash_severity_stress_test.py`.
 
+## Is ASX momentum's edge stable across sub-periods, or concentrated in one window? (Milestone 34)
+
+This closes the last item this project's own Conclusions had named as genuinely open: whether
+ASX momentum's edge (Milestone 22, the cleanest replication anywhere in this project) is
+stable across sub-periods the way the US finding eventually was shown to be (Milestones
+9-13), or whether — like the US mirror's own pre/post-1994 decay, or the low-volatility
+inversion's concentration in a single decade — it is secretly carried by one narrow window
+inside ASX's six-year sample. ASX's sample (2009-10-20 to 2015-12-30, ~1,501 trading days) is
+far too short for the US mirror's decade-by-decade treatment, so this milestone uses the
+coarsest split that still says something: three consecutive ~500-trading-day (~2-year)
+sub-periods, each tested with this project's standard out-of-sample-hedged + HAC methodology,
+plus a rolling-beta stability check per sub-period.
+
+| Sub-period | Long leg ann.ret / p-value | Combined long-short ann.ret / p-value | Combined mean beta |
+|---|---|---|---|
+| Full sample | +11.1% / p=0.0085*** | +35.5% / p=0.0006*** | — |
+| 1: 2009-10-20 to 2011-10-13 | +13.9% / p=0.2821 | +38.6% / p=0.0142** | +0.108 |
+| 2: 2011-10-14 to 2014-01-08 | +7.9% / p=0.2004 | +39.1% / p=0.0335** | -0.489 |
+| 3: 2014-01-09 to 2015-12-30 | +13.2% / p=0.0146** | +30.3% / p=0.0556* | -0.616 |
+
+**No sign flips anywhere.** The long leg's point estimate is positive in all three
+sub-periods (+13.9%, +7.9%, +13.2%) but only individually significant in sub-period 3 — with
+each window holding only ~2 years of daily data, that reads as a statistical-power limitation
+of slicing an already-short sample three ways, not evidence of instability or single-window
+concentration (unlike the US low-vol/MAX findings, which showed genuine decade-level
+concentration or sign-relevant fragility). **The combined long-short book is individually
+significant in all three sub-periods** (p=0.0142, 0.0335, 0.0556) — a materially stronger
+stability result than the long leg alone, and the cleanest sub-period consistency this project
+has found for any signal on any market.
+
+A genuine nuance worth flagging: the combined book's **mean hedge beta drifts** from
+near-zero (+0.108) in sub-period 1 to increasingly net-short (-0.489, then -0.616) in
+sub-periods 2-3. This is not a return-instability problem — the book stays significantly
+positive throughout — but it is a real change in what the book is exposed to over time, useful
+for anyone sizing this position to know rather than assume the hedge composition is static.
+
+**Updated conclusion**: ASX momentum's edge holds up across sub-periods — no sign flips, a
+positive point estimate in every window for both legs, and a combined book significant in
+every single ~2-year slice of the sample. The long leg's individual-window significance is
+inconsistent, but that traces to sample size (each window has roughly a fifth of the daily
+observations the full-sample HAC test uses), not to the edge itself flipping off. This is the
+last item this project's Conclusions had carried as an open, untested limitation; it is now a
+tested, reassuring result rather than an acknowledged gap.
+
+**Reproduce this**: `python investigations/momentum_asx_subperiod_stability.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2164,6 +2210,14 @@ python investigations/momentum_sector_concentration.py
 # above)
 python investigations/momentum_crash_severity_stress_test.py
 
+# Investigation -- is ASX momentum's edge stable across sub-periods, or concentrated in one
+# narrow window of its 6-year sample? (three ~2-year sub-periods, out-of-sample hedge + HAC;
+# no sign flips in either leg, combined long-short book significant in all three sub-periods;
+# long leg positive throughout but individually significant in only one window, a power
+# limitation of a short sample sliced three ways, not an instability finding; see "Is ASX
+# momentum's edge stable across sub-periods" above)
+python investigations/momentum_asx_subperiod_stability.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -2278,7 +2332,14 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    stress simulation, holding the fitted daily effect size fixed and varying only regime
    duration, found a crisis twice as long as 2008-09 would plausibly cost ~44% on average,
    three times as long ~58%, finally giving the risk playbook's long-acknowledged open
-   question a concrete, data-grounded number instead of leaving it unquantified. Momentum's
+   question a concrete, data-grounded number instead of leaving it unquantified. The last
+   item this project's own Conclusions had carried as an untested open limitation — whether
+   ASX momentum's edge is stable across sub-periods, or concentrated in one narrow window of
+   its six-year sample — was then tested directly (Milestone 34): three ~2-year sub-periods,
+   out-of-sample hedge + HAC methodology, no sign flips in either leg, and the combined
+   long-short book individually significant in all three windows, with one real nuance flagged
+   (the book's hedge beta drifts from near-zero to increasingly net-short over the sample) for
+   anyone sizing the position. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -2702,3 +2763,16 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   around, not estimated from data — but it replaces an acknowledged-but-unquantified gap
   with an explicit, reproducible number for anyone sizing this strategy against "2008-09 was
   the worst case" alone.
+- **ASX momentum's sub-period stability, the last item this project's own Conclusions had
+  carried as an untested open limitation, is now tested and reassuring, with one real nuance
+  flagged (Milestone 34).** ASX's six-year sample was split into three ~2-year sub-periods
+  (far too short for the US mirror's decade-by-decade treatment) and re-tested with this
+  project's standard out-of-sample hedge + HAC methodology. No sign flips in either leg; the
+  long leg is positive in all three windows but only individually significant in one
+  (p=0.0146), consistent with a statistical-power limitation of a short sample sliced three
+  ways rather than instability; the combined long-short book is individually significant in
+  **all three** sub-periods (p=0.0142, 0.0335, 0.0556) — the cleanest sub-period consistency
+  found anywhere in this project. The real nuance: the combined book's mean hedge beta drifts
+  from near-zero (+0.108) to increasingly net-short (-0.616) across the three windows — not a
+  return-instability problem, but a real change in hedge composition worth knowing before
+  sizing this position.

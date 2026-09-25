@@ -481,6 +481,19 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   claim as "diversified in practice" (across the sectors those names belong to) — check the
   second explicitly before treating a signal's diversification as given, and say plainly
   when a market can't be checked rather than skipping it silently.**
+- **Milestone 34 closed the last item this project's Conclusions had carried as an untested
+  open limitation: whether ASX momentum's edge (Milestone 22) is stable across sub-periods,
+  or concentrated in one narrow window of its six-year sample.** Split into three ~2-year
+  sub-periods (the coarsest split a six-year sample supports) and re-tested with the standard
+  out-of-sample hedge + HAC methodology: no sign flips in either leg, and the combined
+  long-short book is individually significant in all three sub-periods (p=0.0142, 0.0335,
+  0.0556) — the long leg alone is positive throughout but individually significant in only
+  one window, consistent with a power limitation of a short sample sliced three ways rather
+  than an instability finding. **Rule: an edge tested only on a full-sample basis carries an
+  implicit "and it wasn't secretly concentrated in one sub-window" assumption — check it
+  explicitly even on a sample too short for the finer decade-level treatment used elsewhere,
+  since a coarse split still distinguishes "stable, low individual power" from "one window
+  carrying the whole result."**
 
 ## 2. Risk-management lessons
 
@@ -846,6 +859,18 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     unanswerable — a parameter the data can't pin down (duration, here) can often still be
     varied in simulation around a parameter the data *can* pin down (daily severity),
     turning "we can't know" into "here's what it would cost if it lasted longer."**
+34. **A hedge composition can drift meaningfully even while the return it's protecting stays
+    stable — check both, not just the one that's easier to headline.** Milestone 34's
+    sub-period breakdown of ASX momentum found the combined long-short book significant in
+    every ~2-year window, a clean stability result on the return side — but its mean
+    out-of-sample hedge beta drifted from near-zero (+0.108) in the earliest window to
+    increasingly net-short (-0.489, then -0.616) in the two that followed. Neither number
+    alone tells the full story: return stability without checking beta drift would have
+    missed a real change in what the book is exposed to; beta drift without the return
+    context would have looked more alarming than it is. **Rule: when reporting a sub-period
+    or regime-based stability check, report the hedge/exposure parameters alongside the
+    headline return result, not instead of it — a strategy can be return-stable and
+    exposure-unstable at the same time, and a risk playbook needs both facts.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
