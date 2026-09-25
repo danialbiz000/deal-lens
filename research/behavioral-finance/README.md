@@ -1591,6 +1591,47 @@ mechanism to explain, not two.
 
 **Reproduce this**: `python investigations/max_effect_low_vol_control.py`.
 
+## A third new signal, a different family: does long-term reversal replicate anywhere? (Milestone 30)
+
+Milestones 25 and 28 both tested "lottery demand" signals, which Milestone 29 showed are
+substantially the same mechanism on the US mirror. This milestone tests a genuinely
+different family: long-term reversal (De Bondt & Thaler 1985) predicts multi-year
+*overreaction* correction — the opposite direction from momentum's underreaction story, at a
+much longer horizon than short-term reversal's ~1 month. Formation period: cumulative return
+over a 5-year window, excluding the most recent year (to avoid mechanical overlap with
+momentum's own 12-1 month window). Long the biggest past losers, short the biggest past
+winners. Tested on all three markets from the start, with an immediate non-overlapping
+decade breakdown of the US result per the standing Milestone 26 lesson.
+
+| | NSE, long leg (daily/monthly) | US, long leg (daily/monthly) | ASX, long leg (daily/monthly) |
+|---|---|---|---|
+| Hedged ann. return / p | +1.99%, p=.340 / +2.74%, p=.384 | -2.27%, p=.339 / -1.67%, p=.302 | +2.21%, p=.871 / n/a (9 months) |
+
+| | NSE, combined (daily/monthly) | US, combined (daily/monthly) | ASX, combined (daily/monthly) |
+|---|---|---|---|
+| Hedged ann. return / p | -1.11%, p=.870 / +1.07%, p=.835 | -6.16%, p=.249 / -4.41%, p=.171 | -7.27%, p=.695 / n/a (9 months) |
+
+**A clean null, unlike the messy lottery-demand results.** No market shows a significant
+combined-book or long-leg result at conventional levels, either frequency. ASX's 6-year
+sample is too short for a 5-year formation window to produce a usable track record (only 9
+monthly rebalances survive — reported, not silently dropped, but not informative). The US
+decade breakdown found one nominally significant decade (2010-2017, p=0.0152), but the
+pooled full-sample result is not significant (p=0.249 daily, p=0.171 monthly) — exactly the
+"one out of five decades crosses 0.05 by chance" pattern this project's own Milestone 5
+warned about when testing many sub-windows; treated as noise, not a finding, absent a pooled
+result to back it up.
+
+**Updated conclusion**: long-term reversal does not replicate on any of this project's three
+markets. Unlike the low-volatility/MAX pair, this isn't a messy partial inversion needing a
+mechanism investigation — it's a straightforward retraction-shaped null, joining short-term
+reversal and 52-week-high in the "no demonstrated skill" category rather than opening a new
+thread. This project has now tested six signals across three markets (18 combinations):
+one confirmed (momentum), two lottery-demand signals shown to be one mechanism (low-
+volatility/MAX), and two cleanly null (short-term reversal, long-term reversal) alongside
+52-week-high's momentum-explained ASX result.
+
+**Reproduce this**: `python investigations/long_term_reversal_all_markets.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -1960,6 +2001,13 @@ python investigations/max_effect_all_markets.py
 # independent of low-volatility" above)
 python investigations/max_effect_low_vol_control.py
 
+# Investigation -- a third new signal, a different family (long-term reversal, multi-year
+# overreaction, not lottery demand) on all three markets? (a clean null everywhere -- no
+# significant combined-book or long-leg result at conventional levels on any market; ASX's
+# 6-year sample too short to produce a usable track record; see "A third new signal, a
+# different family" above)
+python investigations/long_term_reversal_all_markets.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -2053,7 +2101,11 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    book's alpha collapses to indistinguishable from zero (p=0.906 daily) while
    low-volatility's own coefficient explains up to 30% of its variance — one mechanism, not
    two independent discoveries, resolved by a control regression rather than left as an open
-   pattern. Momentum's
+   pattern. A third new signal, a genuinely different family from either lottery-demand test
+   (long-term reversal, multi-year overreaction, Milestone 30), was then tested the same way
+   and came back a clean null on every market — no messy partial inversion to investigate
+   this time, just a straightforward "no demonstrated skill" result joining short-term
+   reversal's. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -2429,3 +2481,17 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   MAX's headline result. **The pattern flagged in Milestone 28 is closed: not by finding a
   shared structural cause in the data, but by finding there was only ever one mechanism to
   explain, not two.**
+- **A third new signal, long-term reversal (a genuinely different family from either
+  lottery-demand test), does not replicate on any market — a clean null, not a messy
+  inversion needing a mechanism investigation (Milestone 30).** Tested with the same
+  out-of-sample hedge and HAC methodology, 5-year formation period excluding the most
+  recent year: no significant combined-book or long-leg result at conventional levels on
+  NSE, US, or ASX. ASX's 6-year sample is too short for this signal's formation window to
+  produce a usable track record (9 monthly rebalances). The US decade breakdown found one
+  nominally significant decade (2010-2017, p=0.0152) against an insignificant pooled result
+  (p=0.249 daily) — the "one of five decades crosses 0.05 by chance" pattern this project's
+  own Milestone 5 warned about, treated as noise rather than a finding. **This project has
+  now tested six signals across three markets: one confirmed (momentum), two
+  lottery-demand signals resolved to one mechanism (low-volatility/MAX), and two cleanly
+  null (short-term and long-term reversal), alongside 52-week-high's momentum-explained ASX
+  result.**

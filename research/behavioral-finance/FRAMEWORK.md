@@ -446,6 +446,17 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   correlation between the two signals' scores and, if substantial, run the control
   regression before reporting two separate findings — an "open pattern" is a research debt
   to be paid off with a direct test, not a permanent footnote.**
+- **Milestone 30 tested a third new signal, deliberately chosen from a different
+  behavioral family (long-term reversal / overreaction, not lottery demand), and got a
+  clean null — a useful contrast after two messy lottery-demand results.** No significant
+  result on any market at conventional levels; the one nominally significant US decade
+  (2010-2017, p=0.0152) sat against an insignificant pooled result, the exact
+  multiple-testing pattern Milestone 5 warned about, correctly treated as noise rather than
+  a finding. **Rule: when breadth-testing new signals, vary the underlying behavioral
+  mechanism, not just the construction — two signals from the same family (as Milestones 25
+  and 28 turned out to be) risk producing correlated, redundant results, while a
+  genuinely different family gives an independent read on whether "this project's datasets
+  support most anomalies" or "this project's datasets are simply thin."**
 
 ## 2. Risk-management lessons
 
@@ -766,6 +777,17 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     like, apply the same recognize-and-control-for pattern the next time two related
     signals produce suspiciously similar results, rather than re-deriving the diagnosis
     from scratch or leaving it as an open question.**
+30. **When breadth-testing new signals, vary the underlying behavioral mechanism, not just
+    the price-history construction — same-family signals risk producing correlated,
+    redundant results.** Milestones 25 and 28 both tested "lottery demand" signals and
+    turned out (Milestone 29) to be substantially one mechanism. Milestone 30 deliberately
+    picked a different family (long-term reversal / overreaction) and got a clean null on
+    every market, unlike either lottery-demand signal's messy partial inversion — a useful,
+    independent data point precisely because it wasn't correlated with what came before.
+    **Rule: a project's "breadth" work should sample across behavioral mechanisms
+    (underreaction, overreaction, leverage constraints, lottery preference, ...), not just
+    across constructions within one mechanism — otherwise apparent breadth can be an
+    illusion, with several "different" signals really testing the same underlying effect.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

@@ -2785,6 +2785,67 @@ box(
     "explain, not two.",
     title="ONE MECHANISM, TWO SIGNALS &mdash; RECOGNIZED ON SIGHT"
 )
+box(
+    "Section 5.31 tests a third new signal, deliberately chosen from a "
+    "different behavioral family than either lottery-demand test: "
+    "long-term reversal (multi-year overreaction), not lottery demand.",
+    kind="fact", title="UPDATE FROM SECTION 5.31"
+)
+
+h1("5.31  Milestone 30 &mdash; A third new signal, a different family: does long-term reversal replicate anywhere?")
+p("Sections 5.26 and 5.29 both tested &quot;lottery demand&quot; "
+  "signals, which Section 5.30 showed are substantially the same "
+  "mechanism on the US mirror. This milestone tests a genuinely "
+  "different family: long-term reversal (De Bondt &amp; Thaler 1985) "
+  "predicts multi-year <i>overreaction</i> correction &mdash; the "
+  "opposite direction from momentum's underreaction story, at a much "
+  "longer horizon than short-term reversal's ~1 month. Formation "
+  "period: cumulative return over a 5-year window, excluding the most "
+  "recent year (to avoid mechanical overlap with momentum's own 12-1 "
+  "month window). Long the biggest past losers, short the biggest "
+  "past winners. Tested on all three markets from the start, with an "
+  "immediate non-overlapping decade breakdown of the US result per "
+  "the standing Section 5.27 lesson.")
+data_table(
+    ["Long leg", "NSE (daily/monthly)", "US (daily/monthly)", "ASX (daily/monthly)"],
+    [
+        ["Hedged ann. ret / p", "+1.99%, p=.340 / +2.74%, p=.384", "-2.27%, p=.339 / -1.67%, p=.302", "+2.21%, p=.871 / n/a (9 mo.)"],
+    ],
+    col_widths=[1.4*inch, 2.35*inch, 2.35*inch, 2.35*inch], small=True,
+)
+data_table(
+    ["Combined", "NSE (daily/monthly)", "US (daily/monthly)", "ASX (daily/monthly)"],
+    [
+        ["Hedged ann. ret / p", "-1.11%, p=.870 / +1.07%, p=.835", "-6.16%, p=.249 / -4.41%, p=.171", "-7.27%, p=.695 / n/a (9 mo.)"],
+    ],
+    col_widths=[1.4*inch, 2.35*inch, 2.35*inch, 2.35*inch], small=True,
+)
+p("<b>A clean null, unlike the messy lottery-demand results.</b> No "
+  "market shows a significant combined-book or long-leg result at "
+  "conventional levels, either frequency. ASX's 6-year sample is too "
+  "short for a 5-year formation window to produce a usable track "
+  "record (only 9 monthly rebalances survive &mdash; reported, not "
+  "silently dropped, but not informative). The US decade breakdown "
+  "found one nominally significant decade (2010-2017, p=0.0152), but "
+  "the pooled full-sample result is not significant (p=0.249 daily, "
+  "p=0.171 monthly) &mdash; exactly the &quot;one out of five decades "
+  "crosses 0.05 by chance&quot; pattern this project's own Section "
+  "5.5 warned about when testing many sub-windows; treated as noise, "
+  "not a finding, absent a pooled result to back it up.")
+box(
+    "Long-term reversal does not replicate on any of this project's "
+    "three markets. Unlike the low-volatility/MAX pair, this isn't a "
+    "messy partial inversion needing a mechanism investigation &mdash; "
+    "it's a straightforward retraction-shaped null, joining "
+    "short-term reversal and 52-week-high in the &quot;no "
+    "demonstrated skill&quot; category rather than opening a new "
+    "thread. This project has now tested six signals across three "
+    "markets: one confirmed (momentum), two lottery-demand signals "
+    "shown to be one mechanism (low-volatility/MAX), and two cleanly "
+    "null (short-term and long-term reversal), alongside "
+    "52-week-high's momentum-explained ASX result.",
+    title="A CLEAN NULL &mdash; BREADTH ACROSS MECHANISMS, NOT JUST CONSTRUCTIONS"
+)
 
 # MARKER_END_PART5
 
@@ -3121,6 +3182,15 @@ box(
     "closed the identical-shaped question for ASX momentum and "
     "52-week-high.",
     kind="fact", title="UPDATE FROM PART V.30"
+)
+box(
+    "Part V.31 tested a third new signal from a deliberately different "
+    "behavioral family (long-term reversal, not lottery demand) and "
+    "got a clean null on every market &mdash; no significant result at "
+    "conventional levels, and the one nominally significant US decade "
+    "sat against an insignificant pooled result, correctly read as "
+    "noise. Breadth across mechanisms, not just constructions.",
+    kind="fact", title="UPDATE FROM PART V.31"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -3516,6 +3586,22 @@ bullets([
     "signals produce suspiciously similar results, rather than "
     "re-deriving the diagnosis from scratch or leaving it as an open "
     "question.",
+    "<b>When breadth-testing new signals, vary the underlying "
+    "behavioral mechanism, not just the price-history construction "
+    "&mdash; same-family signals risk producing correlated, redundant "
+    "results.</b> Parts V.26 and V.29 both tested &quot;lottery "
+    "demand&quot; signals and turned out (Part V.30) to be "
+    "substantially one mechanism. Part V.31 deliberately picked a "
+    "different family (long-term reversal / overreaction) and got a "
+    "clean null on every market, unlike either lottery-demand signal's "
+    "messy partial inversion &mdash; a useful, independent data point "
+    "precisely because it wasn't correlated with what came before. A "
+    "project's &quot;breadth&quot; work should sample across "
+    "behavioral mechanisms (underreaction, overreaction, leverage "
+    "constraints, lottery preference, ...), not just across "
+    "constructions within one mechanism &mdash; otherwise apparent "
+    "breadth can be an illusion, with several &quot;different&quot; "
+    "signals really testing the same underlying effect.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -4035,6 +4121,25 @@ bullets([
     "The pattern flagged in Part V.29 is closed: not by finding a "
     "shared structural cause in the data, but by finding there was "
     "only ever one mechanism to explain, not two.",
+    "<b>A third new signal, long-term reversal (a genuinely different "
+    "family from either lottery-demand test), does not replicate on "
+    "any market &mdash; a clean null, not a messy inversion needing a "
+    "mechanism investigation (Part V.31).</b> Tested with the same "
+    "out-of-sample hedge and HAC methodology, 5-year formation period "
+    "excluding the most recent year: no significant combined-book or "
+    "long-leg result at conventional levels on NSE, US, or ASX. ASX's "
+    "6-year sample is too short for this signal's formation window to "
+    "produce a usable track record (9 monthly rebalances). The US "
+    "decade breakdown found one nominally significant decade "
+    "(2010-2017, p=0.0152) against an insignificant pooled result "
+    "(p=0.249 daily) &mdash; the &quot;one of five decades crosses "
+    "0.05 by chance&quot; pattern this project's own Part V.5 warned "
+    "about, treated as noise rather than a finding. This project has "
+    "now tested six signals across three markets: one confirmed "
+    "(momentum), two lottery-demand signals resolved to one mechanism "
+    "(low-volatility/MAX), and two cleanly null (short-term and "
+    "long-term reversal), alongside 52-week-high's momentum-explained "
+    "ASX result.",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -4169,7 +4274,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 29 then ran the India findings through "
+  "needed. Milestones 3 through 30 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -4285,7 +4390,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, twenty-six times in a row "
+  "most recent, best-supported-looking result, twenty-seven times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -4397,7 +4502,15 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "twenty-first check had found for a completely different pair of "
   "signals on a completely different market. Two signals from the "
   "same behavioral family, tested with identical rigor, turned out to "
-  "be one signal wearing two names. "
+  "be one signal wearing two names, and ran a twenty-seventh check "
+  "(Part V.31) that changed what kind of check it was running: a "
+  "third new signal, this time chosen from a different behavioral "
+  "family on purpose, rather than another variation on the same "
+  "lottery-demand theme. It came back a clean null on every market "
+  "&mdash; no partial inversion to chase, no correlated-signal "
+  "artifact to untangle, just the straightforward absence the "
+  "project's original two signals (52-week-high, short-term reversal) "
+  "had already taught it to expect from most things it tests. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -4537,7 +4650,14 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "combined-book intercept to indistinguishable from zero while "
   "low-volatility's own coefficient explained up to 30% of the "
   "variance &mdash; one mechanism, not two, the pattern recognized on "
-  "sight this time rather than rediscovered from scratch. What remains "
+  "sight this time rather than rediscovered from scratch. Part V.31 "
+  "then tested a sixth signal, chosen this time from a family neither "
+  "prior new signal belonged to, and got the cleanest result of the "
+  "three new-signal milestones: nothing anywhere, no partial inversion, "
+  "no correlated-signal puzzle to untangle &mdash; confirming that "
+  "breadth means sampling mechanisms, not just constructions, and that "
+  "a clean null is itself informative once the alternative is two "
+  "messy, entangled ones. What remains "
   "open is not a specific "
   "finding but two honest limits of the data itself: whether the crash "
   "mechanism would reactivate in a genuinely severe future crisis, as "
