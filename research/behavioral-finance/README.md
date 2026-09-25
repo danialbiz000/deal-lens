@@ -1810,6 +1810,60 @@ tested, reassuring result rather than an acknowledged gap.
 
 **Reproduce this**: `python investigations/momentum_asx_subperiod_stability.py`.
 
+## Does momentum's edge survive more realistic transaction cost assumptions? (Milestone 35)
+
+This project's own "Explicit limitations" have named a modeling simplification since the
+first commit: costs are a flat linear `cost_bps` per unit of turnover (`backtest/engine.py`),
+not a real market-impact model. A proper literature-calibrated model (the well-documented
+square-root law: cost *rate* scales with the square root of trade size relative to average
+daily volume, so total impact cost scales roughly as size^1.5) needs ADV data this project
+checked and confirmed it does not have — none of the three working data sources
+(`load_nse_github_mirror`, `load_us_kaggle_mirror`, `load_asx_github_mirror`) carry a volume
+column, and the yfinance/Stooq loaders that do need internet access this sandbox's proxy still
+blocks (re-confirmed directly). Inventing an ADV number to force a "real" model would be
+exactly the kind of unfounded assumption this project's honesty standard exists to prevent.
+
+So this milestone does two things that stay inside what the data actually supports: (1) a
+linear-cost breakeven sweep from the 10bps baseline up to 200bps, needing no ADV assumption at
+all; (2) an explicitly illustrative square-root-law-*shaped* convex overlay, calibrated to this
+project's own observed turnover distribution rather than an assumed ADV — the same "illustrative,
+not a precise reconstruction" precedent already set for the Q1 fat-tail simulation.
+
+| Cost level | US full sample (daily p) | US pre-2008-09 (daily p) | ASX full sample (daily p) |
+|---|---|---|---|
+| 10bps (baseline) | p=0.0609* | p=0.0188** | p=0.0007*** |
+| 25bps | p=0.0983* | p=0.0304** | p=0.0009*** |
+| 50bps | p=0.1988 | p=0.0632* | p=0.0014*** |
+| 75bps | p=0.3594 | p=0.1210 | p=0.0022*** |
+| 100bps | p=0.5836 | p=0.2138 | p=0.0033*** |
+| 150bps | p=0.8509 | p=0.5292 | p=0.0072*** |
+| 200bps | p=0.3562 | p=0.9872 | p=0.0148** |
+
+**ASX momentum's edge is highly cost-robust** — significant at conventional levels all the way
+to 200bps, 20x the baseline assumption, on monthly one-way turnover averaging 38.4%.
+**US momentum is more cost-fragile, and the full-sample number understates how much**: testing
+the full sample (which averages the project's own confirmed pre-2008-09 edge against its
+confirmed post-2008-09 null, Milestones 13-14) loses significance almost immediately past
+baseline; restricting to the project's own established edge window (pre-2008-09) holds up
+through ~50bps (p=0.0632, marginal) but breaks down by 75bps (p=0.1210) and the point estimate
+itself turns negative by 150bps — on monthly one-way turnover averaging 49.6%, noticeably
+higher than ASX's. **The illustrative convex overlay changes the picture only modestly at each
+market's own actual turnover levels**: cumulative cost drag rises 14% over the flat model for
+the US mirror and 6% for ASX, moving baseline significance only slightly (US daily p: 0.0609 to
+0.0638; ASX: 0.0007 to 0.0007) — the strategy's turnover distribution doesn't contain the kind
+of extreme outlier months that would make a convex impact shape bite much harder than a flat
+rate already assumes.
+
+**Updated conclusion**: momentum's confirmed edge is not uniformly cost-robust across markets.
+ASX's edge, already the cleanest replication and the most sub-period-stable result in this
+project (Milestone 34), is also the most cost-robust. The US mirror's pre-2008-09 edge is real
+but sits closer to the margin than its raw p=0.0188 suggests once even moderate additional
+costs are assumed — a genuine, new risk-playbook caveat, not a reversal of the underlying
+finding. A precise dollar-cost answer still needs real ADV data this project doesn't have from
+any working source; that remains an explicit limitation, not a silently closed question.
+
+**Reproduce this**: `python investigations/transaction_cost_realism.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2218,6 +2272,13 @@ python investigations/momentum_crash_severity_stress_test.py
 # momentum's edge stable across sub-periods" above)
 python investigations/momentum_asx_subperiod_stability.py
 
+# Investigation -- does momentum's edge survive more realistic transaction cost assumptions
+# than the project's flat linear cost model? (breakeven sweep 10-200bps + an illustrative
+# square-root-law-shaped convex overlay; ASX momentum robust to 200bps, US pre-2008-09 edge
+# breaks down between 50-75bps; real ADV data confirmed unavailable from any working source;
+# see "Does momentum's edge survive more realistic transaction cost assumptions" above)
+python investigations/transaction_cost_realism.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -2339,7 +2400,15 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    out-of-sample hedge + HAC methodology, no sign flips in either leg, and the combined
    long-short book individually significant in all three windows, with one real nuance flagged
    (the book's hedge beta drifts from near-zero to increasingly net-short over the sample) for
-   anyone sizing the position. Momentum's
+   anyone sizing the position. The project's own oldest-acknowledged modeling simplification —
+   a flat linear transaction-cost assumption, never checked against a more realistic model —
+   was then tested directly too (Milestone 35): a cost-breakeven sweep found ASX momentum
+   robust to costs 20x its 10bps baseline, while the US mirror's genuine pre-2008-09 edge,
+   though real, breaks down between 50-75bps, sitting closer to the margin than its raw
+   significance suggests; an illustrative square-root-law-shaped convex overlay, calibrated to
+   this project's own turnover rather than an assumed trading-volume number this project
+   confirmed it doesn't have, changed the picture only modestly at either market's actual
+   turnover levels. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -2365,7 +2434,14 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   point-in-time constituents file).
 - **Transaction costs are a simple linear model**, not a real market-impact model; real
   turnover costs for a strategy this size would need a proper implementation-shortfall
-  estimate.
+  estimate. **Tested directly by Milestone 35**: a linear-cost breakeven sweep (no ADV
+  assumption needed) finds ASX momentum robust to 200bps (20x the 10bps baseline) while the US
+  mirror's pre-2008-09 edge breaks down between 50-75bps; an illustrative, turnover-calibrated
+  square-root-law-shaped convex overlay (real ADV data confirmed unavailable from any of this
+  project's three working sources) changes the picture only modestly at either market's actual
+  turnover levels. See "Does momentum's edge survive more realistic transaction cost
+  assumptions" above — this narrows the limitation to a checked range, it does not remove it: a
+  true implementation-shortfall estimate still needs real ADV data this project doesn't have.
 - **No out-of-sample / walk-forward validation** is wired up by default — anyone extending
   this should split into a strict in-sample fit period and out-of-sample test period before
   claiming an edge, and check performance decay after each anomaly's publication date
@@ -2776,3 +2852,19 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   from near-zero (+0.108) to increasingly net-short (-0.616) across the three windows — not a
   return-instability problem, but a real change in hedge composition worth knowing before
   sizing this position.
+- **Momentum's edge is not uniformly robust to more realistic transaction cost assumptions —
+  ASX's edge is, the US mirror's genuine pre-2008-09 edge is more cost-fragile than its raw
+  significance suggests (Milestone 35).** A linear-cost breakeven sweep (10bps baseline up to
+  200bps, needing no ADV assumption) finds ASX momentum significant at conventional levels all
+  the way to 200bps; the US mirror's full-sample result (already diluted by its confirmed
+  post-2008-09 null, Milestones 13-14) loses significance almost immediately past baseline, and
+  even restricted to the project's own established pre-2008-09 edge window, significance breaks
+  down between 50bps and 75bps, with the point estimate turning negative by 150bps. An
+  illustrative square-root-law-shaped convex overlay — calibrated to this project's own observed
+  turnover distribution, not an assumed ADV number this project confirmed is unavailable from
+  any of its three working data sources (`load_nse_github_mirror`, `load_us_kaggle_mirror`,
+  `load_asx_github_mirror` all lack a volume column; the yfinance/Stooq loaders that have one
+  still can't reach the internet from this sandbox) — changes cumulative cost drag by 14% (US)
+  and 6% (ASX) relative to the flat model, moving baseline significance only slightly. This
+  narrows, but does not remove, the project's oldest-acknowledged modeling simplification: a
+  precise dollar-cost answer still needs real ADV data this project doesn't have.

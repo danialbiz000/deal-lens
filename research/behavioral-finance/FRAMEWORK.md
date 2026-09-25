@@ -871,6 +871,22 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     or regime-based stability check, report the hedge/exposure parameters alongside the
     headline return result, not instead of it — a strategy can be return-stable and
     exposure-unstable at the same time, and a risk playbook needs both facts.**
+35. **A modeling simplification acknowledged since a project's first commit is still worth
+    testing directly, even when the fully rigorous version of the test is out of reach.**
+    This project's linear transaction-cost model was flagged as a limitation from the start,
+    but never checked against anything more realistic — a literature-calibrated market-impact
+    model needs average daily volume data this project confirmed, directly, it does not have
+    from any of its three working data sources. Milestone 35 didn't let that block the check:
+    a linear-cost breakeven sweep needs no ADV assumption at all, and an illustrative
+    square-root-law-*shaped* convex overlay can be calibrated to the strategy's own observed
+    turnover instead of an assumed volume number. The result was genuinely informative and
+    asymmetric: ASX momentum stayed significant to 200bps, while the US mirror's real
+    pre-2008-09 edge broke down between 50-75bps — a real difference between markets that a
+    single flat-cost assumption would have hidden. **Rule: when the fully rigorous version of a
+    check needs data you've confirmed you don't have, look for the version of the check that
+    doesn't need it, rather than leaving an old limitation unexamined indefinitely — a
+    breakeven sweep and an illustratively-calibrated overlay can answer a real question even
+    when a precise dollar-cost number can't be produced.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
