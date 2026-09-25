@@ -2508,8 +2508,78 @@ box(
     "reversal and 52-week-high as a cleanly retracted one &mdash; it is "
     "its own, distinct negative result: a well-documented academic "
     "anomaly that this project's own data does not support, and on its "
-    "best-tested market, actively contradicts.",
+    "best-tested market, actively contradicts. <i>(Refined, not "
+    "overturned, by Section 5.27: the ten-start-date sweep above answers "
+    "whether the whole result is an early-window artifact, not where "
+    "within 1970-2017 it actually lives &mdash; a decade-by-decade "
+    "breakdown narrows it considerably. See below.)</i>",
     title="NOT REPLICATED, AND NOT JUST RETRACTED &mdash; INVERTED"
+)
+box(
+    "Section 5.27 checks the mechanism behind Section 5.26's US "
+    "inversion directly, rather than letting the pooled 1970-2017 number "
+    "stand as this project's final word on it.",
+    kind="fact", title="UPDATE FROM SECTION 5.27"
+)
+
+h1("5.27  Milestone 26 &mdash; Does the US low-volatility inversion survive scrutiny of its own mechanism?")
+p("Section 5.26's ten-start-date sweep confirmed the US inversion isn't "
+  "a repeat of Section 5.16's exact pre-1985 thin-universe problem for "
+  "reversal &mdash; but a cumulative &quot;from-date-X-onward&quot; "
+  "sweep cannot distinguish a steady, persisting effect from one episode "
+  "pooled with several quiet decades, the identical blind spot this "
+  "project already corrected once for the momentum-crash mechanism "
+  "(Sections 5.20-5.22). This milestone runs four checks the data "
+  "actually supports &mdash; this dataset has no market-cap, sector, or "
+  "fundamentals data, only a fixed 30-ticker universe of today's "
+  "mega-cap survivors (Section 5.16) &mdash; rather than leaving the "
+  "inversion unexplained.")
+data_table(
+    ["Decade", "n (days)", "Hedged ann. return", "daily alpha p"],
+    [
+        ["1970-1979", "1,873", "-53.44%", "0.0002 (thin: 1-3 names/leg)"],
+        ["1980-1989", "2,529", "-5.13%", "0.8913 (n.s.)"],
+        ["1990-1999", "2,528", "-19.98%", "0.0244"],
+        ["2000-2009", "2,515", "-14.90%", "0.2862 (n.s.)"],
+        ["2010-2017", "1,972", "-5.61%", "0.4519 (n.s.)"],
+    ],
+    col_widths=[1.3*inch, 1.3*inch, 2.1*inch, 2.7*inch],
+    small=True,
+)
+p("<b>Four checks, one narrower picture.</b> With only 30 tickers "
+  "ranked into fifths, each leg holds roughly a sixth of the universe; "
+  "in the 1970s that's genuinely thin (1-3 names/leg, the same order of "
+  "magnitude as Section 5.16's 2-4-stock reversal problem), only "
+  "reaching a reasonable 5-7 names from the late 1980s onward (Check "
+  "1). One ticker, INTC, populates the high-vol (short) leg in 195 of "
+  "216 months (90%) during exactly the window Section 5.26's sweep "
+  "called significant, while the low-vol leg is comparatively "
+  "diversified (Check 2). The non-overlapping decade breakdown above "
+  "(Check 3) shows the inversion is not a persisting 47-year "
+  "phenomenon: significant in exactly one well-populated decade (the "
+  "1990s), essentially zero immediately before and after it (1980s, "
+  "2000s, 2010s), with its only other significant decade (the 1970s) "
+  "the same thin window Check 1 flags as unreliable. Dropping INTC "
+  "entirely and rerunning the full test (Check 4): the result survives "
+  "(daily ann. return -18.29%, p=0.0009; monthly -15.60%, p=0.0005) "
+  "&mdash; smaller than the -20.70%/-18.09% headline, but still highly "
+  "significant, so it is not purely a single-stock artifact.")
+box(
+    "Section 5.26's &quot;significant inversion, robust to start "
+    "date&quot; framing overstated how the effect is distributed. It is "
+    "real in the sense that it survives dropping its single most-present "
+    "ticker and isn't confined to the unreliable pre-1980 window alone. "
+    "But it is not the broad-based, multi-decade phenomenon the pooled "
+    "number and the cumulative sweep implied &mdash; it is a real, "
+    "concentrated 1990s effect, heavily but not solely carried by one "
+    "ticker whose own history spans exactly that decade's semiconductor "
+    "boom, sitting next to a thin-universe 1970s echo of Section 5.16's "
+    "own diagnosis. Read it as a genuine 1990s-specific episode this "
+    "dataset happens to contain, not as &quot;high-volatility stocks "
+    "beat low-volatility ones in the US for half a century&quot; "
+    "&mdash; that broader claim does not survive being checked decade "
+    "by decade.",
+    title="A REAL EFFECT, BUT A DECADE WIDE, NOT FORTY-SEVEN YEARS WIDE"
 )
 
 # MARKER_END_PART5
@@ -2798,6 +2868,19 @@ box(
     "and &quot;retracted&quot;: a documented academic anomaly this project's "
     "own data actively contradicts on its best-tested market.",
     kind="fact", title="UPDATE FROM PART V.26"
+)
+box(
+    "Part V.27 checked the US inversion's own internal mechanism rather "
+    "than letting the pooled 1970-2017 number stand unexplained. A "
+    "non-overlapping decade breakdown &mdash; not the cumulative "
+    "from-date sweep Part V.26 used &mdash; found it significant in the "
+    "1990s only, essentially zero in the 1980s/2000s/2010s, and its "
+    "other significant decade (the 1970s) sharing the exact "
+    "1-3-names-per-leg thinness Part V.16 diagnosed for reversal. One "
+    "ticker (INTC) populated the high-vol leg 90% of the window Part "
+    "V.26 called robust; dropping it entirely did not eliminate the "
+    "result. Real, but a decade wide, not forty-seven years wide.",
+    kind="fact", title="UPDATE FROM PART V.27"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -3124,6 +3207,23 @@ bullets([
     "statistical force in your own data is its own category of finding, "
     "worth reporting plainly rather than filed away as an inconclusive "
     "negative.",
+    "<b>A robustness sweep that only asks &quot;does it hold from date X "
+    "onward&quot; cannot tell a persisting effect from a pooled one "
+    "&mdash; the exact blind spot this project already corrected once "
+    "applies just as much to a brand-new finding as to an old one.</b> "
+    "Part V.27 broke Part V.26's US low-volatility inversion into "
+    "non-overlapping decades instead of cumulative from-date windows, "
+    "and found the effect significant in the 1990s only (p=0.0244), "
+    "essentially zero in the 1980s/2000s/2010s (p=0.29-0.89), with its "
+    "other &quot;significant&quot; decade (the 1970s) sharing the exact "
+    "1-3-names-per-leg thinness Part V.16 diagnosed for reversal. A "
+    "single ticker (INTC) populated the high-vol leg 90% of the window "
+    "Part V.26's sweep called robust, though dropping it did not "
+    "eliminate the result. Before calling a cumulative-window result "
+    "&quot;robust to start date,&quot; re-test it with non-overlapping "
+    "windows too &mdash; a pooled effect and a persisting one look "
+    "identical to a from-date sweep, and only the decade-by-decade "
+    "version tells them apart.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -3568,7 +3668,26 @@ bullets([
     "2000 start &mdash; not a thin-universe artifact. This should not be "
     "filed alongside momentum as a second working signal, nor alongside "
     "reversal and 52-week-high as a cleanly retracted one &mdash; it is "
-    "its own distinct negative result, worth reporting on its own terms.",
+    "its own distinct negative result, worth reporting on its own terms. "
+    "<i>(Refined by Part V.27: the effect concentrates in the 1990s "
+    "specifically, not a persisting 47-year phenomenon &mdash; see "
+    "below.)</i>",
+    "<b>The US low-volatility inversion is real but concentrated, not "
+    "the persisting multi-decade phenomenon the pooled 1970-2017 number "
+    "implied (Part V.27).</b> A non-overlapping decade breakdown (not "
+    "the cumulative from-date sweep Part V.26 used) finds the hedged "
+    "combined book significantly negative in the 1990s only (p=0.0244) "
+    "and the thin, unreliable 1970s (p=0.0002, but only 1-3 names per "
+    "leg &mdash; the same order of thinness Part V.16 flagged for "
+    "reversal); the 1980s, 2000s, and 2010s all show no significant "
+    "effect (p=0.29-0.89). One ticker, INTC, is present in the high-vol "
+    "leg 90% of the 1978-1995 window, but dropping it entirely does not "
+    "eliminate the result (daily ann. return -18.29%, p=0.0009 vs. the "
+    "headline -20.70%, p=0.0002) &mdash; not purely a single-stock "
+    "artifact. Read this as a genuine, concentrated 1990s-specific "
+    "episode this dataset happens to contain, not as evidence that "
+    "high-volatility stocks broadly outperformed low-volatility ones "
+    "across the full 1970-2017 sample.",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -3703,7 +3822,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 25 then ran the India findings through "
+  "needed. Milestones 3 through 26 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -3819,7 +3938,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, twenty-two times in a row "
+  "most recent, best-supported-looking result, twenty-three times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -3888,14 +4007,22 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "correlation the twentieth had flagged: it built the actual control "
   "regression, and the result that had looked new dissolved entirely, "
   "leaving nothing where a suspected second discovery had briefly stood, "
-  "and finally ran a twenty-second check (Part V.26) that wasn't a "
+  "ran a twenty-second check (Part V.26) that wasn't a "
   "correction of anything either: it built a signal this project had "
   "never tested before, of a genuinely different kind than the three "
   "already on the books, and tried it on all three markets at once "
   "rather than working up to that the slow way &mdash; and found not a "
   "sixth confirmation but a result with real statistical force running "
   "backward, checked against the specific thin-universe confound this "
-  "same dataset had already produced once, and cleared it. "
+  "same dataset had already produced once, and cleared it, and finally "
+  "ran a twenty-third check (Part V.27) that turned this project's own "
+  "pooled-window lesson &mdash; already learned twice, on the crash "
+  "mechanism and on the NSE signal &mdash; on the very result the "
+  "twenty-second check had just produced: a non-overlapping decade "
+  "breakdown of the twenty-second's own inversion found it significant "
+  "in exactly one decade, not the forty-seven years its cumulative "
+  "sweep had implied, with a single ticker behind ninety percent of the "
+  "short leg in the years that mattered most. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -4001,7 +4128,13 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "well-documented academic anomaly, tested here for the first time, "
   "that does not merely fail to replicate but actively inverts, "
   "checked and cleared of the one confound this project's own history "
-  "with this exact dataset would have predicted. What remains open is not a specific "
+  "with this exact dataset would have predicted &mdash; then narrowed "
+  "one step further by Part V.27, which broke that same inversion into "
+  "non-overlapping decades instead of trusting the cumulative sweep that "
+  "had cleared it, and found a real effect confined to a single decade "
+  "(the 1990s) rather than the forty-seven-year phenomenon the pooled "
+  "number implied, substantially but not entirely carried by one "
+  "ticker's own history. What remains open is not a specific "
   "finding but two honest limits of the data itself: whether the crash "
   "mechanism would reactivate in a genuinely severe future crisis, as "
   "opposed to the milder episodes this sample happens to contain, is a "

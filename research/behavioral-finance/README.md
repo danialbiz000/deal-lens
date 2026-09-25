@@ -1364,7 +1364,71 @@ and 52-week-high as a cleanly retracted one — it is its own, distinct negative
 well-documented academic anomaly that this project's own data does not support, and on its
 best-tested market, actively contradicts.
 
+*(Refined, not overturned, by Milestone 26: the ten-start-date sweep above answers "is the
+whole result an early-window artifact?" but not where within 1970-2017 the effect actually
+lives. A non-overlapping decade breakdown finds it concentrated in the 1990s specifically —
+not the 1980s, 2000s, or 2010s — and the single most-present ticker in the high-vol leg
+(INTC, 90% of months in the 1978-1995 window) accounts for part, but not all, of the
+magnitude. See "Does the US low-volatility inversion survive scrutiny of its own mechanism?"
+below.)*
+
 **Reproduce this**: `python investigations/low_volatility_all_markets.py`.
+
+## Does the US low-volatility inversion survive scrutiny of its own mechanism? (Milestone 26)
+
+Milestone 25's ten-start-date robustness sweep confirmed the US inversion isn't a repeat of
+Milestone 16's exact pre-1985 thin-universe problem for reversal — but a cumulative
+"from-date-X-onward" sweep can't distinguish a steady, persisting effect from one episode
+pooled with several quiet decades, the identical blind spot this project already corrected
+once for the momentum-crash mechanism (Milestones 19-21). This milestone runs four checks
+the data actually supports — this dataset has no market-cap, sector, or fundamentals data,
+only a fixed 30-ticker universe of today's mega-cap survivors (Milestone 16) — rather than
+letting Milestone 25's pooled number stand as an unexplained inversion.
+
+**Check 1 — decile leg size over time.** With only 30 tickers ranked into fifths, each leg
+holds roughly 1/5 of the universe. In the 1970s that's genuinely thin (1-3 names per leg,
+the same order of magnitude as Milestone 16's 2-4-stock reversal problem); leg size only
+reaches a more reasonable 5-7 names from the late 1980s onward.
+
+**Check 2 — ticker concentration, 1978-1995 window.** One ticker, INTC, populates the
+high-vol (short) leg in 195 of 216 months (90%) during exactly the window Milestone 25's
+sweep called significant. The low-vol (long) leg is comparatively diversified (XOM 69%, PG
+67%, no single name dominating as completely).
+
+**Check 3 — non-overlapping decade breakdown**, rather than cumulative from-date sweeps:
+
+| Decade | n (days) | Hedged ann. return | daily alpha p |
+|---|---|---|---|
+| 1970-1979 | 1,873 | -53.44% | **0.0002** (thin: 1-3 names/leg) |
+| 1980-1989 | 2,529 | -5.13% | 0.8913 (n.s.) |
+| 1990-1999 | 2,528 | -19.98% | **0.0244** |
+| 2000-2009 | 2,515 | -14.90% | 0.2862 (n.s.) |
+| 2010-2017 | 1,972 | -5.61% | 0.4519 (n.s.) |
+
+The inversion is not a persisting 47-year phenomenon. It is significant in exactly one full
+decade with a reasonably populated universe (the 1990s), essentially zero in the 1980s
+immediately preceding it and in the 2000s/2010s that follow, and its only other significant
+decade (the 1970s) is the same thin 1-3-name-per-leg window Check 1 flags as unreliable by
+this project's own standard.
+
+**Check 4 — leave-one-out.** Dropping INTC entirely and rerunning the full combined-book
+test: the result survives (daily ann. return -18.29%, p=0.0009; monthly ann. return -15.60%,
+p=0.0005) — smaller than the -20.70%/-18.09% headline number, but still highly significant.
+INTC's dominance of the short leg does not, by itself, manufacture the result.
+
+**Updated conclusion**: Milestone 25's "significant inversion, robust to start date" framing
+overstated how the effect is distributed. It is real in the sense that it isn't a single
+ticker's artifact (Check 4) and isn't confined to the unreliable pre-1980 window alone
+(Check 3 finds a second, well-populated significant decade). But it is also not the
+broad-based, multi-decade phenomenon the pooled 1970-2017 number and the cumulative
+start-date sweep implied — it is a real, concentrated 1990s effect, heavily but not solely
+carried by one ticker (INTC) whose own history spans exactly that decade's semiconductor
+boom, sitting next to a thin-universe 1970s echo of Milestone 16's own diagnosis. Read the
+US low-volatility inversion as "a genuine 1990s-specific episode this dataset happens to
+contain," not as "high-volatility stocks beat low-volatility ones in the US for half a
+century" — the latter claim does not survive being checked decade by decade.
+
+**Reproduce this**: `python investigations/low_volatility_us_mechanism.py`.
 
 ## Data provenance: the NSE GitHub mirror
 
@@ -1702,6 +1766,14 @@ python investigations/momentum_control_asx_52w_high.py
 # anywhere?" above)
 python investigations/low_volatility_all_markets.py
 
+# Investigation -- does the US low-volatility inversion survive being checked decade by
+# decade, rather than only via a cumulative from-date sweep? (partly -- it's not a single
+# ticker's artifact (survives dropping INTC) and not confined to the unreliable pre-1980
+# window alone, but it's also not a persisting 47-year phenomenon: significant in the 1990s
+# only, essentially zero in the 1980s/2000s/2010s; see "Does the US low-volatility inversion
+# survive scrutiny of its own mechanism?" above)
+python investigations/low_volatility_us_mechanism.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -1768,7 +1840,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    ASX, and a statistically significant *inversion* on the US mirror (hedged combined book
    loses 20.70%/yr, p=0.0002, high-volatility names significantly outperforming low-volatility
    ones net of beta), robust to the same pre-1985 thin-universe check that mattered for
-   reversal. Momentum's
+   reversal. That US inversion was then checked for its own internal mechanism (Milestone
+   26), the same scrutiny already applied to every other surprising result in this project:
+   a non-overlapping decade breakdown found it significant in the 1990s only, not the 1980s,
+   2000s, or 2010s, with a single ticker (INTC) present in the high-vol leg 90% of the
+   1978-1995 window — a real, concentrated 1990s-specific effect that survives dropping that
+   ticker, not the persisting 47-year phenomenon the pooled full-sample number implied.
+   Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -2088,4 +2166,17 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   should not be filed alongside momentum as a second working signal, nor alongside reversal
   and 52-week-high as a cleanly retracted one — it is its own distinct negative result: a
   well-documented academic anomaly this project's data does not support, and on its
-  best-tested market, actively contradicts.**
+  best-tested market, actively contradicts.** *(Refined by Milestone 26: the effect
+  concentrates in the 1990s specifically, not a persisting 47-year phenomenon — see below.)*
+- **The US low-volatility inversion is real but concentrated, not the persisting
+  multi-decade phenomenon the pooled 1970-2017 number implied (Milestone 26).** A
+  non-overlapping decade breakdown (not the cumulative from-date sweep Milestone 25 used)
+  finds the hedged combined book significantly negative in the 1990s only (p=0.0244) and
+  the thin, unreliable 1970s (p=0.0002, but only 1-3 names per leg — the same order of
+  thinness Milestone 15 flagged for reversal); the 1980s, 2000s, and 2010s all show no
+  significant effect (p=0.29-0.89). One ticker, INTC, is present in the high-vol leg 90% of
+  the 1978-1995 window, but dropping it entirely does not eliminate the result (daily
+  ann. return -18.29%, p=0.0009 vs. the headline -20.70%, p=0.0002) — it is not purely a
+  single-stock artifact. **Read this as a genuine, concentrated 1990s-specific episode this
+  dataset happens to contain, not as evidence that high-volatility stocks broadly
+  outperformed low-volatility ones across the full 1970-2017 sample.**

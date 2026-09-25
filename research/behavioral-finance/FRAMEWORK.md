@@ -397,6 +397,19 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   ("replicates like momentum" or "retracts like reversal") — a well-documented academic
   anomaly can fail to replicate and invert with real statistical force, and that is itself
   a legitimate, reportable finding, not a null result to discard.**
+- **Milestone 26 checked whether Milestone 25's US inversion was a persisting effect or a
+  pooled artifact, and found it was neither exactly — a real but concentrated result.** A
+  cumulative from-date sweep (Milestone 25) can't distinguish a steady effect from one
+  episode pooled with quiet decades; a non-overlapping decade breakdown found the inversion
+  significant in the 1990s only (p=0.0244), essentially zero in the 1980s/2000s/2010s
+  (p=0.29-0.89), with its other significant decade (the 1970s) the same order of
+  universe-thinness (1-3 names/leg) Milestone 15 flagged for reversal. One ticker (INTC)
+  populated the high-vol leg 90% of the 1978-1995 window, but dropping it did not eliminate
+  the result. **Rule: a robustness sweep that only asks "does it hold from date X onward"
+  cannot tell a persisting effect from a pooled one — the same blind spot this project
+  already corrected once for the momentum-crash mechanism (Milestones 19-21) applies to any
+  new finding tested only that way; run the non-overlapping-window version before calling a
+  result either "robust" or "an artifact."**
 
 ## 2. Risk-management lessons
 
@@ -667,6 +680,18 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     result into "replicates" or "retracts" — a well-documented anomaly that inverts with
     real statistical force in your own data is its own category of finding, worth reporting
     plainly rather than filed away as an inconclusive negative.**
+26. **A robustness sweep that only asks "does it hold from date X onward" cannot tell a
+    persisting effect from a pooled one — the exact blind spot this project already
+    corrected once applies just as much to a brand-new finding as to an old one.** Milestone
+    26 broke Milestone 25's US low-volatility inversion into non-overlapping decades instead
+    of cumulative from-date windows, and found the effect significant in the 1990s only
+    (p=0.0244), essentially zero in the 1980s/2000s/2010s (p=0.29-0.89), with its other
+    "significant" decade (the 1970s) sharing the exact 1-3-names-per-leg thinness Milestone
+    15 diagnosed for reversal. A single ticker (INTC) populated the high-vol leg 90% of the
+    window Milestone 25's sweep called robust, though dropping it did not eliminate the
+    result. **Rule: before calling a cumulative-window result "robust to start date,"
+    re-test it with non-overlapping windows too — a pooled effect and a persisting one look
+    identical to a from-date sweep, and only the decade-by-decade version tells them apart.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
