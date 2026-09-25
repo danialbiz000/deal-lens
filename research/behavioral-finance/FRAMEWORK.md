@@ -457,6 +457,18 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   and 28 turned out to be) risk producing correlated, redundant results, while a
   genuinely different family gives an independent read on whether "this project's datasets
   support most anomalies" or "this project's datasets are simply thin."**
+- **Milestone 31 finally tested this section's own flagship deliverable — the equal-weighted
+  composite score, unchanged since Milestone 1 — against the 30 milestones of evidence
+  accumulated around it, rather than leaving its design unexamined while every component
+  was tested repeatedly.** Dropping 52-week-high and reversal (both "no demonstrated skill")
+  and keeping only momentum does not improve the out-of-sample-hedged result on either
+  market where momentum is confirmed — the current 3-signal composite performs marginally
+  better (US: p=0.027 vs p=0.042 daily; ASX: p<0.0001 vs p=0.0006 daily) than momentum
+  alone. Most likely explanation: 52-week-high's high correlation with momentum's own
+  ranking (0.76-0.82 on ASX) provides cross-sectional noise-reduction rather than
+  independent alpha. **Rule: a practical deliverable's design assumptions age the same way
+  a research finding does — re-examine them against the evidence that has accumulated since
+  they were set, rather than treating "this is how we built it originally" as permanent.**
 
 ## 2. Risk-management lessons
 
@@ -788,6 +800,17 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     (underreaction, overreaction, leverage constraints, lottery preference, ...), not just
     across constructions within one mechanism — otherwise apparent breadth can be an
     illusion, with several "different" signals really testing the same underlying effect.**
+31. **A naive "prune the components with no demonstrated skill" intuition can be wrong, and
+    the way to find out is to test the blend directly, not reason about it from the
+    individual verdicts.** Milestone 31 tested whether dropping 52-week-high and reversal
+    (both individually retracted) from the composite score and keeping only momentum would
+    improve the out-of-sample-hedged result. It didn't — the full equal-weighted composite
+    scored better on both tested markets, most likely because a component correlated with
+    the real signal's ranking can reduce cross-sectional noise even with zero standalone
+    alpha. **Rule: a blended score's optimal composition doesn't follow mechanically from
+    each component's individual verdict — test the blend itself before pruning components
+    that "shouldn't" be adding value; the intuition that a retracted signal must be dead
+    weight in every context is itself a hypothesis, not a conclusion.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

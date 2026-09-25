@@ -1632,6 +1632,51 @@ volatility/MAX), and two cleanly null (short-term reversal, long-term reversal) 
 
 **Reproduce this**: `python investigations/long_term_reversal_all_markets.py`.
 
+## Does the practical composite score still make sense given the accumulated evidence? (Milestone 31)
+
+`signals/composite.py`, the equal-weighted three-signal "Behavioral Mispricing Score"
+presented in `FRAMEWORK.md` as this project's investment framework, has been unchanged since
+the project's first milestone — built before any of the subsequent 30 milestones of evidence
+existed. By this project's own accumulated findings, that blend now looks questionable on
+paper: momentum is the one demonstrated, repeatedly-stress-tested real edge; 52-week-high and
+short-term reversal both have "no demonstrated skill" verdicts, reversal's traced to a
+2-4-stock survivorship artifact. An equal-weighted blend of one real signal and two with no
+demonstrated independent skill isn't obviously the right practical score — worth testing
+directly with this project's own out-of-sample hedge + HAC methodology rather than leaving
+the composite unexamined while every individual signal has been tested repeatedly.
+
+| Variant | US, daily p (ann. ret) | US, monthly p (ann. ret) | ASX, daily p (ann. ret) | ASX, monthly p (ann. ret) |
+|---|---|---|---|---|
+| Current composite (all 3 signals) | **0.0267** (+4.03%) | 0.0240 (+7.26%) | **<0.0001** (+39.74%) | **<0.0001** (+34.22%) |
+| Evidence-weighted (momentum only, via composite) | 0.0418 (+3.52%) | 0.0549 (+7.62%) | 0.0008 (+35.10%) | 0.0002 (+30.75%) |
+| Momentum alone (`signals/momentum.py` directly) | 0.0432 (+3.47%) | 0.0557 (+7.59%) | 0.0006 (+35.45%) | 0.0001 (+30.97%) |
+
+**Contrary to the naive expectation, dropping the two components with no demonstrated
+individual skill does not improve the out-of-sample-hedged result on either market — if
+anything, the current equal-weighted composite performs marginally better** (lower p-values,
+higher point-estimate returns) than momentum alone on both US and ASX. The gap is modest on
+the US mirror (p=0.027 vs p=0.042 daily) and more pronounced on ASX (p<0.0001 vs p=0.0006
+daily), though ASX's short sample means all three variants are already comfortably
+significant there.
+
+**Read this carefully — it is not a re-endorsement of 52-week-high or reversal.** Neither
+demonstrates standalone alpha net of beta anywhere in this project's testing. The most
+likely explanation isn't hidden alpha in the retracted components: 52-week-high's ASX
+returns correlate 0.76-0.82 with momentum's own (Milestone 23-24), so blending it in likely
+acts as a correlated-ranking noise-reduction on the composite's cross-sectional sort rather
+than adding independent information — a component can improve a blended rank's
+signal-to-noise even with zero standalone alpha, if it's positively correlated with the
+"true" signal's ranking. This is a modest, non-decisive empirical result, not a mechanism
+finding; it argues against the naive "prune the dead weight" intuition without proving why.
+
+**Updated conclusion**: leave `signals/composite.py`'s current equal weighting as-is — the
+empirical evidence, tested directly rather than assumed, does not support simplifying it to
+momentum-only, even though momentum is the only individually-validated component. `FRAMEWORK.md`
+is updated to state this explicitly rather than leaving the composite's rationale
+un-re-examined after 30 milestones of evidence accumulated around it.
+
+**Reproduce this**: `python investigations/composite_score_evidence_check.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2008,6 +2053,14 @@ python investigations/max_effect_low_vol_control.py
 # different family" above)
 python investigations/long_term_reversal_all_markets.py
 
+# Investigation -- does the practical composite score (signals/composite.py, unchanged since
+# Milestone 1) still make sense given 30 milestones of evidence? (surprisingly, yes as-is --
+# dropping the two "no demonstrated skill" components does not improve the out-of-sample-
+# hedged result on either market where momentum is confirmed; the current equal-weighted
+# composite performs marginally better than momentum alone; see "Does the practical composite
+# score still make sense" above)
+python investigations/composite_score_evidence_check.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -2105,7 +2158,16 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    (long-term reversal, multi-year overreaction, Milestone 30), was then tested the same way
    and came back a clean null on every market — no messy partial inversion to investigate
    this time, just a straightforward "no demonstrated skill" result joining short-term
-   reversal's. Momentum's
+   reversal's. With six signals now tested, this project's own flagship practical output —
+   the equal-weighted three-signal composite score, unchanged since Milestone 1 — was itself
+   finally checked against the evidence accumulated around it (Milestone 31): dropping the
+   two components with no demonstrated individual skill, contrary to the naive expectation,
+   did not improve the out-of-sample-hedged result on either market where momentum is
+   confirmed — the current composite performs marginally better, most likely because
+   52-week-high's high correlation with momentum's own ranking on ASX acts as a
+   noise-reduction on the cross-sectional sort rather than independent information. The
+   composite's current weighting is left as-is, now for a tested reason rather than an
+   unexamined default. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -2495,3 +2557,17 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   lottery-demand signals resolved to one mechanism (low-volatility/MAX), and two cleanly
   null (short-term and long-term reversal), alongside 52-week-high's momentum-explained ASX
   result.**
+- **The practical composite score's equal weighting, unexamined since Milestone 1, was
+  finally tested against 30 milestones of accumulated evidence — and, contrary to the naive
+  expectation, held up (Milestone 31).** Dropping the two components (52-week-high,
+  reversal) with no demonstrated individual skill and keeping only momentum does not
+  improve the out-of-sample-hedged combined book on either market where momentum is
+  confirmed: the current 3-signal composite scores lower p-values and higher point-estimate
+  returns than momentum alone on both the US mirror (p=0.027 vs p=0.042 daily) and ASX
+  (p<0.0001 vs p=0.0006 daily). **This is not a re-endorsement of 52-week-high or reversal**
+  — neither shows standalone alpha net of beta anywhere in this project's testing. The more
+  likely explanation is that 52-week-high's high correlation with momentum's own ranking
+  (0.76-0.82 on ASX, Milestone 23-24) makes it act as noise-reduction on the composite's
+  cross-sectional sort rather than an independent alpha source — a modest, non-decisive
+  empirical result, not a mechanism finding. `signals/composite.py`'s equal weighting is
+  left as-is, now for a tested reason rather than an unexamined historical default.

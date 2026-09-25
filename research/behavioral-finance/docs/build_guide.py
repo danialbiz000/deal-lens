@@ -126,16 +126,29 @@ def box(text, kind="decision", title=None):
     story.append(Spacer(1, 8))
 
 
+def _escape_cell_text(s: str) -> str:
+    """data_table() cells are authored as plain characters (no HTML entities --
+    see the Milestone 18 note on why box()'s Paragraph-based entities aren't
+    safe here). Wrapping cells in Paragraph (below) enables proper word-wrap
+    within the declared column width, but Paragraph parses its input as
+    mini-XML, so literal '&'/'<'/'>' (e.g. "<0.0001") must be escaped first
+    so they keep rendering as plain text rather than being parsed as markup.
+    """
+    return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
 def data_table(header, rows, col_widths=None, small=False):
-    data = [header] + rows
-    t = Table(data, colWidths=col_widths, repeatRows=1)
     fs = 8.3 if small else 9
+    header_style = ParagraphStyle(name="TableHeader", fontName="Helvetica-Bold",
+                                   fontSize=fs, leading=fs * 1.25, textColor=colors.white)
+    body_style = ParagraphStyle(name="TableBody", fontName="Helvetica",
+                                 fontSize=fs, leading=fs * 1.25, textColor=colors.black)
+    wrapped_header = [Paragraph(_escape_cell_text(c), header_style) for c in header]
+    wrapped_rows = [[Paragraph(_escape_cell_text(c), body_style) for c in row] for row in rows]
+    data = [wrapped_header] + wrapped_rows
+    t = Table(data, colWidths=col_widths, repeatRows=1)
     style = [
         ("BACKGROUND", (0, 0), (-1, 0), TABLE_HEAD_BG),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, -1), fs),
         ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, TABLE_ROW_BG]),
         ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#c3ccd6")),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
@@ -996,7 +1009,7 @@ data_table(
         ["NSE (India)", "0.63", "-0.54", "-0.73"],
         ["US (Kaggle mirror)", "0.44", "-0.32", "-0.49"],
     ],
-    col_widths=[1.6*inch, 2.1*inch, 1.5*inch, 1.7*inch],
+    col_widths=[1.53*inch, 2.01*inch, 1.43*inch, 1.63*inch],
 )
 p("The two signals genuinely are correlated (0.44-0.63) &mdash; a stock near "
   "its 52-week high does tend to look &quot;expensive&quot; on this proxy. "
@@ -1056,7 +1069,7 @@ data_table(
         ["Worst bucket: bear + high-vol", "-1.07 Sharpe, -38% ann.", "-1.26 Sharpe, -61% ann."],
         ["Return skewness, combined long-short", "-0.66", "-1.32"],
     ],
-    col_widths=[2.9*inch, 1.9*inch, 1.9*inch],
+    col_widths=[2.86*inch, 1.87*inch, 1.87*inch],
     small=True,
 )
 p("All four signatures point the same way, in both markets. The leg "
@@ -1106,7 +1119,7 @@ data_table(
         ["US short leg (theory's predicted locus)", "p=0.65", "p=0.34", "p=0.61"],
         ["US long leg", "p=0.15", "p<0.0001", "p=0.0139"],
     ],
-    col_widths=[2.3*inch, 1.5*inch, 1.3*inch, 1.6*inch],
+    col_widths=[2.27*inch, 1.48*inch, 1.28*inch, 1.58*inch],
     small=True,
 )
 p("<b>The specific regime-conditioning mechanism does not survive formal "
@@ -1237,7 +1250,7 @@ data_table(
         ["Hedged daily return significant?", "p=0.35", "p=0.45"],
         ["Hedged monthly return significant?", "p=0.42", "p=0.17"],
     ],
-    col_widths=[2.4*inch, 2.2*inch, 2.2*inch],
+    col_widths=[2.33*inch, 2.14*inch, 2.14*inch],
     small=True,
 )
 p("<b>Independent confirmation of Milestone 6, by a stronger method.</b> "
@@ -1301,7 +1314,7 @@ data_table(
         ["Monthly alpha (annualized)", "+9.2%/yr, p<.0001", "+15.3%/yr, p<.0001"],
         ["Beta", "~+1.0 to +1.1", "~-0.05 to -0.24, mostly not significant"],
     ],
-    col_widths=[2.3*inch, 2.3*inch, 2.3*inch],
+    col_widths=[2.2*inch, 2.2*inch, 2.2*inch],
     small=True,
 )
 p("The combined long-short book's beta is close to zero and, at daily "
@@ -1347,7 +1360,7 @@ data_table(
         ["Daily alpha (ann.)", "+9.8%/yr, p=.003", "+6.5%/yr, p=.032", "+16.1%/yr, p=.011", "+8.6%/yr, p=.116 (n.s.)"],
         ["Monthly alpha (ann.)", "+11.4%/yr, p=.0004", "+7.1%/yr, p=.041", "+18.6%/yr, p=.0008", "+13.1%/yr, p=.035"],
     ],
-    col_widths=[1.5*inch, 1.4*inch, 1.4*inch, 1.4*inch, 1.4*inch],
+    col_widths=[1.39*inch, 1.3*inch, 1.3*inch, 1.3*inch, 1.3*inch],
     small=True,
 )
 p("<b>Real, partial decay &mdash; exactly the textbook pattern, not full "
@@ -1408,7 +1421,7 @@ data_table(
         ["Daily alpha (HAC)", "p=.0010", "p=.1485 (n.s.)", "p=.0244", "p=.5900 (n.s.)"],
         ["Monthly alpha (HAC)", "p=.0017", "p=.1886 (n.s.)", "p=.0506 (n.s.)", "p=.5049 (n.s.)"],
     ],
-    col_widths=[1.5*inch, 1.4*inch, 1.4*inch, 1.4*inch, 1.4*inch],
+    col_widths=[1.39*inch, 1.3*inch, 1.3*inch, 1.3*inch, 1.3*inch],
     small=True,
 )
 p("<b>This is a further, sharper correction, not a confirmation of "
@@ -1536,7 +1549,7 @@ data_table(
         ["Reversal, long leg", "+5.31%/yr, p=.046", "+0.25%/yr, p=.629"],
         ["Reversal, combined", "-0.41%/yr, p=.293", "-0.57%/yr, p=.576"],
     ],
-    col_widths=[2.3*inch, 2.4*inch, 2.4*inch],
+    col_widths=[2.14*inch, 2.23*inch, 2.23*inch],
     small=True,
 )
 p("<b>Two genuinely different stories, not one.</b> The 52-week-high "
@@ -1602,7 +1615,7 @@ data_table(
         ["12-1 momentum, long leg", "+12.65%/yr, p=.008", "-0.23%/yr, p=.152 (n.s.)", "ill-conditioned"],
         ["Reversal, long leg", "+13.46%/yr, p=.014", "-0.41%/yr, p=.026", "2004-11-22"],
     ],
-    col_widths=[1.9*inch, 1.7*inch, 2.0*inch, 1.5*inch],
+    col_widths=[1.77*inch, 1.58*inch, 1.86*inch, 1.39*inch],
     small=True,
 )
 p("<b>Momentum's decay is not a smooth line &mdash; it does not even "
@@ -1704,7 +1717,7 @@ data_table(
         ["Method B: data-driven break date", "2010-12-31", "1980-08-29"],
         ["Method B: sup|t| (bootstrap p)", "2.771 (p=.138, n.s.)", "3.369 (p=.048)"],
     ],
-    col_widths=[2.4*inch, 2.2*inch, 2.2*inch],
+    col_widths=[2.33*inch, 2.14*inch, 2.14*inch],
     small=True,
 )
 p("<b>Momentum: the specific 2008 hypothesis holds; an unconstrained "
@@ -1801,7 +1814,7 @@ data_table(
         ["1990-01-01", "-0.73%/yr, p=.896", "+5.47%/yr, p=.0192"],
         ["1995-01-01", "+0.48%/yr, p=.581", "+3.75%/yr, p=.121"],
     ],
-    col_widths=[1.9*inch, 2.3*inch, 2.5*inch],
+    col_widths=[1.87*inch, 2.27*inch, 2.46*inch],
     small=True,
 )
 p("<b>Reversal's entire positive-alpha claim depends on the "
@@ -1863,7 +1876,7 @@ data_table(
         ["Baseline (non-crash-regime) alpha", "+0.00038/day, p=.003 (~+9.6%/yr)", "+0.00017/day, p=.203 (n.s.)"],
         ["Implied return, Bear+High-Vol day", "~-11%/yr (n.s.)", "~-37%/yr"],
     ],
-    col_widths=[2.2*inch, 2.3*inch, 2.3*inch],
+    col_widths=[2.14*inch, 2.23*inch, 2.23*inch],
     small=True,
 )
 p("<b>The crash mechanism was dormant before 2008 and activated "
@@ -2086,7 +2099,7 @@ data_table(
         ["Bear regime fires post-2010?", "Yes (200 days)", "Yes (47 days)", "No", "No"],
         ["Sec. 5.17 pattern replicates", "1 of 4 vol windows", "2 of 4", "2 of 4 (incl. default)", "3 of 4"],
     ],
-    col_widths=[1.75*inch, 1.55*inch, 1.35*inch, 1.75*inch, 1.25*inch],
+    col_widths=[1.51*inch, 1.34*inch, 1.16*inch, 1.51*inch, 1.08*inch],
     small=True,
 )
 p("<b>Section 5.19's &quot;no bear regime since 2009&quot; is not "
@@ -2158,7 +2171,7 @@ data_table(
         ["Interaction coefficient", "-0.00172/day, p=.203 (n.s.)", "-0.00143/day, p=.443 (n.s.)"],
         ["Bear-alone coefficient", "+0.00126/day, p=.226 (n.s.)", "+0.00212/day, p=.023"],
     ],
-    col_widths=[2.1*inch, 2.35*inch, 2.35*inch],
+    col_widths=[2.04*inch, 2.28*inch, 2.28*inch],
     small=True,
 )
 p("<b>The mechanism did not reactivate, under either alternate lookback "
@@ -2221,7 +2234,7 @@ data_table(
         ["Daily ann. return / p", "+7.66%/yr, p=.044", "+23.72%/yr, p=.112 (n.s.)", "+4.60%/yr, p=.180 (n.s.)"],
         ["Monthly ann. return / p", "+7.94%/yr, p=.073", "+21.55%/yr, p=.132 (n.s.)", "+4.96%/yr, p=.250 (n.s.)"],
     ],
-    col_widths=[1.65*inch, 1.45*inch, 2.15*inch, 1.85*inch],
+    col_widths=[1.53*inch, 1.35*inch, 2.0*inch, 1.72*inch],
     small=True,
 )
 p("<b>Not the confound named, but a different and arguably more serious "
@@ -2296,7 +2309,7 @@ data_table(
         ["Hedged monthly ann. return / p", "+9.97%/yr, p=.0141", "+30.97%/yr, p=.0001"],
         ["Mean hedge beta", "+0.83", "-0.42"],
     ],
-    col_widths=[2.3*inch, 2.25*inch, 2.25*inch],
+    col_widths=[2.23*inch, 2.18*inch, 2.18*inch],
     small=True,
 )
 p("<b>Momentum replicates cleanly on ASX &mdash; the strongest, most "
@@ -2343,7 +2356,7 @@ data_table(
         ["52-week-high", "+7.00%/yr, p=.099 / +8.41%/yr, p=.0091", "+24.52%/yr, p=.0126 / +23.80%/yr, p=.0023"],
         ["Short-term reversal", "-4.04%/yr, p=.491 / -3.40%/yr, p=.529", "-3.14%/yr, p=.818 / -2.49%/yr, p=.719"],
     ],
-    col_widths=[1.5*inch, 2.75*inch, 2.75*inch],
+    col_widths=[1.41*inch, 2.59*inch, 2.59*inch],
     small=True,
 )
 p("<b>Reversal replicates the established pattern: no edge, anywhere.</b> "
@@ -2411,7 +2424,7 @@ data_table(
         ["Momentum exposure coefficient", "+0.265, p=.017 / +0.303, p=.015", "+0.876, p<.0001 / +0.842, p<.0001"],
         ["R2", "0.089 / 0.082", "0.658 / 0.596"],
     ],
-    col_widths=[2.0*inch, 2.5*inch, 2.5*inch],
+    col_widths=[1.89*inch, 2.36*inch, 2.36*inch],
     small=True,
 )
 p("<b>Decisive: 52-week-high's ASX alpha does not survive controlling "
@@ -2464,7 +2477,7 @@ data_table(
     [
         ["Hedged ann. ret / p", "-1.70%, p=.673 / -0.46%, p=.857", "-2.45%, p=.172 / -2.19%, p=.125", "+7.73%, p=.090 / +8.74%, p=.0099"],
     ],
-    col_widths=[1.4*inch, 2.35*inch, 2.35*inch, 2.35*inch],
+    col_widths=[1.09*inch, 1.84*inch, 1.84*inch, 1.84*inch],
     small=True,
 )
 data_table(
@@ -2472,7 +2485,7 @@ data_table(
     [
         ["Hedged ann. ret / p", "-2.56%, p=.943 / +0.86%, p=.849", "-20.70%, p=.0002 / -18.09%, p=.0004", "+15.54%, p=.123 / +16.04%, p=.114"],
     ],
-    col_widths=[1.4*inch, 2.35*inch, 2.35*inch, 2.35*inch],
+    col_widths=[1.09*inch, 1.84*inch, 1.84*inch, 1.84*inch],
     small=True,
 )
 p("<b>No clean story across markets &mdash; and the most striking "
@@ -2543,7 +2556,7 @@ data_table(
         ["2000-2009", "2,515", "-14.90%", "0.2862 (n.s.)"],
         ["2010-2017", "1,972", "-5.61%", "0.4519 (n.s.)"],
     ],
-    col_widths=[1.3*inch, 1.3*inch, 2.1*inch, 2.7*inch],
+    col_widths=[1.16*inch, 1.16*inch, 1.87*inch, 2.41*inch],
     small=True,
 )
 p("<b>Four checks, one narrower picture.</b> With only 30 tickers "
@@ -2611,7 +2624,7 @@ data_table(
         ["2000-2009", "+1.95%, p=0.492", "+3.96%, p=0.318"],
         ["2010-2017", "-0.52%, p=0.951", "+0.09%, p=0.865"],
     ],
-    col_widths=[1.5*inch, 3.2*inch, 3.2*inch],
+    col_widths=[1.25*inch, 2.67*inch, 2.67*inch],
     small=True,
 )
 p("<b>Part A, US mirror.</b> Reversal's decade breakdown "
@@ -2680,14 +2693,14 @@ data_table(
     [
         ["Hedged ann. ret / p", "+2.26%, p=.216 / +2.70%, p=.222", "+2.09%, p=.084 / +2.80%, p=.097", "+2.68%, p=.294 / +3.63%, p=.078"],
     ],
-    col_widths=[1.4*inch, 2.35*inch, 2.35*inch, 2.35*inch], small=True,
+    col_widths=[1.09*inch, 1.84*inch, 1.84*inch, 1.84*inch], small=True,
 )
 data_table(
     ["Combined", "NSE (daily/monthly)", "US (daily/monthly)", "ASX (daily/monthly)"],
     [
         ["Hedged ann. ret / p", "-6.61%, p=.325 / -4.24%, p=.369", "-12.56%, p=.079 / -9.47%, p=.0143", "+4.29%, p=.465 / +6.16%, p=.336"],
     ],
-    col_widths=[1.4*inch, 2.35*inch, 2.35*inch, 2.35*inch], small=True,
+    col_widths=[1.09*inch, 1.84*inch, 1.84*inch, 1.84*inch], small=True,
 )
 p("<b>A weaker echo of Section 5.26's pattern, not a clean replication "
   "or a clean retraction.</b> NSE and ASX show nothing significant at "
@@ -2706,7 +2719,7 @@ data_table(
         ["2000-2009", "2,515", "-8.89%", "0.5504 (n.s.)"],
         ["2010-2017", "1,972", "+5.36%", "0.2620 (n.s.)"],
     ],
-    col_widths=[1.3*inch, 1.3*inch, 2.1*inch, 2.7*inch], small=True,
+    col_widths=[1.16*inch, 1.16*inch, 1.87*inch, 2.41*inch], small=True,
 )
 p("<b>Unlike low-volatility's US inversion, MAX's pooled significance "
   "does not cleanly survive decomposition.</b> No single decade "
@@ -2760,7 +2773,7 @@ data_table(
         ["Low-vol coefficient", "0.379, p<.0001*** / 0.475, p<.0001***", "0.454, p<.0001*** / 0.499, p<.0001***"],
         ["R²", "0.071 / 0.135", "0.196 / 0.299"],
     ],
-    col_widths=[2.1*inch, 3.35*inch, 3.35*inch], small=True,
+    col_widths=[1.57*inch, 2.51*inch, 2.51*inch], small=True,
 )
 p("<b>The combined book's alpha &mdash; the part of Section 5.29's "
   "headline result &mdash; collapses to indistinguishable from zero</b> "
@@ -2811,14 +2824,14 @@ data_table(
     [
         ["Hedged ann. ret / p", "+1.99%, p=.340 / +2.74%, p=.384", "-2.27%, p=.339 / -1.67%, p=.302", "+2.21%, p=.871 / n/a (9 mo.)"],
     ],
-    col_widths=[1.4*inch, 2.35*inch, 2.35*inch, 2.35*inch], small=True,
+    col_widths=[1.09*inch, 1.84*inch, 1.84*inch, 1.84*inch], small=True,
 )
 data_table(
     ["Combined", "NSE (daily/monthly)", "US (daily/monthly)", "ASX (daily/monthly)"],
     [
         ["Hedged ann. ret / p", "-1.11%, p=.870 / +1.07%, p=.835", "-6.16%, p=.249 / -4.41%, p=.171", "-7.27%, p=.695 / n/a (9 mo.)"],
     ],
-    col_widths=[1.4*inch, 2.35*inch, 2.35*inch, 2.35*inch], small=True,
+    col_widths=[1.09*inch, 1.84*inch, 1.84*inch, 1.84*inch], small=True,
 )
 p("<b>A clean null, unlike the messy lottery-demand results.</b> No "
   "market shows a significant combined-book or long-leg result at "
@@ -2845,6 +2858,71 @@ box(
     "null (short-term and long-term reversal), alongside "
     "52-week-high's momentum-explained ASX result.",
     title="A CLEAN NULL &mdash; BREADTH ACROSS MECHANISMS, NOT JUST CONSTRUCTIONS"
+)
+box(
+    "Section 5.32 turns this project's audit discipline on its own "
+    "flagship practical deliverable: the equal-weighted composite "
+    "score, unchanged since Milestone 1, checked for the first time "
+    "against the 30 milestones of evidence accumulated around it.",
+    kind="fact", title="UPDATE FROM SECTION 5.32"
+)
+
+h1("5.32  Milestone 31 &mdash; Does the practical composite score still make sense given the accumulated evidence?")
+p("<i>signals/composite.py</i>, the equal-weighted three-signal "
+  "&quot;Behavioral Mispricing Score&quot; presented in Part VI.1 as "
+  "this project's investment framework, has been unchanged since the "
+  "project's first milestone &mdash; built before any of the "
+  "subsequent 30 milestones of evidence existed. By this project's "
+  "own accumulated findings, that blend now looks questionable on "
+  "paper: momentum is the one demonstrated, repeatedly-stress-tested "
+  "real edge; 52-week-high and short-term reversal both have &quot;no "
+  "demonstrated skill&quot; verdicts, reversal's traced to a "
+  "2-4-stock survivorship artifact. An equal-weighted blend of one "
+  "real signal and two with no demonstrated independent skill isn't "
+  "obviously the right practical score &mdash; worth testing directly "
+  "with this project's own out-of-sample hedge and HAC methodology "
+  "rather than leaving the composite unexamined while every "
+  "individual signal has been tested repeatedly.")
+data_table(
+    ["Variant", "US daily", "US monthly", "ASX daily", "ASX monthly"],
+    [
+        ["Current composite", "p=.0267 (+4.03%)", "p=.0240 (+7.26%)", "p<.0001 (+39.74%)", "p<.0001 (+34.22%)"],
+        ["Momentum-only (via composite)", "p=.0418 (+3.52%)", "p=.0549 (+7.62%)", "p=.0008 (+35.10%)", "p=.0002 (+30.75%)"],
+        ["Momentum alone (direct)", "p=.0432 (+3.47%)", "p=.0557 (+7.59%)", "p=.0006 (+35.45%)", "p=.0001 (+30.97%)"],
+    ],
+    col_widths=[1.7*inch, 1.225*inch, 1.225*inch, 1.225*inch, 1.225*inch], small=True,
+)
+p("<i>(p-value shown with the combined book's hedged annualized return "
+  "in parentheses.)</i>")
+p("<b>Contrary to the naive expectation, dropping the two components "
+  "with no demonstrated individual skill does not improve the "
+  "out-of-sample-hedged result on either market</b> &mdash; if "
+  "anything, the current equal-weighted composite performs marginally "
+  "better (lower p-values, higher point-estimate returns) than "
+  "momentum alone on both US and ASX. The gap is modest on the US "
+  "mirror (p=0.027 vs p=0.042 daily) and more pronounced on ASX "
+  "(p&lt;0.0001 vs p=0.0006 daily), though ASX's short sample means "
+  "all three variants are already comfortably significant there.")
+p("<b>Read this carefully &mdash; it is not a re-endorsement of "
+  "52-week-high or reversal.</b> Neither demonstrates standalone "
+  "alpha net of beta anywhere in this project's testing. The most "
+  "likely explanation isn't hidden alpha in the retracted components: "
+  "52-week-high's ASX returns correlate 0.76-0.82 with momentum's own "
+  "(Sections 5.24-5.25), so blending it in likely acts as a "
+  "correlated-ranking noise-reduction on the composite's "
+  "cross-sectional sort rather than adding independent information "
+  "&mdash; a component can improve a blended rank's signal-to-noise "
+  "even with zero standalone alpha, if it's positively correlated "
+  "with the &quot;true&quot; signal's ranking. This is a modest, "
+  "non-decisive empirical result, not a mechanism finding.")
+box(
+    "Leave <i>signals/composite.py</i>'s current equal weighting "
+    "as-is &mdash; the empirical evidence, tested directly rather "
+    "than assumed, does not support simplifying it to momentum-only, "
+    "even though momentum is the only individually-validated "
+    "component. Part VI.1's framework is correct as built, now for a "
+    "tested reason rather than an unexamined historical default.",
+    title="THE COMPOSITE'S DESIGN SURVIVES ITS OWN AUDIT"
 )
 
 # MARKER_END_PART5
@@ -3191,6 +3269,18 @@ box(
     "sat against an insignificant pooled result, correctly read as "
     "noise. Breadth across mechanisms, not just constructions.",
     kind="fact", title="UPDATE FROM PART V.31"
+)
+box(
+    "Part V.32 tested this section's own composite score against the "
+    "evidence accumulated since Milestone 1. Dropping 52-week-high and "
+    "reversal (both individually retracted) and keeping only momentum "
+    "did not improve the out-of-sample-hedged result on either market "
+    "where momentum is confirmed &mdash; the current equal-weighted "
+    "composite performed marginally better on both, most likely "
+    "because 52-week-high's high correlation with momentum's own "
+    "ranking provides noise-reduction rather than independent alpha. "
+    "The framework above is correct as built.",
+    kind="fact", title="UPDATE FROM PART V.32"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -3602,6 +3692,22 @@ bullets([
     "constructions within one mechanism &mdash; otherwise apparent "
     "breadth can be an illusion, with several &quot;different&quot; "
     "signals really testing the same underlying effect.",
+    "<b>A naive &quot;prune the components with no demonstrated "
+    "skill&quot; intuition can be wrong, and the way to find out is to "
+    "test the blend directly, not reason about it from the individual "
+    "verdicts.</b> Part V.32 tested whether dropping 52-week-high and "
+    "reversal (both individually retracted) from the composite score "
+    "and keeping only momentum would improve the out-of-sample-hedged "
+    "result. It didn't &mdash; the full equal-weighted composite "
+    "scored better on both tested markets, most likely because a "
+    "component correlated with the real signal's ranking can reduce "
+    "cross-sectional noise even with zero standalone alpha. A "
+    "blended score's optimal composition doesn't follow mechanically "
+    "from each component's individual verdict &mdash; test the blend "
+    "itself before pruning components that &quot;shouldn't&quot; be "
+    "adding value; the intuition that a retracted signal must be dead "
+    "weight in every context is itself a hypothesis, not a "
+    "conclusion.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -4140,6 +4246,26 @@ bullets([
     "(low-volatility/MAX), and two cleanly null (short-term and "
     "long-term reversal), alongside 52-week-high's momentum-explained "
     "ASX result.",
+    "<b>The practical composite score's equal weighting, unexamined "
+    "since Milestone 1, was finally tested against 30 milestones of "
+    "accumulated evidence &mdash; and, contrary to the naive "
+    "expectation, held up (Part V.32).</b> Dropping the two components "
+    "(52-week-high, reversal) with no demonstrated individual skill "
+    "and keeping only momentum does not improve the out-of-sample-"
+    "hedged combined book on either market where momentum is "
+    "confirmed: the current 3-signal composite scores lower p-values "
+    "and higher point-estimate returns than momentum alone on both the "
+    "US mirror (p=0.027 vs p=0.042 daily) and ASX (p&lt;0.0001 vs "
+    "p=0.0006 daily). This is not a re-endorsement of 52-week-high or "
+    "reversal &mdash; neither shows standalone alpha net of beta "
+    "anywhere in this project's testing. The more likely explanation "
+    "is that 52-week-high's high correlation with momentum's own "
+    "ranking (0.76-0.82 on ASX) makes it act as noise-reduction on the "
+    "composite's cross-sectional sort rather than an independent "
+    "alpha source &mdash; a modest, non-decisive empirical result, not "
+    "a mechanism finding. <i>signals/composite.py</i>'s equal "
+    "weighting is left as-is, now for a tested reason rather than an "
+    "unexamined historical default.",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -4274,7 +4400,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 30 then ran the India findings through "
+  "needed. Milestones 3 through 31 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -4390,7 +4516,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, twenty-seven times in a row "
+  "most recent, best-supported-looking result, twenty-eight times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -4510,7 +4636,15 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "&mdash; no partial inversion to chase, no correlated-signal "
   "artifact to untangle, just the straightforward absence the "
   "project's original two signals (52-week-high, short-term reversal) "
-  "had already taught it to expect from most things it tests. "
+  "had already taught it to expect from most things it tests, and "
+  "finally ran a twenty-eighth check (Part V.32) that pointed the "
+  "whole apparatus at itself in a different sense than before: not at "
+  "a finding, but at the practical deliverable built on top of all the "
+  "findings, unexamined since before any of them existed. The naive "
+  "prediction &mdash; that pruning the two individually-retracted "
+  "components should help &mdash; was wrong; the original blend "
+  "tested better on both markets where the one confirmed signal "
+  "actually works. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -4519,9 +4653,13 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "argument about reversal had been conducted on three stocks, "
   "discovering a real reason behind the one number that survived all of "
   "it, discovering that a market believed fully closed still "
-  "had something left to find, and finally discovering that turning a "
+  "had something left to find, discovering that turning a "
   "sharper instrument on the project's own older, cruder-method "
-  "conclusions was itself worth doing even when nothing broke, are all "
+  "conclusions was itself worth doing even when nothing broke, and "
+  "finally discovering that the practical deliverable sitting on top "
+  "of all of it had never itself been checked against what it was "
+  "built on top of &mdash; and, once checked, didn't need fixing, are "
+  "all "
   "findings: the project never "
   "found a result, an explanation, or even a way of testing an "
   "explanation, durable enough to stop re-checking. What survives is "
