@@ -1,0 +1,1158 @@
+# From research to practice: framework, risk playbook, and product idea
+
+This document translates the research in `README.md` / `case_studies/` /
+`signals/` / `risk_simulation/` into the three concrete outputs the project was
+scoped for: an investment framework, risk-management lessons, and a
+business/product idea.
+
+## 1. Investment framework: the Behavioral Mispricing Score
+
+**What it is.** `signals/composite.py` combines three independently-documented
+behavioral anomalies — 12-1 month momentum (underreaction), 52-week-high
+proximity (anchoring), and 1-month reversal (overreaction) — into a single,
+cross-sectionally z-scored composite per stock per day.
+
+**How it's meant to be used**, based on how Fuller & Thaler / LSV / AQR
+actually deploy signals like this (see `case_studies/behavioral_funds.md`):
+
+- **Not as a standalone strategy.** Every fund in the case studies pairs
+  behavioral signals with fundamental discipline (value screens, quality
+  filters, sector/beta neutralization) rather than trading the raw signal.
+  The natural use is a **tilt or flag layered on top of an existing
+  fundamentals-driven screen**, not a replacement for it: a stock that
+  screens well fundamentally *and* sits in the top behavioral decile is a
+  stronger candidate than either signal alone; a stock flagged as a
+  behavioral "loser" is worth a second look before initiating or sizing a
+  position, even if fundamentals look fine.
+- **Decile, not point-estimate.** Treat the score as a rank, not a precise
+  number — the whole point of `backtest/engine.py`'s decile-sort methodology
+  is that the edge shows up in the spread between the extreme deciles, not in
+  any single stock's score being "correct."
+- **Never trust the blend without checking its parts — this is now a proven
+  failure mode, not a hypothetical one.** The NSE empirical run
+  (`README.md`, "Empirical results") shows exactly why: the *composite*
+  score looked like a mediocre, roughly break-even signal (Sharpe ≈ 0), and
+  stopping there would have been a reasonable-looking but wrong conclusion.
+  Decomposing it showed the composite was averaging together one signal that
+  actively lost money (52-week-high) with one that *looked* like a real,
+  positive edge net of costs (short-term reversal, Sharpe 0.22 net) — a
+  conclusion Milestone 8 later retracted (next section). **Rule: always
+  report and validate each component signal separately before trusting a
+  blended score, and re-weight or drop components that don't independently
+  earn their place** — and note that "looks like an edge in the initial
+  decomposition" is still not the same as "is a demonstrated edge" (see
+  below).
+- **Re-validate on each new universe before trusting it there — now confirmed necessary,
+  not just prudent.** A second market (US large-caps, 1970–2017) was run through the same
+  pipeline (`README.md`, "Replication on a second market"), and momentum and reversal
+  **flipped which one looked real**: reversal was NSE's edge and the US's near-zero result;
+  momentum was NSE's near-zero result and the US's real edge. Only the 52-week-high
+  signal's *loss* was consistent both times. **Rule: a single-market backtest result is
+  provisional by default — run it on at least one independent market before including it
+  in a live framework, and expect roughly a coin-flip's chance that a specific component
+  signal's sign won't hold.** (Milestone 8 later showed the US momentum side of this flip
+  was the real one — see below.)
+- **A component that survives decomposition should still survive a "why" check before
+  being trusted as a real edge or discarded as a real problem.** The 52-week-high signal's
+  loss looked at first like it might be a value/growth confound specific to India's bull
+  market; a direct test (orthogonalizing against a value proxy, `README.md`
+  "Investigating the 52-week-high result") rejected that explanation in both markets. The
+  loss is real and not an artifact of an unrelated factor — which makes it more, not less,
+  important to keep this specific signal excluded from the composite until its true cause
+  is understood.
+- **Decompose the legs before discarding a signal — still correct, but the fix isn't
+  "long-only" after all.** `README.md`, "Testing momentum-crash risk directly," decomposed
+  the 52-week-high signal's long and short legs and found the long leg's raw average
+  return significantly positive, the short leg's significantly negative, in every
+  specification (Milestone 5). **Rule: don't discard a component signal wholesale because
+  its long-short backtest lost money — decompose the legs first.** That rule still holds;
+  what it was used to conclude did not (next bullet).
+- **The actual cause, found last, was the most basic check: an uncontrolled beta
+  mismatch.** Milestone 4's crash-risk story looked compelling descriptively; Milestone 5
+  formally rejected it (no significant regime-conditioning in the short leg, either
+  market). Milestone 6 then ran the check that should have come *first* — a CAPM regression
+  of each leg against the market — and found it: the long leg carries ≈+0.8 market beta,
+  the short leg ≈−1.2 to −1.4, leaving the combined book significantly net short-beta
+  (−0.32 to −0.70, every cut) in markets that returned ~20%/year over the sample. Once beta
+  is controlled for, **alpha is insignificant in all 12 regressions run — both legs, both
+  markets, both frequencies.** There is no demonstrated stock-selection skill in this
+  signal, long or short, once its uncontrolled market exposure is accounted for. **Rule,
+  corrected from the "long-only" conclusion above: this signal is not currently a
+  demonstrated source of alpha in either direction.**
+- **Milestone 6's regression alpha was independently confirmed, not just re-derived, by
+  actually building and testing a hedged version.** A single full-sample regression
+  coefficient could in principle have missed a real, time-varying alpha. Milestone 7 built
+  the real thing instead: a rolling, strictly out-of-sample beta hedge (re-estimated every
+  rebalance from only the preceding ~year of data, applied forward, never using data from
+  the period being hedged — the way a real fund would operate it). The hedge cut the
+  correlation with the market from strongly negative to near zero and roughly halved the
+  loss in both markets — but the residual return remained statistically indistinguishable
+  from zero everywhere (p between 0.17 and 0.45). **Rule: when a regression finds no alpha,
+  don't stop there if the claim matters — build the actual hedged strategy and test the
+  real thing. In this case the two methods agreed, which is what makes the "no alpha"
+  conclusion trustworthy rather than an artifact of one modeling choice.** A live version of
+  this signal would still need beta-neutralized position sizing (not just a market-return
+  overlay) and would face real hedging transaction costs, given the rolling beta itself is
+  quite unstable over time in both markets — not modeled here.
+- **Check for a beta mismatch between the legs before reaching for a behavioral
+  explanation — not after three milestones of chasing more exotic ones.** This project
+  tested crash-window concentration, a value/growth confound, and formal momentum-crash
+  regime-conditioning — all before checking whether the two legs were even beta-matched.
+  They weren't, and that single, mechanical omission fully explains what the other three
+  hypotheses were built to explain. **Rule: for any long-short backtest, run the CAPM
+  regression on each leg first. It is cheaper than any of the alternatives and, in this
+  project's own case, was the one that actually had the answer.**
+- **A compelling descriptive pattern is a hypothesis, not a finding, until it's been
+  tested formally.** The Milestone 4 → 5 → 6 sequence is a worked example of exactly this,
+  twice over: a regime-bucket comparison that looked like strong evidence collapsed under
+  formal significance testing, and the formally-tested-but-still-uncontrolled decomposition
+  itself collapsed once a basic beta check was added. **"Formally tested, not confirmed" and
+  "explained by something more basic" are both genuinely weaker claims than "strongly
+  supported," even when the same underlying numbers motivated all three. Report the
+  weakest claim that's actually been earned, and keep checking simpler explanations even
+  after a more sophisticated one has passed one round of testing.**
+- **Apply the same scrutiny to a positive finding as to a negative one — this project had
+  been letting its one "success" coast on an old conclusion.** Every beta check through
+  Milestone 7 was run on the 52-week-high signal, the one that *lost* money. Short-term
+  reversal — this repo's original, and only, reported positive edge — was never re-examined
+  the same way. Milestone 8 finally did, and it didn't survive: none of reversal's 12 alpha
+  tests (2 markets × 3 legs × 2 frequencies) are significant. **Rule: a positive finding
+  earns no exemption from the checks a negative one gets. If a signal was "confirmed"
+  before the project's own standards of rigor caught up with it, re-run it under the
+  current standard before continuing to cite it.**
+- **When the same rigor finally turns up a real positive, that's worth saying plainly, not
+  hedging into meaninglessness.** Milestone 8 also tested 12-1 momentum the same way, and
+  found something the earlier milestones hadn't: on the US mirror, momentum's long leg and
+  combined book show large, highly significant alpha (annualized ≈+8-15%/yr, p<0.01 in
+  every cut) with a combined-book beta close to zero. Unlike the isolated marginal p≈0.03
+  hits Milestone 5 correctly dismissed as consistent with pure chance, this is a **coherent
+  cluster** — same signal, same market, same direction, significant across both legs and
+  both frequencies — a qualitatively different and much less noise-like pattern. **Rule: a
+  cluster of consistent, high-significance results across related cuts of the same
+  hypothesis is stronger evidence than an isolated hit, even before running a formal
+  multiple-testing correction; don't apply the same "probably noise" discount to a coherent
+  finding that's appropriate for a scattered one.** This is currently this project's single
+  most credible candidate for a genuine, demonstrated edge — with the caveat that it is one
+  market, unreplicated on NSE.
+- **The publication-decay check (Milestone 9) found exactly the textbook pattern: real
+  decay, not disappearance.** Split at 1994 (~1yr after Jegadeesh & Titman's 1993
+  publication), the long leg's alpha shrinks ~33% (daily) to ~38% (monthly) post-1994 but
+  stays significant in both; the combined book's alpha shrinks 30-47% and loses
+  significance at daily frequency (p=0.116) while remaining significant monthly (p=0.035).
+  The magnitude matches McLean & Pontiff's (2016) documented average post-publication decay
+  across anomalies generally — this is the expected pattern playing out exactly as the
+  literature predicts, not a surprise finding. **Rule: "promising, not confirmed" was the
+  right interim label — the confirmed version is narrower (long leg, primarily) and smaller
+  than the full-sample number, which is what a decay check is supposed to do: replace an
+  unqualified headline number with the honestly-sized one that survives scrutiny.** Report
+  the post-decay number when sizing anything against this finding, not the full-sample one.
+- **Milestone 10 tested Milestone 9's own decayed number the same way Milestone 7 tested
+  Milestone 6's — with an actual rolling, out-of-sample hedge, not an in-sample regression
+  coefficient — and found it does not survive.** Milestone 9 fit one beta per sub-sample
+  using that sub-sample's own data; Milestone 10 instead re-estimated beta every rebalance
+  from only the preceding year of trailing data (exactly the methodology Milestone 7
+  already established as this project's required standard) and applied the identical
+  1994 split to the resulting hedged return series. Pre-1994, the hedge strongly confirms
+  alpha in both legs (p≤0.025). Post-1994, alpha is not statistically distinguishable from
+  zero in either leg at either frequency (p=0.15-0.59), and the hedged combined book's
+  average post-1994 return is outright negative. **Rule: an in-sample per-era regression
+  and a genuinely out-of-sample rolling hedge can disagree even when both are run
+  correctly, and the out-of-sample version is the one that matters — it's the only one a
+  real fund could actually have traded. Never let an earlier milestone's more convenient
+  methodology stand once a stricter one, already used elsewhere in the same project, is
+  available to re-check it.** This project's headline finding is therefore real and robust
+  pre-1994, and not currently demonstrated to be forward-sizeable in the post-publication
+  era — a materially more conservative conclusion than Milestone 9's, reached by applying
+  the project's own best existing method to its own best surviving result.
+- **Milestone 11 investigated Milestone 10's null result in depth, at explicit user
+  request, rather than stopping at "not significant."** Two obvious objections were
+  tested directly: that the post-1994 null result is really just the well-documented 2009
+  momentum crash (Daniel & Moskowitz, 2016) distorting the average, and that it's an
+  artifact of the specific 252-day rolling hedge window chosen. Neither held up. A
+  five-era breakdown showed the long leg's hedged excess return declining steadily from
+  +6.5%/yr (1994-99) to +0.1%/yr (2010-2017) — a trend across the whole post-publication
+  period, not a single bad episode. Excluding the March-August 2009 crash window (which
+  did cost the combined book 40% cumulatively on its own) moved the long leg's p-value
+  from 0.149 to a still-marginal 0.095 and barely moved the combined book's (0.590 to
+  0.334) — real, but nowhere near sufficient to explain the result on its own. Re-running
+  the hedge at 126-, 252-, and 378-day windows gave the identical pattern every time.
+  **Rule: when a null result survives the two most obvious "maybe it's just noise/an
+  artifact" objections, that's stronger evidence for the result, not a reason to keep
+  looking for an out.** This project's most rigorous read of its own headline finding is
+  now: genuine, strong pre-1994 alpha, and genuine, ongoing decay since — not a temporary
+  shock the strategy is due to recover from.
+- **Milestone 12 asked whether that whole pattern is a momentum-specific quirk or a
+  market-wide phenomenon, by applying the identical toolkit to the other two US
+  signals — and found genuinely different answers for each.** 52-week-high shows no
+  significant alpha in either era, in any leg: it never had genuine stock-selection skill,
+  consistent with Milestones 6-7's beta-only explanation. Short-term reversal's long leg,
+  by contrast, shows the exact same signature as momentum's: real, significant pre-1994
+  alpha (+5.31%/yr, p=0.046) that decays completely to noise post-1994 (+0.25%/yr,
+  p=0.629) — a pattern invisible in Milestone 8's full-sample regression, which correctly
+  found no full-sample significance but could not distinguish "never real" from "real,
+  then decayed." **Rule: a full-sample null result answers "is there significant alpha on
+  average," not "was there ever genuine alpha" — those are different questions, and this
+  project's own reversal signal shows they can have different answers.** The "real
+  pre-1994, decayed since" pattern is therefore not a momentum idiosyncrasy: it appears in
+  two of three signals' long legs, consistent with a market-wide explanation (the same
+  1990s-2000s scaling-up of quantitative, cross-sectional strategies this project's own
+  case studies on LTCM and the 2007 Quant Quake already document as reshaping US equity
+  markets over exactly this period) rather than a fluke specific to one anomaly. *[Since
+  retracted for reversal — Milestone 15 traced this "genuine pre-1994 alpha" to a thin,
+  survivorship-biased 1972-1977 sample window; see below.]*
+- **Milestone 13 quantified the decay directly instead of relying on a fixed 1994 cutoff,
+  and found the two surviving long legs decay in genuinely different shapes.** A
+  continuous linear-trend regression on momentum's long leg gives a slope that is not
+  statistically significant (p=0.15) — the effect did not decay smoothly. A rolling
+  5-year trajectory explains why: momentum's hedged alpha stayed consistently strong
+  (+4% to +22%/yr) from the 1970s through the window ending January 2008, then broke
+  sharply negative from 2009 on. Splitting explicitly at September 2008 gives a far
+  cleaner divide (pre: +8.02%/yr, p=0.0005; post: -0.56%/yr, p=0.998) than the 1994 split
+  ever produced. Reversal's long leg, in contrast, shows a real, statistically significant
+  linear decay (slope -0.41%/yr, p=0.026) with an implied zero-crossing around November
+  2004. **Rule: a binary split at a theoretically-motivated date (here, a publication
+  year) can be directionally correct while still misdescribing the actual shape and
+  timing of an effect — quantify the trend continuously, and sanity-check it against a
+  non-parametric rolling trajectory, before writing up "gradual decay" as the mechanism.**
+  Momentum's weakness is better attributed to a 2008-09 regime shift (plausibly the same
+  2009 momentum crash examined directly in Milestone 11) than to slow, 1990s
+  publication-driven crowding. *[Since retracted for reversal — Milestone 15 found this
+  "smooth trend" was itself an artifact of unreliable early data; momentum's finding here
+  is unaffected.]*
+- **Milestone 14 formalized the "broke around 2008-09" claim with a proper structural-break
+  test, and the result is more conservative than Milestone 13's descriptive comparison.** A
+  Chow-style test at a single, literature-motivated date (2008-09-01, from Daniel &
+  Moskowitz 2016) confirms a real level shift in momentum (p=0.026 daily) — but an
+  unconstrained Quandt-Andrews sup-Wald search (which does not assume any break date) finds
+  its single best-fitting break 27 months later, at December 2010, and that unconstrained
+  maximum is not statistically significant once corrected for the multiple-testing problem
+  of searching ~375 candidate dates (400-draw block-bootstrap p=0.138). Reversal shows the
+  opposite: no break near 2008 (p=0.34), but a genuine, significant break (bootstrap
+  p=0.048) around August 1980 — the sharp early decline from its extraordinarily high
+  late-1970s level, not a smoothly accumulating multi-decade slope as the linear-trend
+  regression alone suggested. **Rule: a descriptive "this cutoff fits better" comparison
+  and a formal, multiple-testing-corrected structural-break test can disagree even when
+  both are computed correctly on the same data — trust the formal test, and expect it to
+  be more conservative, not less, than the comparison that motivated running it.** *[Since
+  retracted for reversal — Milestone 15 found this August 1980 "break" is a thin-universe
+  and data-quality artifact, not a real 1980 market event; momentum's finding here is
+  unaffected.]*
+- **Milestone 15 investigated the mechanism behind that August 1980 break, at explicit
+  request — and the answer reverses, not just refines, everything Milestones 9, 12, 13,
+  and 14 had concluded about reversal.** The reversal signal's decile long leg is only 2-4
+  stocks from 1972 through 1983, drawn from a total universe of 9-14 names — today's
+  mega-cap survivors (AAPL, JPM, JNJ, PG, XOM, and so on) backfilled to their earliest
+  available data, a textbook survivorship-biased sample where every name, by construction,
+  went on to become a winner. Two genuine, previously undocumented data anomalies compound
+  this (`WMT` round-trips -52%/+109% across two weeks in December 1974; `INTC` jumps +101%
+  and +51% in 1972, both consistent with split-adjustment errors in the raw feed).
+  Re-testing reversal's long-leg significance from a range of start dates shows its entire
+  positive-alpha claim (already only marginal at full sample, p=0.068) depends completely
+  on the unreliable 1972-1977 window: from any later start, including the exact date
+  Milestone 14's own search identified (1980-08-29), alpha is never significant (p=0.54 to
+  0.96, usually slightly negative). **Momentum, run through the identical thin, biased,
+  partly-glitched early data as a control, was unaffected — significant (p≤0.02) at every
+  comparable start date.** **Rule: when a signal's finding depends on data density you
+  haven't checked, check it before trusting the finding — a decile portfolio with 2-4
+  names is not a diversified strategy, it is a handful of individual stock bets, and
+  &quot;statistically significant&quot; on such a sample tells you about those specific
+  stocks' survivorship, not about a market-wide behavioral effect.** Short-term reversal's
+  apparent pre-2005 alpha is retracted outright, not narrowed: this project has found no
+  reliably demonstrated reversal edge anywhere in this dataset, in any leg, at any point in
+  the sample.
+- **Milestone 16 gave momentum's 2008-09 break a genuine causal mechanism, not just a
+  confirmed date.** This project's own look-ahead-free Bear × High-Volatility
+  momentum-crash regression (built in Milestones 5-6, where it was tested on the
+  52-week-high signal, full-sample, and rejected) was applied to momentum's hedged long
+  leg, split at the same literature-motivated 2008-09-01 date used since Milestone 14. The
+  interaction term is small and statistically insignificant pre-2008 (p=0.42) but large,
+  negative, and significant post-2008 (coef=-0.00218/day, p=0.008): on the roughly 9% of
+  post-2008 trading days that are both high-volatility and trailing-bear, the long leg
+  loses at an annualized rate around 37%, while baseline (non-crash) alpha has fallen to
+  statistically indistinguishable from zero. **Rule: a structural break confirmed by a
+  date is still an unexplained fact until tested against a specific, named mechanism —
+  and a mechanism this project rejected for one signal, in one era, can still be real for
+  a different signal, in a different era; don't let an earlier rejection close off
+  re-testing the same hypothesis somewhere new.** The classic momentum-crash dynamic
+  appears to have been dormant through the pre-crisis decades and active since,
+  consistent with a market where momentum-following capital had scaled up enough by 2008
+  for the mechanism to actually bite.
+- **Milestone 17 tested the same crash mechanism on NSE — and, in the process, exposed a
+  methodological gap in this project's own earlier NSE momentum test.** Milestone 8's
+  "no significant NSE momentum alpha" used a static full-sample regression, never the
+  rolling out-of-sample hedge this project has used for every US momentum test since
+  Milestone 7. Applying that hedge to NSE momentum for the first time reaffirms no
+  significant full-sample alpha (daily p=0.170, monthly p=0.168) but surfaces a new,
+  tentative post-2008 signal (daily p=0.044, monthly p=0.073) the cruder test could not
+  have found — with the caveat that NSE's universe grew from ~30 to 48 names over the same
+  window, so part of the improvement may be a less-thin cross-section rather than a real
+  regime change. Separately, the Bear × High-Vol interaction that explained momentum's US
+  break is never significant on NSE (p=0.96 full-sample); NSE instead shows a plain,
+  unconditional Bear effect (p=0.002) — a related but mechanistically different pattern.
+  **Rule: applying your own best methodology to an already-tested market, not just a new
+  one, can still turn up something a cruder earlier pass missed — "already checked" and
+  "checked with your current best method" are not the same claim, and a rejected
+  full-sample result doesn't mean every sub-period was checked with equal power.**
+- **Milestone 18 split Milestone 16's "post-2008" block into the 2008-09 crisis and the
+  years after it, and found the crash-regime significance was carried entirely by the
+  crisis itself.** The US mirror's trailing-12-month market return never went negative
+  again after September 2009, through the end of its coverage in November 2017 — the 2011
+  and 2015-16 selloffs both recovered before the 252-day lookback registered a sustained
+  bear state. That means the "post-2008" window Milestone 16 tested contributes zero
+  Bear+High-Vol observations outside the 337-day crisis itself, so the interaction cannot
+  even be tested on the years since. Isolated to the crisis window alone, the
+  multiplicative interaction term specifically is not significant (p=0.26 long leg); high
+  volatility and the bear flag each independently are (p&lt;0.0001, p=0.036). **Rule: a
+  pooled regression's significant coefficient can be generated by contrasting two very
+  different sub-periods rather than by a persisting effect within either one — before
+  reading "significant across a multi-year window" as "a standing regime," split the
+  window and check whether the effect (and the regime it's conditioned on) is actually
+  present throughout, or concentrated in one episode acting as its own control group.**
+- **Milestone 19 swept the two regime-construction parameters every crash-regime finding
+  since Milestone 5 has used, and found two different answers for two different claims.**
+  Testing a 4x4 grid of volatility windows (10/21/42/63 days) and bear-market lookbacks
+  (126/189/252/378 days) against momentum's hedged long leg: Milestone 16's qualitative
+  "dormant pre-2008, active post-2008" pattern replicates in 8 of 16 combinations, reliably
+  near this project's own defaults (21-day vol, 252-day bear) but not at the shortest
+  volatility window (10 days) or shortest bear-lookback (126 days). Milestone 18's specific
+  "no bear market recurred after 2009" claim, however, does not survive shorter, equally
+  standard lookbacks: at 126 or 189 trading days (~6-9 months) instead of 252 (~1 year), a
+  bear regime does fire post-2010 — 200 and 47 days respectively, in 2010-11 and 2015-16.
+  **Rule: a qualitative pattern and the specific quantitative claim built on top of it can
+  have very different robustness — test both separately, and when a finding depends on a
+  binary condition (did X ever happen), check whether that condition's own definition,
+  not just the finding built on it, would survive a different reasonable convention.**
+- **Milestone 20 closed the thread Milestone 19 opened: re-running the crash-mechanism
+  test under the lookbacks where a real post-2010 bear regime exists, the mechanism did not
+  reactivate.** Under both alternate bear-lookbacks (126 and 189 days), the Bear ×
+  High-Vol interaction on the 2010-onward window is nowhere near significant (p=0.20,
+  p=0.44) despite 148 and 31 real Bear+High-Vol days to test it against. At the 189-day
+  lookback the bear-market main effect is significant but positive (p=0.023) — momentum's
+  long leg did better, not worse, during those periods, the opposite sign from the crisis
+  coefficient. **Rule: an "untested" finding and a "tested and not found" finding are
+  different claims with different confidence — once a robustness check surfaces a case
+  where a prior untestable question becomes testable, run the actual test rather than
+  leaving it as a hypothetical; a mechanism that fails to reactivate when given the chance
+  is stronger evidence for its being episode-specific than simply lacking a chance to
+  reactivate.**
+- **Milestone 21 turned the pooled-window lesson from Milestones 18-20 back on this
+  project's own remaining open finding, and it didn't survive.** The tentative NSE
+  post-2008 momentum signal (Milestone 17) shipped with a named, untested caveat: NSE's
+  universe grew from ~30 to 48 names over the window. Splitting at 2010-11-04, when the
+  universe became permanently fixed at 48 names: the growing sub-period actually shows a
+  *larger* point estimate (+23.72%/yr) than the full window, not a smaller, thin-universe-
+  inflated one, so the growth-confound story specifically isn't confirmed — but neither
+  sub-period is significant alone (p=0.11, p=0.18), only the pooled full window (p=0.044).
+  **Rule: a project's own house methodology should be applied to its own findings as
+  readily as to a market it's studying — a lesson learned from correcting one result (the
+  crash mechanism) is worth testing against every other result built the same way (a pooled
+  significance test), not treated as specific to the finding that taught it.**
+- **Milestone 22 found and validated a third, genuinely independent market (ASX
+  Australia) after an extensive search ruled out every reachable European source, and
+  momentum replicated cleanly.** `stooq.com`, `huggingface.co`, `github.com`'s own HTML
+  pages, and general `api.github.com` repo browsing are all blocked in this sandbox;
+  several candidate European-stock repositories turned out to be fetch-at-runtime pipeline
+  code, not committed data. `grantcarthew/data-asx-historical-share-tables` — a mirror of
+  ASX's own daily report emails, 2009-2015 — worked. Applying the out-of-sample hedge and
+  HAC test directly (not this project's own cruder early-stage methodology): long-leg
+  alpha significant at both frequencies (p=0.0085 daily, p=0.0141 monthly), the cleanest
+  result of the three markets tested, with the combined book's large magnitude tied to a
+  plausible, checked economic story (Australia's 2011-2015 mining downturn) rather than a
+  hedge artifact. **Rule: when a data source is hard to find, that difficulty is itself
+  worth documenting in the writeup, not just the result once found — future readers (and
+  future milestones) benefit from knowing what was ruled out and why, not just what
+  worked; and a short sample is a stated limitation, not a reason to withhold a
+  significant result — say what the test can and can't yet establish.**
+- **Milestone 23 completed the ASX picture and reopened a question two other markets had
+  called resolved.** Testing 52-week-high and reversal on ASX with the same methodology as
+  momentum: reversal replicates the established null cleanly (p=0.49-0.82, no edge, exactly
+  as on NSE and the US mirror). 52-week-high does not — its hedged combined book is
+  significant at both frequencies, unlike the "zero alpha in 12 of 12 regressions" verdict
+  Milestones 6-7 reached on the other two markets. But 52-week-high's and momentum's ASX
+  leg returns correlate at 0.76-0.82, and their short legs carry nearly identical mean
+  betas (−1.36 vs. −1.26) — both signals are substantially picking the same names, pointing
+  to a shared driver (Australia's 2011-2015 mining divergence) rather than a second,
+  independent anomaly. **Rule: when a new market reopens a question resolved elsewhere,
+  check whether the new result is actually independent of an already-confirmed finding
+  before treating it as a second discovery — two signals moving together on one market can
+  look like two confirmations while really being one.**
+- **Milestone 24 turned a suggestive correlation into a decisive test, closing the thread
+  Milestone 23 left explicitly open.** Regressing 52-week-high's ASX hedged returns on
+  momentum's own hedged returns: 52-week-high's intercept collapses to insignificant at all
+  four cuts (p=0.32-0.94), while momentum's coefficient is highly significant everywhere,
+  explaining up to 66% of the combined book's variance. Not a stronger correlation number —
+  a direct test that a correlation coefficient alone cannot substitute for. **Rule: a
+  correlation between two results is evidence for a shared mechanism, not proof of one —
+  when the tools exist to run the actual control regression, run it, rather than resting
+  the conclusion on the correlation coefficient that motivated the suspicion.**
+- **Milestone 25 tested a genuinely new signal (the low-volatility anomaly) on all three
+  markets from the start, and found no clean story — including a statistically significant
+  inversion on the market with the longest history.** NSE showed nothing; ASX showed a
+  modest, real long-leg-only signal; the US mirror's hedged combined book lost 20.70%/yr
+  (p=0.0002) — high-volatility names significantly outperformed low-volatility ones, the
+  opposite of the anomaly's prediction. Checked against this project's own known pre-1985
+  thin-universe problem in this exact dataset (Milestone 15): the inversion held from ten
+  different start dates through 1995, not a data-quality artifact. **Rule: a new signal
+  tested honestly does not have to fit either of the project's two existing templates
+  ("replicates like momentum" or "retracts like reversal") — a well-documented academic
+  anomaly can fail to replicate and invert with real statistical force, and that is itself
+  a legitimate, reportable finding, not a null result to discard.**
+- **Milestone 26 checked whether Milestone 25's US inversion was a persisting effect or a
+  pooled artifact, and found it was neither exactly — a real but concentrated result.** A
+  cumulative from-date sweep (Milestone 25) can't distinguish a steady effect from one
+  episode pooled with quiet decades; a non-overlapping decade breakdown found the inversion
+  significant in the 1990s only (p=0.0244), essentially zero in the 1980s/2000s/2010s
+  (p=0.29-0.89), with its other significant decade (the 1970s) the same order of
+  universe-thinness (1-3 names/leg) Milestone 15 flagged for reversal. One ticker (INTC)
+  populated the high-vol leg 90% of the 1978-1995 window, but dropping it did not eliminate
+  the result. **Rule: a robustness sweep that only asks "does it hold from date X onward"
+  cannot tell a persisting effect from a pooled one — the same blind spot this project
+  already corrected once for the momentum-crash mechanism (Milestones 19-21) applies to any
+  new finding tested only that way; run the non-overlapping-window version before calling a
+  result either "robust" or "an artifact."**
+- **Milestone 27 retroactively applied Milestone 26's own tools to the project's older,
+  cumulative-sweep-validated conclusions, and found the audit confirmatory, not
+  corrective — which is itself worth knowing, not assumed.** Reversal's null and momentum's
+  pre-1994 significance (both validated by the original cumulative sweep, Milestones 15-16)
+  and ASX's two positive findings had never been re-checked with a non-overlapping decade
+  breakdown or a ticker-concentration/leave-one-out test. All four survived: reversal's one
+  significant decade turned out to be the exact thin 1970s window already blamed for its
+  apparent edge (an independent confirmation, not a new problem); momentum's significance
+  concentrated in the 1980s-1990s, not the unreliable 1970s, actually strengthening
+  confidence; and both ASX findings survived dropping their single most-present ticker.
+  **Rule: when a new diagnostic tool exposes a flaw in one finding, check whether any
+  earlier conclusion validated by the older, weaker method is quietly resting on the same
+  flaw — the audit itself is cheap, and "the older conclusions all survived" is a real,
+  reportable result, not a wasted milestone.**
+- **Milestone 28 tested a second new signal (the MAX effect / lottery demand) with this
+  project's full current-best-practice toolkit applied from the start, and got a genuinely
+  different failure mode from Milestone 25's low-volatility signal, not a repeat of it.**
+  Neither replicated positively on any market, and both showed some degree of US inversion —
+  but low-volatility's concentrated cleanly and decisively in one decade (the 1990s,
+  p=0.0244) while MAX's pooled US significance (p=0.079 daily) does not survive decomposition
+  at all: no single decade reaches conventional 5% significance. **Rule: two signals from the
+  same behavioral-finance family (here, "lottery demand") can fail in structurally different
+  ways — a superficially similar headline number (both negative, both on the US mirror)
+  can hide very different underlying robustness once decomposed, so run the same
+  decomposition on a new signal immediately rather than assuming an earlier signal's
+  diagnosis transfers.**
+- **Milestone 29 closed the open pattern Milestone 28 flagged (two lottery-demand signals
+  both inverting on the US mirror) with a direct control regression, the same tool that
+  resolved the identical-shaped question for ASX momentum/52-week-high.** The two signals'
+  scores correlate ~0.61 on the US mirror; regressing MAX's hedged combined-book return on
+  low-volatility's collapses MAX's intercept to indistinguishable from zero (p=0.906 daily)
+  while low-volatility's own coefficient explains up to 30% of the variance. **Rule: when a
+  new signal's result echoes an existing one in direction on the same dataset, check the
+  correlation between the two signals' scores and, if substantial, run the control
+  regression before reporting two separate findings — an "open pattern" is a research debt
+  to be paid off with a direct test, not a permanent footnote.**
+- **Milestone 30 tested a third new signal, deliberately chosen from a different
+  behavioral family (long-term reversal / overreaction, not lottery demand), and got a
+  clean null — a useful contrast after two messy lottery-demand results.** No significant
+  result on any market at conventional levels; the one nominally significant US decade
+  (2010-2017, p=0.0152) sat against an insignificant pooled result, the exact
+  multiple-testing pattern Milestone 5 warned about, correctly treated as noise rather than
+  a finding. **Rule: when breadth-testing new signals, vary the underlying behavioral
+  mechanism, not just the construction — two signals from the same family (as Milestones 25
+  and 28 turned out to be) risk producing correlated, redundant results, while a
+  genuinely different family gives an independent read on whether "this project's datasets
+  support most anomalies" or "this project's datasets are simply thin."**
+- **Milestone 31 finally tested this section's own flagship deliverable — the equal-weighted
+  composite score, unchanged since Milestone 1 — against the 30 milestones of evidence
+  accumulated around it, rather than leaving its design unexamined while every component
+  was tested repeatedly.** Dropping 52-week-high and reversal (both "no demonstrated skill")
+  and keeping only momentum does not improve the out-of-sample-hedged result on either
+  market where momentum is confirmed — the current 3-signal composite performs marginally
+  better (US: p=0.027 vs p=0.042 daily; ASX: p<0.0001 vs p=0.0006 daily) than momentum
+  alone. Most likely explanation: 52-week-high's high correlation with momentum's own
+  ranking (0.76-0.82 on ASX) provides cross-sectional noise-reduction rather than
+  independent alpha. **Rule: a practical deliverable's design assumptions age the same way
+  a research finding does — re-examine them against the evidence that has accumulated since
+  they were set, rather than treating "this is how we built it originally" as permanent.**
+  **[Qualified by Milestone 39: this comparison was drawn on gross, cost-free returns. Once
+  realistic transaction costs are applied, the composite's ~2x higher turnover (a consequence
+  of blending in the two "no demonstrated skill" components) erodes its baseline edge fast —
+  momentum alone becomes the more cost-robust practical choice on both confirmed markets. See
+  below.]**
+- **Milestone 32 checked whether momentum's US edge is a disguised sector bet — the level
+  above the individual-ticker concentration checks Milestones 26-27 already ran.** No sector
+  exceeds a 1.5x overweight relative to its universe share in either leg; the largest
+  deviation is a modest Technology tilt (1.4x) with a corresponding Communication
+  Services/Financials underweight. ASX's independently-confirmed momentum result couldn't be
+  checked the same way — no reliable sector-classification source for its 209-ticker
+  universe is reachable from this sandbox, and this project's honesty standard treats
+  hand-classifying 209 unfamiliar codes from memory as worse than not running the check.
+  **Rule: "diversified by construction" (a decile sort across many names) is not the same
+  claim as "diversified in practice" (across the sectors those names belong to) — check the
+  second explicitly before treating a signal's diversification as given, and say plainly
+  when a market can't be checked rather than skipping it silently.**
+- **Milestone 34 closed the last item this project's Conclusions had carried as an untested
+  open limitation: whether ASX momentum's edge (Milestone 22) is stable across sub-periods,
+  or concentrated in one narrow window of its six-year sample.** Split into three ~2-year
+  sub-periods (the coarsest split a six-year sample supports) and re-tested with the standard
+  out-of-sample hedge + HAC methodology: no sign flips in either leg, and the combined
+  long-short book is individually significant in all three sub-periods (p=0.0142, 0.0335,
+  0.0556) — the long leg alone is positive throughout but individually significant in only
+  one window, consistent with a power limitation of a short sample sliced three ways rather
+  than an instability finding. **Rule: an edge tested only on a full-sample basis carries an
+  implicit "and it wasn't secretly concentrated in one sub-window" assumption — check it
+  explicitly even on a sample too short for the finer decade-level treatment used elsewhere,
+  since a coarse split still distinguishes "stable, low individual power" from "one window
+  carrying the whole result."**
+- **Milestone 38 tested a fourth new signal, deliberately chosen from a genuinely different
+  family than any tested before it — not cross-sectional stock selection but a time-series
+  calendar anomaly, the turn-of-month effect.** Tested directly on the equal-weighted market
+  proxy (no decile backtest or beta hedge needed, since this is a long-only market-timing
+  question), it became the first new signal since momentum itself to positively replicate on
+  more than one market: highly significant on NSE and the US mirror (p<0.01 both, full
+  sample), not significant on ASX. A sub-period breakdown found the same publication-era decay
+  already documented for momentum — strong early, insignificant in both markets' most recent
+  ~15-16 years — the identical decay shape now found independently in an unrelated signal
+  family. **Rule: breadth-testing across genuinely different behavioral mechanisms
+  (Milestone 30's lesson) should include different signal CONSTRUCTIONS too, not just
+  different cross-sectional rankings — a time-series calendar effect tests this project's
+  entire toolkit (data, HAC regression, sub-period discipline) against a question its
+  decile-backtest engine was never built for, and a positive replication still needs the same
+  decay-checking discipline as every cross-sectional one.**
+- **Milestone 39 closed the loop between two of this project's own findings that had never
+  been tested together: Milestone 31's gross-return composite-vs-momentum comparison and
+  Milestone 35's cost-realism methodology.** Re-running Milestone 31's three variants through
+  Milestone 35's cost sweep found the composite trades roughly twice momentum-alone's monthly
+  turnover on both confirmed markets (US: 92.6% vs. 49.6%; ASX: 89.7% vs. 38.4%) — blending in
+  two components with no individually demonstrated skill doesn't just add ranking noise, it
+  materially increases trading frequency. At the 10bps baseline the composite's point estimate
+  does edge out momentum-alone, confirming Milestone 31 — but that edge evaporates fast: the
+  composite's point estimate turns negative by 50bps on the US mirror while momentum-alone
+  stays positive through 100bps, and the composite loses significance by 200bps on ASX while
+  momentum-alone stays significant at the same cost level. **Rule: two of a project's own
+  correct conclusions, drawn under different methodological lenses at different points in
+  time, can still combine into a result neither one alone would have shown — a gross-return
+  comparison and a cost-realism finding, each individually valid, together revise the
+  project's practical recommendation without either one being wrong on its own terms. When a
+  project develops a sharper lens for one question (transaction costs), it's worth explicitly
+  re-running that lens over every earlier comparison the sharper lens could affect, not just
+  the finding that originally motivated building it.**
+- **Milestone 40 checked directly, rather than assumed, whether momentum and the turn-of-month
+  effect — this project's two positively-replicating findings — are actually independent.**
+  Milestone 29 already found once that two "separate" signals (MAX, low-volatility) can turn
+  out to be one mechanism counted twice, diagnosed by a direct control regression rather than a
+  correlation coefficient. Applying the identical discipline here — regressing momentum's own
+  out-of-sample-hedged return on the turn-of-month dummy — found the opposite result: on the US
+  mirror, momentum's edge is actually *lower* during turn-of-month days (a marginally
+  significant negative add-on, p=0.098), the opposite direction a shared mechanism would
+  predict; on ASX, the add-on is statistically indistinguishable from noise (p=0.4499). **Rule:
+  finding one project's own instance of "two signals are really one" (Milestone 29) creates an
+  obligation to check every other pair of validated findings the same way, not just assume
+  independence by default — and a clean, checked independence result is itself worth reporting
+  explicitly, since it's the necessary condition for treating two signals as genuinely additive
+  in a practical framework rather than redundant.**
+- **Milestone 41 assembled every "does signal X replicate on market Y" test this project has
+  ever run — 21 in total, across 6 cross-sectional signals and one calendar effect, each on 3
+  markets — into one pre-registered family and applied a formal multiple-testing correction for
+  the first time.** Only 4 of 21 tests survive Benjamini-Hochberg or Bonferroni correction at
+  α=0.05, and momentum on ASX is the only currently-live, positive, cross-sectional finding
+  among them — the other three survivors (turn-of-month on two markets, low-volatility's US
+  inversion) were each already independently qualified by their own dedicated milestone as
+  historical-only or decade-concentrated before this correction ever ran. Momentum on the US
+  mirror does not survive correction on this flat test, fully consistent with (not contradicted
+  by) the project's own era-split demonstration that a naive full-sample test dilutes a genuine
+  pre-2008-09 edge with a real decay. **Rule: a formal multiple-testing correction, run honestly
+  across a project's full discovery history, is a powerful independent check precisely because
+  it uses a completely different logic (statistical correction for the number of hypotheses
+  tested) than the project's own mechanism-level investigations — when the two independent
+  methods converge on the same set of fragile versus robust findings, that convergence is
+  stronger evidence than either method alone, and a project that has already been honest about
+  each individual finding's limitations should expect, not fear, this kind of check.**
+- **Milestone 42 crossed two previously-separate stress tests — crash duration (Milestone 33)
+  and cost realism (Milestones 35-36) — rather than leaving them as independent findings.**
+  Real bid-ask spreads and market impact widen specifically during high-volatility, illiquid
+  regimes, exactly the Bear+HighVol conditions this project's own crash mechanism (Milestone
+  17) already identifies — a duration stress test that holds costs flat, or a cost stress test
+  applied uniformly across calm and crisis months alike, both miss the case where a strategy
+  has to keep trading through the crisis it's modeling. Raising costs 1.0x-5.0x specifically on
+  crash-regime rebalances, with duration held fixed at the actual worst historical episode,
+  worsened the estimated crash-episode loss only modestly (-25.6% to -26.7% at 5x) — the
+  structural regime-return drift dominates, and rising costs during a crisis are a real but
+  second-order amplifier, not the primary driver of tail risk. **Rule: two stress tests that
+  each vary one dimension of the same underlying risk (here, a crash episode) should eventually
+  be crossed rather than left as parallel, independently-varying checks — the interaction term
+  is sometimes the more decision-relevant number than either marginal effect alone, and finding
+  it small is itself a useful, reportable result, not a null finding to discard.**
+- **Milestone 44 extended the cost-realism lens (built for momentum, Milestone 35) to this
+  project's other live findings, and found momentum's cost-robustness is the exception, not the
+  norm.** Before sweeping costs, checking what there was to protect first: MAX and long-term
+  reversal have no positive finding anywhere in this project, so there was nothing to test for
+  either. Of the two remaining live findings, ASX low-volatility's long leg was only ever
+  marginally significant before any cost and barely survives this project's own standing 10bps
+  baseline; turn-of-month, a long-only market-timing strategy that pays a round-trip cost on
+  100% of notional roughly 12 times a year (unlike a decile rebalance's partial monthly
+  turnover), collapses to statistical noise on the US mirror at that same 10bps baseline. **Rule:
+  a signal's cost-robustness is a property of ITS OWN structure (how much of the book turns over,
+  how large the round-trip is relative to the edge), not a project-wide default — never assume
+  one signal's demonstrated cost-robustness generalizes to another signal's practical viability
+  without checking that signal's own turnover and trading structure directly.**
+- **Milestone 45 tried to build this project's first genuinely combined, end-to-end-tested
+  practical product — and found the naive framing didn't match the project's own accumulated
+  evidence.** Momentum and turn-of-month were shown independent (Milestone 40) and both
+  survive a formal multiple-testing correction (Milestone 41), so combining them looked like
+  the obvious next step. But no single market has both live at once: turn-of-month is not
+  significant on ASX, and NSE momentum has never shown an edge at all. The real combination
+  is cross-market — ASX momentum with NSE turn-of-month — and, evaluated cost-adjusted over
+  a fair, comparable date window, it delivered a genuine diversification benefit: a combined
+  Sharpe ratio (+2.00) exceeding both standalone legs (+1.69, +1.24) and their simple average
+  (+1.46), with near-zero correlation (+0.02) between the two return streams. **Rule: before
+  building a combined position from two "independent" findings, check which markets each
+  finding is actually live in — independence between two signals says nothing about whether
+  they happen to be live in the same place, and the naive same-market combination this
+  project assumed at the outset turned out not to exist, while a better one (cross-market)
+  did.**
+
+## 2. Risk-management lessons
+
+Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
+`case_studies/ltcm_1998.md` / `quant_quake_2007_and_amaranth.md`:
+
+1. **Never calibrate tail risk on a calm-regime correlation matrix alone.**
+   The simulation shows a Gaussian VaR model calibrated on "normal" data
+   underestimates the true 99.9% tail loss by ~1.3x and the expected
+   shortfall beyond it by ~1.65x, purely because it can't see correlations
+   rising toward 1 under stress. Any leveraged or market-neutral strategy
+   needs a **stress correlation matrix as a second scenario**, not just a
+   historical-calibration VaR number.
+2. **Leverage doesn't just scale losses, it changes which losses are
+   survivable.** LTCM's underlying spread moves were not physically
+   unprecedented; 25:1+ leverage turned a bad quarter into a solvency event.
+   Position-size and leverage limits should be set against the
+   *stress-regime* tail estimate, not the calm-regime one.
+3. **Crowding is a correlation risk you can't see in your own book.** The
+   2007 Quant Quake shows that even a well-diversified-looking portfolio can
+   be secretly correlated with every other fund running a similar signal.
+   A practical mitigant: track how "crowded" a factor is (e.g., aggregate
+   assets tracking similar signals, or a simple proxy like realized
+   correlation of your strategy's returns to a public momentum/value index)
+   and de-risk when crowding is high, independent of your own model's
+   confidence.
+4. **A winning streak is not evidence against tail risk.** Amaranth's Brian
+   Hunter had a strong track record before the 2006 blowup; recent success
+   under one regime is weak evidence that a concentrated position is safe
+   under a different one. Any framework that sizes positions partly on
+   trailing Sharpe or recent P&L needs an explicit override for
+   concentration limits that doesn't relax just because a book has been
+   working.
+5. **Treat "the model says it's fine" as a hypothesis, not a fact**,
+   especially near known regime-change triggers (sovereign defaults,
+   liquidity crunches, crowded-factor unwinds) — which is really the
+   project's whole thesis applied to your own tooling, not just to the
+   market you're modeling.
+6. **The Q1 mechanism and the Q2 investigation asked the same question — Q1 answered it
+   with a simulation, Q2's real data gave a more honest, weaker answer.**
+   `risk_simulation/fat_tails_vs_normal.py` showed, in a stylized simulation, that tail
+   risk compounds specifically when volatility and correlation rise together. `README.md`'s
+   momentum-crash-risk investigation set out to find the same signature in a real
+   backtest, and a first descriptive pass (Milestone 4) looked like it had. Formal
+   significance testing (Milestone 5) did not confirm it. **Any short position built on
+   a behavioral signal should still be regime-tested before being sized** — that
+   precaution doesn't depend on this specific mechanism being confirmed — but "regime-
+   tested" has to mean the HAC-regression version, not the regime-bucket version, given
+   what happened here when the two disagreed.
+7. **A compelling descriptive pattern is a hypothesis, not a finding — this project
+   produced its own cautionary tale.** Milestone 4's regime-bucket comparison (Sharpe by
+   volatility tercile, bull vs. bear) looked like a clean, four-signature confirmation of
+   momentum-crash risk. Formal HAC-regression testing at daily and monthly frequency
+   (Milestone 5) found none of the regime-conditioning coefficients significant in the
+   leg the theory actually predicts (the short leg), in either market. Both analyses used
+   the same underlying data; only the statistical rigor differed. **Rule: never size a
+   position, write a risk limit, or make a claim in a report based on a descriptive
+   regime split alone — run the regression with proper standard errors first, and expect
+   a real chance that the compelling-looking pattern won't survive it.**
+8. **The cheapest test is the one to run first, and this project ran it last.** Three
+   escalating hypotheses (crash-window concentration, a value/growth confound, formal
+   momentum-crash regime-conditioning) were tested across Milestones 2, 3, and 5 before
+   Milestone 6 finally ran a plain CAPM beta regression — the single cheapest, most
+   standard check for any long-short book — and found the entire answer in it: an
+   uncontrolled beta mismatch between the legs, fully explaining every prior milestone's
+   numbers, with no behavioral story needed. **Rule: order your hypothesis tests from
+   cheapest/most-mechanical to most-exotic, not the reverse. A beta regression takes
+   minutes and rules out (or in) the most common cause of "surprising" long-short
+   performance; save the behavioral and regime-conditioning hypotheses for after it comes
+   back clean.**
+9. **A risk process that only re-tests its losers eventually trusts a winner it never
+   should have.** Every rigor upgrade in this project (Milestones 4-7) was applied to the
+   signal that was losing money. The one signal reported as a genuine edge (reversal) rode
+   on its original, less rigorous validation for six milestones before anyone checked it
+   the same way. Milestone 8 found it didn't hold up. **Rule: schedule periodic re-validation
+   of every "confirmed" edge under your *current* standard of rigor, not just your
+   standard at the time it was confirmed — a standard that improves over the life of a
+   book (as this project's did) should apply retroactively, especially to the positions
+   still being sized on the old conclusion.**
+10. **Size a position on the decayed number, not the full-sample number — and check that
+    decayed number was itself estimated out-of-sample.** Milestone 9 split this project's
+    one surviving edge (US momentum) at its 1993 publication date and found real decay:
+    alpha down ~30-47% post-1994, with one cut losing significance entirely. That was
+    already a large correction to the full-sample number — but it was still an in-sample
+    estimate. Milestone 10 re-tested the same post-1994 period with an actual rolling,
+    out-of-sample hedge (the standard Milestone 7 already required for this project's own
+    negative findings) and found the post-1994 alpha does not survive at all, in either
+    leg. **Rule: for any published anomaly, run the pre/post-publication split before
+    sizing anything against it — and don't stop at an in-sample per-era regression;
+    re-confirm with a hedge that could actually have been traded forward, because the two
+    can and do disagree.** The pre-publication half of the sample describes a market that
+    no longer exists; as of this project's most rigorous test, the post-publication market
+    has not been shown to pay this edge at all.
+11. **Before accepting a null result, rule out the obvious "maybe it's just one bad episode"
+    and "maybe it's a methodology artifact" objections — and if it survives both, treat
+    that as the null result getting stronger, not weaker.** Milestone 11 tested whether
+    Milestone 10's post-1994 null result was really just the 2009 momentum crash, and
+    whether it depended on the specific hedge window chosen. Neither objection explained
+    it: the era-by-era trend showed ongoing decay through 2017, well after 2009, and the
+    result was identical across three different hedge windows. **Rule: a finding that
+    survives a genuine attempt to explain it away deserves more confidence, not less —
+    the temptation after an unwelcome result is to look for the one adjustment that makes
+    it go away; running that check honestly, and reporting it even when it doesn't help,
+    is what separates a stress-test from a fishing expedition.**
+12. **A full-sample "no significant alpha" verdict does not mean a signal was never real —
+    check whether it's actually two eras averaging to zero before writing it off entirely.**
+    Milestone 8 declared short-term reversal fully retracted based on a full-sample
+    regression, which was the technically correct read of that specific test. Milestone 12
+    applied the era-split toolkit built for momentum and found reversal's long leg had been
+    genuinely, significantly positive pre-1994 and decayed to noise since — the same
+    pattern as momentum, hidden inside a full-sample average that happened to net out near
+    zero. **Rule: retest every full-sample null result from before your era-split toolkit
+    existed with that toolkit, not just your full-sample findings — a "no effect on
+    average" verdict can quietly contain a real, decayed effect that a single-number
+    summary cannot distinguish from a signal that was simply never real.**
+13. **A binary before/after split can get the direction right while getting the mechanism
+    wrong — quantify the trend continuously before naming a cause.** Milestone 13 fit a
+    continuous linear decay rate to momentum's and reversal's hedged long legs instead of
+    trusting the 1994 publication-date cutoff. Reversal's decay turned out to be genuinely
+    smooth and statistically significant, consistent with the publication-decay story.
+    Momentum's did not: its linear trend was not significant, because the real pattern is a
+    sharp break around the 2008-09 financial crisis, not a gradual erosion starting in
+    1994. **Rule: once a binary split finds a real effect, don't stop there — fit a
+    continuous trend and inspect a rolling, non-parametric trajectory to check whether the
+    story you're about to tell (e.g., "publication-driven crowding") actually matches the
+    shape of the data, or just happens to fall on the correct side of an arbitrary cutoff.**
+    *[Reversal's "genuinely smooth" decay cited here was itself later retracted by
+    Milestone 15 — it turned out to be an artifact of thin, unreliable early data, not a
+    real trend at all. The lesson (quantify continuously, don't stop at a binary split)
+    still holds; the specific reversal example does not.]*
+14. **Even a data-driven, non-arbitrary date can still be the wrong test — correct for the
+    search itself before trusting it.** Milestone 13 picked September 2008 by eyeballing a
+    rolling trajectory, which is a comparison, not a test: it doesn't say whether that split
+    is meaningfully better than what chance alone would produce from searching many candidate
+    dates. Milestone 14 ran the actual test two ways: a single pre-registered date (motivated
+    by an external, published crash episode, not this project's own plot) confirmed momentum's
+    break; an unconstrained search over ~375 candidate dates, corrected via bootstrap for
+    having searched that many, did not decisively confirm any single dominant break (its own
+    best-fit date, December 2010, wasn't even the one the earlier milestone had proposed).
+    **Rule: a hypothesis motivated by an external, independent source (a published crash date,
+    a known regulatory change) can be tested directly and cheaply; a hypothesis motivated by
+    your own data (the best-looking split you found by eye) requires a multiple-testing-
+    corrected test before it earns the same confidence — and expect the corrected version to
+    be measurably more conservative.**
+15. **When a signal's finding depends on data density you haven't checked, check it before
+    trusting the finding.** Milestone 15 traced reversal's August 1980 "break" to its
+    source: a decile portfolio of only 2-4 stocks, drawn from a 9-14-name universe of
+    today's mega-cap survivors backfilled to the 1970s, plus two previously undocumented
+    data anomalies. Reversal's entire positive-alpha claim depended on this unreliable
+    window and vanished completely once excluded, at every later start date tested.
+    Momentum, run through the identical thin data as a control, was unaffected. **Rule: a
+    decile portfolio with 2-4 names is not a diversified strategy, it is a handful of
+    individual stock bets, and "statistically significant" on such a sample tells you
+    about those specific stocks' survivorship, not about a market-wide behavioral effect —
+    check minimum portfolio size and data density for every sub-period a significance
+    claim rests on, not just the full sample's average.**
+16. **A structural break confirmed by a date is still an unexplained fact until tested
+    against a named mechanism.** Milestone 16 applied this project's own Bear ×
+    High-Volatility momentum-crash regression (Milestones 5-6, rejected for the
+    52-week-high signal, full-sample) to momentum's hedged long leg, split at the same
+    2008-09-01 date. The interaction term is insignificant pre-2008 (p=0.42) but large,
+    negative, and significant post-2008 (p=0.008) — the classic momentum-crash mechanism
+    was dormant through the pre-crisis decades and activated since. **Rule: a mechanism
+    this project rejected for one signal, in one era, can still be real for a different
+    signal in a different era — don't let an earlier rejection close off re-testing the
+    same hypothesis somewhere new; a confirmed break date is a fact, not yet an
+    explanation.**
+17. **"Already checked" and "checked with your current best method" are not the same
+    claim.** Milestone 8's NSE momentum test used a static full-sample regression.
+    Applying the rolling out-of-sample hedge this project built in Milestone 7 to NSE
+    momentum for the first time reaffirmed no significant full-sample alpha, but surfaced
+    a tentative post-2008 signal (daily p=0.044, monthly p=0.073) the cruder test lacked
+    the power to see — while the Bear × High-Volatility crash mechanism confirmed for US
+    momentum (Milestone 16) turned out not to replicate on NSE at all. **Rule: a rejected
+    finding on an already-tested market is worth re-checking with each new methodology
+    upgrade this project builds, not just applying new methods to new markets — the
+    earlier rejection may have been correct for the test it used and still be missing
+    something a better test would find; and a confirmed mechanism on one market is a
+    hypothesis, not a law, everywhere else.**
+18. **A pooled multi-year regression's significant coefficient can be one crisis acting as
+    its own control group, not a persisting regime.** Milestone 18 split Milestone 16's
+    "post-2008" test window at end-2009 and found the US mirror's trailing-12-month market
+    return never went negative again after September 2009 through the end of the sample —
+    so the interaction term Milestone 16 found significant across the whole post-2008
+    block had zero Bear+High-Vol observations to draw on outside the 337-day crisis itself.
+    Run on the crisis window alone, the multiplicative interaction specifically was not
+    significant (p=0.26); volatility and bear-state each mattered on their own instead.
+    **Rule: before reading a coefficient significant across a multi-year window as
+    evidence of a standing regime, split the window and check whether the conditioning
+    regime (here, a trailing bear market) actually recurs throughout it — a test that
+    silently rests on one sub-period contrasted against a calm remainder is a test of "did
+    something happen once," not "is this now a permanent feature."**
+19. **A qualitative pattern and the specific quantitative claim built on it can have very
+    different robustness, and a binary "did X ever happen" claim is only as robust as its
+    own definition.** Milestone 19 swept the two regime-construction parameters (volatility
+    window, bear-market lookback) every crash-regime finding since Milestone 5 has used.
+    Milestone 16's "dormant pre-2008, active post-2008" pattern replicated in 8 of 16 nearby
+    parameter combinations, reliably near this project's own defaults. But Milestone 18's
+    specific "no bear market recurred after 2009" claim did not survive shorter, equally
+    standard bear-lookbacks (126 or 189 trading days instead of 252) — a bear regime fires
+    post-2010 under those conventions. **Rule: test the pattern and the specific claim
+    separately, since they can have different robustness; and when a finding rests on
+    whether some condition ever occurred, stress-test the condition's own definition, not
+    just the finding built on top of it — the definition is often the more arbitrary
+    choice.**
+20. **"Untested" and "tested and not found" are different claims, and closing a
+    robustness thread means running the test the robustness check made possible, not just
+    noting that it's now possible.** Milestone 20 re-ran the crash-mechanism persistence
+    test under the two bear-lookbacks Milestone 19 found actually see a post-2010 bear
+    regime. The interaction did not reactivate at either window (p=0.20, p=0.44), and at
+    the 189-day lookback the bear-market main effect was significant but positive — the
+    opposite sign from crash risk. **Rule: when a robustness check reveals that a
+    previously untestable question has become testable, run the test rather than leaving
+    it flagged as an open thread — a mechanism that fails to reactivate when given a real
+    chance to is materially stronger evidence than a mechanism that was simply never
+    checked.**
+21. **A named caveat is a promise to test it, and a lesson learned from one correction
+    applies to your own other findings, not just the one that taught it.** Milestone 21
+    tested the growth-confound caveat Milestone 17 attached to the tentative NSE momentum
+    signal, splitting at the exact date NSE's universe became permanently fixed at 48
+    names. The growing sub-period showed a larger point estimate, not a smaller,
+    thin-universe-inflated one, so the named confound wasn't confirmed — but neither
+    sub-period reached significance alone, only the pooled full window, the identical
+    pooled-window pattern Milestones 18-20 had just diagnosed in the crash mechanism.
+    **Rule: apply a methodology lesson learned from one finding to every other finding
+    built the same way, including your own project's most-favored remaining result — a
+    named but untested caveat is unfinished work, not a disclosed limitation.**
+22. **A sandbox's specific network allowlist is itself a research constraint worth
+    documenting, and a genuinely independent third market is worth the search effort even
+    when the first choice (Europe) isn't reachable.** Milestone 22 spent real effort
+    ruling out Stooq, Hugging Face, `github.com`'s own pages, and general `api.github.com`
+    browsing before finding `raw.githubusercontent.com` could serve a real, committed ASX
+    dataset once the exact file paths were known. Momentum replicated cleanly there
+    (p=0.0085 daily, p=0.0141 monthly), the strongest of the three markets, on a sample
+    too short (six years) for the era-stability checks run on the US mirror. **Rule:
+    document a data search's dead ends, not just its destination — the next milestone (or
+    the next project) benefits from knowing which doors were tried and found locked; and
+    label a new result by what it has and hasn't yet been checked against, not by how
+    clean it looks on first pass.**
+23. **A correlated pair of signals confirming together is not two confirmations — check
+    whether a new result is independent of an already-established one before counting it
+    separately.** Milestone 23 completed the ASX picture: reversal replicated its
+    established null cleanly, but 52-week-high showed significant hedged alpha where
+    Milestones 6-7 had found zero alpha in 12 of 12 regressions on the other two markets.
+    Checking the correlation between 52-week-high's and momentum's ASX leg returns (0.76
+    long leg, 0.82 combined) and their near-identical short-leg betas (−1.36 vs. −1.26)
+    showed the two signals were substantially picking the same names. **Rule: before
+    treating a new significant result as a second, independent finding, check its
+    correlation with an already-confirmed one built from related inputs — a shared
+    underlying driver can make one real economic effect look like two separate
+    discoveries.**
+24. **A correlation is a hypothesis about a shared mechanism, not a test of one — run the
+    control regression once the tools exist to.** Milestone 24 regressed ASX 52-week-high's
+    hedged returns directly on momentum's, rather than resting on Milestone 23's 0.76-0.82
+    correlation coefficient. 52-week-high's intercept collapsed to insignificant at all four
+    cuts (p=0.32-0.94); momentum's own coefficient was significant everywhere, explaining up
+    to 66% of the combined book's variance. **Rule: a correlation between two findings
+    motivates a control test; it is not a substitute for running one — when a suspected
+    shared mechanism can be tested directly, the correlation coefficient that raised the
+    suspicion should be treated as a lead, not a conclusion.**
+25. **A new signal doesn't have to fit either of your project's existing outcome templates
+    — a genuine, well-documented anomaly can fail and invert, and that is a legitimate
+    finding on its own terms.** Milestone 25 tested the low-volatility anomaly on all three
+    markets at once and found no positive replication anywhere: null on NSE, a modest
+    long-leg-only signal on ASX, and a statistically significant inversion on the US mirror
+    (high-vol beat low-vol net of beta, p<0.001), checked and confirmed not to be a repeat
+    of the pre-1985 thin-universe artifact that sank reversal. **Rule: don't force a new
+    result into "replicates" or "retracts" — a well-documented anomaly that inverts with
+    real statistical force in your own data is its own category of finding, worth reporting
+    plainly rather than filed away as an inconclusive negative.**
+26. **A robustness sweep that only asks "does it hold from date X onward" cannot tell a
+    persisting effect from a pooled one — the exact blind spot this project already
+    corrected once applies just as much to a brand-new finding as to an old one.** Milestone
+    26 broke Milestone 25's US low-volatility inversion into non-overlapping decades instead
+    of cumulative from-date windows, and found the effect significant in the 1990s only
+    (p=0.0244), essentially zero in the 1980s/2000s/2010s (p=0.29-0.89), with its other
+    "significant" decade (the 1970s) sharing the exact 1-3-names-per-leg thinness Milestone
+    15 diagnosed for reversal. A single ticker (INTC) populated the high-vol leg 90% of the
+    window Milestone 25's sweep called robust, though dropping it did not eliminate the
+    result. **Rule: before calling a cumulative-window result "robust to start date,"
+    re-test it with non-overlapping windows too — a pooled effect and a persisting one look
+    identical to a from-date sweep, and only the decade-by-decade version tells them apart.**
+27. **A new diagnostic tool's job isn't finished the day it fixes the finding that motivated
+    it — turn it on every earlier conclusion the older, weaker method validated too.**
+    Milestone 27 retroactively applied Milestone 26's decade-breakdown and
+    ticker-concentration checks to reversal's null and momentum's pre-1994 significance
+    (both originally validated by a cumulative sweep, Milestones 15-16) and to ASX's two
+    positive findings, none of which had ever been re-checked this way. Every one survived:
+    reversal's one significant decade was the exact thin 1970s window already blamed for its
+    apparent edge; momentum's significance concentrated in the 1980s-1990s, standing on
+    firmer ground than before; both ASX findings survived dropping their most-present
+    ticker. **Rule: a confirmatory audit is still a result, not a wasted one — "the older
+    conclusions all survive the new check" is exactly what should be verified, not assumed,
+    every time a project develops a sharper diagnostic than the one it used before.**
+28. **Two signals from the same behavioral family can fail in structurally different ways —
+    a superficially similar headline number can hide very different underlying robustness.**
+    Milestone 28 tested the MAX effect (lottery demand) with the full current-best-practice
+    toolkit applied from the start, including an immediate decade breakdown of any
+    significant US result rather than waiting for a later milestone to run it. Both MAX and
+    Milestone 25's low-volatility signal failed to replicate positively anywhere and both
+    showed a US inversion — but low-volatility's concentrated cleanly and decisively in one
+    decade (p=0.0244) while MAX's pooled US significance (p=0.079 daily) doesn't survive
+    decomposition at all, with no single decade reaching conventional 5% significance.
+    **Rule: don't assume one signal's diagnosis (mechanism, robustness, failure mode)
+    transfers to a second, related signal just because the headline direction matches — run
+    the same decomposition immediately, since the underlying robustness can differ sharply
+    even when the top-line number looks similar.**
+29. **An "open pattern" flagged in one milestone is a research debt, not a permanent
+    footnote — pay it off with the same control-regression tool that already closed the
+    identical-shaped question elsewhere.** Milestone 28 left open whether MAX's and
+    low-volatility's shared US inversion was structural or coincidental. Milestone 29 found
+    the two signals' scores correlate ~0.61 and, regressing MAX's hedged combined-book
+    return on low-volatility's, found MAX's intercept collapses to indistinguishable from
+    zero (p=0.906) while low-volatility's coefficient explains up to 30% of the variance —
+    the same "one mechanism, two signals" pattern already diagnosed for ASX momentum and
+    52-week-high (Milestone 24), now recognized on sight rather than treated as a fresh
+    puzzle. **Rule: once a project has learned what a correlated-signals artifact looks
+    like, apply the same recognize-and-control-for pattern the next time two related
+    signals produce suspiciously similar results, rather than re-deriving the diagnosis
+    from scratch or leaving it as an open question.**
+30. **When breadth-testing new signals, vary the underlying behavioral mechanism, not just
+    the price-history construction — same-family signals risk producing correlated,
+    redundant results.** Milestones 25 and 28 both tested "lottery demand" signals and
+    turned out (Milestone 29) to be substantially one mechanism. Milestone 30 deliberately
+    picked a different family (long-term reversal / overreaction) and got a clean null on
+    every market, unlike either lottery-demand signal's messy partial inversion — a useful,
+    independent data point precisely because it wasn't correlated with what came before.
+    **Rule: a project's "breadth" work should sample across behavioral mechanisms
+    (underreaction, overreaction, leverage constraints, lottery preference, ...), not just
+    across constructions within one mechanism — otherwise apparent breadth can be an
+    illusion, with several "different" signals really testing the same underlying effect.**
+31. **A naive "prune the components with no demonstrated skill" intuition can be wrong, and
+    the way to find out is to test the blend directly, not reason about it from the
+    individual verdicts.** Milestone 31 tested whether dropping 52-week-high and reversal
+    (both individually retracted) from the composite score and keeping only momentum would
+    improve the out-of-sample-hedged result. It didn't — the full equal-weighted composite
+    scored better on both tested markets, most likely because a component correlated with
+    the real signal's ranking can reduce cross-sectional noise even with zero standalone
+    alpha. **Rule: a blended score's optimal composition doesn't follow mechanically from
+    each component's individual verdict — test the blend itself before pruning components
+    that "shouldn't" be adding value; the intuition that a retracted signal must be dead
+    weight in every context is itself a hypothesis, not a conclusion.**
+32. **"Diversified by construction" is not the same claim as "diversified in practice" —
+    check the second explicitly.** Milestone 32 tested whether momentum's decile-sorted US
+    long/short legs, diversified by construction across 30 individual names, are also
+    diversified across sectors. They are: no sector exceeds 1.5x its universe share in
+    either leg. **Rule: a signal built to rank many names still deserves an explicit
+    sector/factor concentration check before being trusted as genuinely diversified — a
+    cross-sectional rank spreads exposure across names, not automatically across whatever
+    groupings those names happen to cluster into.**
+33. **When a sample's history can't estimate a parameter a risk question depends on, simulate
+    around it rather than leaving the question open indefinitely.** This project's
+    Conclusions named an open question since Milestone 21 — how bad the momentum-crash
+    mechanism could get in a crisis more severe than 2008-09 — and never resolved it, because
+    the sample's history only contains one crisis to learn from. Milestone 33 recognized that
+    the unresolvable parameter was specifically *duration* (the worst Bear+HighVol episode in
+    the post-2008 sample ran 196 days; historical bear markets elsewhere ran years), not the
+    daily effect size (which HAC-regression pins down with real confidence, p=0.0081). Holding
+    the fitted daily drift and its residual distribution fixed and bootstrap-simulating longer
+    durations gave the risk playbook a concrete number (~44% mean loss at 2x the worst
+    historical episode, ~58% at 3x) instead of an acknowledged-but-unquantified gap. **Rule:
+    separate what a sample can and can't estimate before declaring a risk question
+    unanswerable — a parameter the data can't pin down (duration, here) can often still be
+    varied in simulation around a parameter the data *can* pin down (daily severity),
+    turning "we can't know" into "here's what it would cost if it lasted longer."**
+34. **A hedge composition can drift meaningfully even while the return it's protecting stays
+    stable — check both, not just the one that's easier to headline.** Milestone 34's
+    sub-period breakdown of ASX momentum found the combined long-short book significant in
+    every ~2-year window, a clean stability result on the return side — but its mean
+    out-of-sample hedge beta drifted from near-zero (+0.108) in the earliest window to
+    increasingly net-short (-0.489, then -0.616) in the two that followed. Neither number
+    alone tells the full story: return stability without checking beta drift would have
+    missed a real change in what the book is exposed to; beta drift without the return
+    context would have looked more alarming than it is. **Rule: when reporting a sub-period
+    or regime-based stability check, report the hedge/exposure parameters alongside the
+    headline return result, not instead of it — a strategy can be return-stable and
+    exposure-unstable at the same time, and a risk playbook needs both facts.**
+35. **A modeling simplification acknowledged since a project's first commit is still worth
+    testing directly, even when the fully rigorous version of the test is out of reach.**
+    This project's linear transaction-cost model was flagged as a limitation from the start,
+    but never checked against anything more realistic — a literature-calibrated market-impact
+    model needs average daily volume data this project confirmed, directly, it does not have
+    from any of its three working data sources. Milestone 35 didn't let that block the check:
+    a linear-cost breakeven sweep needs no ADV assumption at all, and an illustrative
+    square-root-law-*shaped* convex overlay can be calibrated to the strategy's own observed
+    turnover instead of an assumed volume number. The result was genuinely informative and
+    asymmetric: ASX momentum stayed significant to 200bps, while the US mirror's real
+    pre-2008-09 edge broke down between 50-75bps — a real difference between markets that a
+    single flat-cost assumption would have hidden. **Rule: when the fully rigorous version of a
+    check needs data you've confirmed you don't have, look for the version of the check that
+    doesn't need it, rather than leaving an old limitation unexamined indefinitely — a
+    breakeven sweep and an illustratively-calibrated overlay can answer a real question even
+    when a precise dollar-cost number can't be produced.**
+36. **A striking cross-market asymmetry deserves decomposition before it gets filed as a
+    conclusion — and the model that produced it deserves the same scrutiny as the result.**
+    Milestone 35 found ASX momentum's edge cost-robust to 200bps+ while the US mirror's
+    pre-2008-09 edge broke down between 50-75bps, a ~7x gap that a 1.3x turnover difference
+    couldn't plausibly explain on its own. Milestone 36 decomposed it: the edge-magnitude ratio
+    (ASX's ~5.4x larger annualized return) accounted for almost all of it, turnover only a
+    modest ~1.3x contributor — multiplying the two reproduced the observed breakeven ratio
+    almost exactly. It then turned the same scrutiny on the model itself: a flat cost rate
+    applied identically to both markets implicitly assumes a mid/large-cap Australian universe
+    trades as cheaply as 30 US mega-caps, the opposite of what a real desk would expect, meaning
+    ASX's apparent cost-robustness is probably overstated even though the underlying arithmetic
+    decomposition is sound. **Rule: a surprising cross-market or cross-signal gap should be
+    decomposed into its component drivers before being reported as a finding on its own, and a
+    shared modeling assumption behind a comparison should be checked for which side it favors —
+    an asymmetric result built on a symmetric-looking assumption can still be biased in a
+    predictable direction.**
+37. **A naive walk-forward selection process — pick the best-looking in-sample backtest among
+    several candidates — is not a safe substitute for mechanism-level scrutiny of each
+    candidate, and this project's own data proves it wasn't just a theoretical risk.**
+    Milestone 37 split the US mirror at 1994-01-01 and ranked all six signals this project has
+    coded by pre-1994 out-of-sample-hedged significance. The "winner" was low-volatility's
+    strongly negative (inverted) result (p=0.0006), not momentum (p=0.0244, second place) — and
+    a process using only that ranking would have judged momentum's own post-1994 result
+    (p=0.59) a bust, exactly the already-known Milestone 9-10 decay finding, now reframed as a
+    selection failure rather than a single-signal one. **Rule: when validating a strategy
+    selection process, don't just check whether the SELECTED signal's return survives
+    out-of-sample — check whether the SELECTION RULE ITSELF would have chosen the signal that
+    later proved out to be real. A rule that ranks candidates by raw significance alone can
+    reliably prefer a decaying or inverted anomaly over a genuine, if less flashy, edge; the
+    economic interpretation this project applied to each candidate (not the p-value alone) is
+    what actually separated the two.**
+38. **A risk model's central finding, illustrated on a hypothetical book, is not yet
+    demonstrated on the position you actually hold — test it there too, and re-apply the
+    project's own confound-checking discipline when the real number looks too dramatic.**
+    Milestone 43 computed empirical vs. Gaussian VaR/CVaR directly on momentum's real
+    out-of-sample-hedged return series, the same one every significance test in this project
+    already uses, rather than trusting Q1's stylized Monte Carlo simulation as the final word.
+    The raw full-sample US result looked almost too good at illustrating Q1's point (a 2.95x
+    99.9% CVaR understatement, nearly double Q1's own hypothetical 1.65x) — until the single
+    worst day in the series turned out to sit inside the exact 1972-77 window Milestone 15 had
+    already flagged as thin and data-glitched. Excluding it cut the gap to 1.71x, still real but
+    materially smaller. **Rule: a real-data result that confirms a hypothesis dramatically is
+    exactly the moment to re-run your project's own established confound checks against it, not
+    the moment to stop checking because the number already supports the story you expected.**
+    Bootstrap confidence intervals on every far-tail estimate are the second half of the same
+    discipline: a single 99.9% VaR/CVaR number from a few thousand days of data is not a fact,
+    it is a point estimate with real, sometimes wide, uncertainty around it, and a risk
+    playbook should size against that range, not the point estimate alone.
+39. **A shared surface-level construction between two strategies does not imply a shared
+    crash-risk mechanism — check it directly, on the actual regime-interaction test, not by
+    analogy.** Low-volatility and MAX both share momentum's shape: a long-short book short
+    something plausibly higher-beta (the high-volatility leg, the high-lottery leg). Milestone
+    46 applied momentum's own Bear+HighVol regime-interaction test (Milestones 16-17) to both,
+    on every market and leg where either signal shows anything, and found every interaction
+    coefficient statistically indistinguishable from zero (p=0.41-0.98) — the known negative
+    results on these signals are a steady, persistent drag (Milestone 26: concentrated in one
+    decade), not a crash-conditional spike like momentum's own break. **Rule: a plausible
+    mechanism-level analogy between two strategies ("both short a high-beta-like leg, so both
+    should crash the same way") is a hypothesis worth testing, not a fact to assume — and a
+    clean null from testing it directly is itself worth recording, since it rules out a
+    specific, previously-untested channel by which two signals' risks could have been
+    correlated in a real portfolio.**
+40. **A multiple-testing correction is only as good as the family it's built from — and not
+    every significance test this project has ever printed belongs in the same family.**
+    Milestone 41 corrected one clean family (21 replication tests). Milestone 47 built a second,
+    comparable one: all 17 Bear+HighVol crash-interaction tests this project has ever run
+    (momentum across three eras, two markets, two legs; low-volatility and MAX per Milestone
+    46) — deliberately excluding decade-breakdown and sub-period checks (Milestones 26-28, 34,
+    38), which are conditional localizations of an already-flagged effect, not independent
+    discovery claims, and would inflate the family with non-exchangeable tests if folded in.
+    The result was sobering: momentum's own post-2008-09 crash mechanism (p=0.0081 raw, this
+    project's explanation for its worst historical loss since Milestone 16) does not survive
+    either Benjamini-Hochberg (adj. p=0.1384) or Bonferroni correction. **Rule: this does not
+    mean the mechanism is false — it replicates an out-of-sample, literature-documented
+    phenomenon (Daniel & Moskowitz 2016) this project never computed — but it does mean a
+    finding's within-project statistical confidence should be judged against the comparable
+    family of tests it belongs to, not the single uncorrected p-value that first surfaced it,
+    and a project willing to correct its best replication result should be equally willing to
+    correct its own most-trusted risk explanation.**
+
+## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
+
+**The gap this targets.** Off-the-shelf factor data (momentum, value,
+quality) is sold by large vendors (MSCI, AQR's own public factor data,
+Bloomberg) as pre-blended, black-box composites, priced for institutions
+with seven-figure budgets. Smaller systematic funds, family offices, RIAs,
+and independent research desks either can't afford that tier or can't see
+*inside* the composite to know which component is actually carrying the
+edge on their specific universe — exactly the failure mode this project hit
+firsthand on the NSE data (section 1, above), and hit *again* when its own
+first-reported positive finding (reversal) turned out not to survive a
+beta check the project hadn't yet thought to run (Milestone 8). The product
+is built directly around fixing that: **decomposed, auditable behavioral
+signals plus honest, per-universe, beta-adjusted validation, not another
+black-box score** — the same standard that, when finally applied evenly,
+is what surfaced this project's one genuine finding (US momentum) instead
+of its retracted one (reversal).
+
+**What it is.** A subscription analytics service with two parts:
+
+- **Signal side**: the momentum / 52-week-high / reversal library in
+  `signals/`, run per-client against *their* universe (not a generic global
+  one), reported as separate, individually-backtested components — never
+  pre-blended — with the decile backtest and cost-adjusted Sharpe shown for
+  each, on their actual investable names, not a vendor's benchmark universe.
+  Every reported number ships with its own beta-regression alpha/beta
+  breakdown (Milestone 6) so a client can see whether a signal's performance
+  is genuine stock-selection skill or just uncontrolled market exposure, and
+  a pre/post-publication decay split re-confirmed with an actual rolling,
+  out-of-sample hedge (Milestones 9-10) for any signal drawn from published
+  academic research, and a minimum-data-density check flagging any period
+  where a decile portfolio would hold fewer than, say, 10 names (Milestone
+  15, which found a "genuine" edge that was actually 2-4 survivor-biased
+  stocks masquerading as a diversified portfolio) — checks most
+  factor-data vendors don't surface at all, and which this project's own
+  experience shows can materially change the answer versus an in-sample
+  split alone.
+- **Risk side**: the regime-switching stress-VaR methodology from
+  `risk_simulation/fat_tails_vs_normal.py`, run against a client's actual
+  position correlations and leverage, reporting calm-regime vs. stress-regime
+  tail loss side by side — the comparison a standard historical-VaR vendor
+  tool doesn't show. Any reported crash-regime exposure ships with a
+  persistence check (Milestone 18: does the conditioning regime — e.g., a
+  trailing bear market — actually recur across the window tested, or is a
+  single crisis acting as its own control group and inflating apparent
+  significance) before it's presented as a standing risk factor rather than
+  a one-episode finding, and a parameter-sensitivity sweep (Milestone 19: does
+  the regime definition itself — the volatility window, the bear-market
+  lookback — hold up under a few other reasonable choices, not just the one
+  that happened to be picked first).
+
+**Minimum viable version**: a report generator that takes a client's
+portfolio or watchlist and CSV price history, and outputs, per name: each
+individual behavioral signal's current value and its own historical
+Sharpe/drawdown on that universe (not a pre-blended score), plus a portfolio-
+level calm-vs-stress VaR comparison. Buildable directly on the code already
+in this repo folder.
+
+**Target customer**: small-to-mid systematic equity funds, family offices,
+and independent RIAs — priced out of institutional factor-data tiers but
+sophisticated enough to want decomposed, re-validated signals rather than a
+black box. A secondary market: finance graduate programs and CFA/PE prep
+courses, as a teaching tool for exactly the "don't trust the blend" lesson
+this project surfaced.
+
+**Revenue model**: per-seat analytics subscription, tiered by number of
+tracked universes/portfolios — the same go-to-market as quant factor-data
+vendors, but priced and scoped for the segment those vendors don't serve
+well, and differentiated specifically on transparency (every number traces
+to runnable code and a stated backtest window, not a vendor's proprietary
+methodology).
+
+**Moat, such as it is**: not the signals themselves (all public, published
+research) — the moat is the discipline of per-client, per-universe
+decomposed validation instead of a generic pre-blended score, which is
+exactly what a larger vendor selling a standardized product across all
+clients structurally can't do cheaply.
