@@ -1061,6 +1061,23 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     clean null from testing it directly is itself worth recording, since it rules out a
     specific, previously-untested channel by which two signals' risks could have been
     correlated in a real portfolio.**
+40. **A multiple-testing correction is only as good as the family it's built from — and not
+    every significance test this project has ever printed belongs in the same family.**
+    Milestone 41 corrected one clean family (21 replication tests). Milestone 47 built a second,
+    comparable one: all 17 Bear+HighVol crash-interaction tests this project has ever run
+    (momentum across three eras, two markets, two legs; low-volatility and MAX per Milestone
+    46) — deliberately excluding decade-breakdown and sub-period checks (Milestones 26-28, 34,
+    38), which are conditional localizations of an already-flagged effect, not independent
+    discovery claims, and would inflate the family with non-exchangeable tests if folded in.
+    The result was sobering: momentum's own post-2008-09 crash mechanism (p=0.0081 raw, this
+    project's explanation for its worst historical loss since Milestone 16) does not survive
+    either Benjamini-Hochberg (adj. p=0.1384) or Bonferroni correction. **Rule: this does not
+    mean the mechanism is false — it replicates an out-of-sample, literature-documented
+    phenomenon (Daniel & Moskowitz 2016) this project never computed — but it does mean a
+    finding's within-project statistical confidence should be judged against the comparable
+    family of tests it belongs to, not the single uncorrected p-value that first surfaced it,
+    and a project willing to correct its best replication result should be equally willing to
+    correct its own most-trusted risk explanation.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

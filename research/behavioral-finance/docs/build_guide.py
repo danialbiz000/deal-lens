@@ -3959,6 +3959,90 @@ box(
     "have suggested there should be something.",
     title="A CLEAN NULL: SHARED SHAPE DOES NOT MEAN SHARED CRASH RISK"
 )
+box(
+    "Section 5.48 builds a second multiple-testing family &mdash; every "
+    "Bear+HighVol crash-interaction test this project has ever run "
+    "&mdash; and finds momentum's own post-2008-09 crash mechanism "
+    "does not survive correction.",
+    kind="fact", title="UPDATE FROM SECTION 5.48"
+)
+
+h1("5.48  Milestone 47 &mdash; Does a fuller multiple-testing correction change what this project's crash-mechanism finding should be trusted at?")
+p("Section 5.42 corrected exactly one family: the 21 &quot;does "
+  "signal X replicate on market Y&quot; tests. This project has run "
+  "other kinds of significance tests since &mdash; most comparably, "
+  "the Bear+HighVol crash-mechanism regime-interaction test itself, "
+  "applied repeatedly across Sections 5.17-5.19, 5.21, and 5.47 to "
+  "different signals, markets, and eras. Before building a bigger "
+  "correction, this section makes an explicit choice most literal "
+  "readings of &quot;correct everything&quot; would skip: <b>not "
+  "every p-value this project has ever printed belongs in one "
+  "family.</b> A decade-by-decade breakdown (Sections 5.27-5.29, "
+  "5.35) or a sub-period check (Section 5.39) is a <i>localization</i> "
+  "test, conditional on an effect already flagged as worth "
+  "explaining &mdash; not a fresh, independent &quot;is this "
+  "real&quot; discovery claim. Folding those into the same corrected "
+  "family as 21 independent replication attempts would inflate it "
+  "with tests that aren't exchangeable with the others, manufacturing "
+  "false precision rather than adding rigor.")
+p("What does belong in a second, comparable family: the Bear+HighVol "
+  "interaction test itself, applied with the exact same construction "
+  "to momentum (three eras, two markets, two legs) and, per Section "
+  "5.47, to low-volatility and MAX (two markets, three legs) &mdash; "
+  "17 tests in total, every p-value computed fresh.")
+data_table(
+    ["Test", "Coefficient", "Raw p", "BH-adj p", "Bonf-adj p"],
+    [
+        ["Momentum US long leg, post-2008-09", "-0.00218", "0.0081", "0.1384", "0.1384"],
+        ["Momentum US long leg, full sample", "-0.00099", "0.1353", "0.9836", "1.0000"],
+        ["Momentum US combined leg, post-2008-09", "-0.00231", "0.2062", "0.9836", "1.0000"],
+        ["(14 more tests, all not significant)", "", "", "", ""],
+    ],
+    col_widths=[2.4*inch, 1.1*inch, 0.8*inch, 0.9*inch, 0.9*inch], small=True,
+)
+p("<b>Out of 17 tests, only 1 is significant at raw p&lt;0.05 "
+  "&mdash; momentum US's own post-2008-09 crash-mechanism interaction "
+  "(p=0.0081), this project's established explanation (Section 5.17) "
+  "for its worst historical loss &mdash; and it does <i>not</i> "
+  "survive either correction (BH-adj=0.1384, Bonf-adj=0.1384).</b> "
+  "This is a genuinely sobering result, not a footnote: the same "
+  "statistical discipline that confirmed ASX momentum's replication "
+  "survives the harshest correction available (Section 5.42) finds "
+  "that this project's own crash-mechanism explanation, taken purely "
+  "on this project's own data and tested against the comparable "
+  "family it belongs to, would not clear a pre-registered "
+  "significance bar.")
+p("This does not retract the crash mechanism, but it does properly "
+  "qualify how much of its credibility comes from this project's own "
+  "data specifically. The mechanism is not solely an in-project "
+  "finding: it replicates a specific, out-of-sample, "
+  "literature-documented phenomenon (Daniel &amp; Moskowitz 2016), "
+  "discovered and published years before this project's own 2008-09 "
+  "result was ever computed, on datasets this project has never "
+  "touched. A single p=0.0081 inside this project's own data, "
+  "evaluated against a comparable family of 17 tests this project "
+  "itself ran, does not clear a strict corrected bar &mdash; but the "
+  "mechanism's credibility was never resting on this project's "
+  "p-value alone the way, say, momentum's own headline replication "
+  "claim rests on this project's own tests. This also reinforces, "
+  "via a completely different statistical route, what Section 5.19 "
+  "already found by isolating the 2008-09 crisis window directly: "
+  "the interaction term itself was not significant there either "
+  "(p=0.26 long leg) once tested alone, with volatility and bear-state "
+  "mattering independently rather than through their interaction. Two "
+  "different scrutiny methods, run at different times for different "
+  "reasons, converge on the same more-cautious reading.")
+box(
+    "Treat the crash-mechanism explanation as theoretically "
+    "well-motivated and directionally consistent with an established "
+    "literature, but hold its within-project statistical confidence "
+    "to the same corrected standard this project now applies to "
+    "everything else &mdash; which is more cautious than the "
+    "uncorrected p=0.0081 alone would suggest. A project willing to "
+    "correct its best replication result should be equally willing "
+    "to correct its own most-trusted risk explanation.",
+    title="A SOBERING RESULT, NOT A RETRACTION"
+)
 
 # MARKER_END_PART5
 
@@ -4486,6 +4570,16 @@ box(
     "statistically indistinguishable from zero (p=0.41-0.98) &mdash; a "
     "clean null.",
     kind="fact", title="UPDATE FROM PART V.47"
+)
+box(
+    "Part V.48 built a second multiple-testing family &mdash; 17 "
+    "Bear+HighVol crash-interaction tests this project has ever run "
+    "&mdash; deliberately excluding decade-breakdown checks as "
+    "conditional localizations, not fresh discoveries. Momentum's own "
+    "post-2008-09 crash mechanism (p=0.0081 raw) does not survive "
+    "correction (BH-adj=0.1384): sobering, though not a retraction "
+    "given the mechanism's independent literature support.",
+    kind="fact", title="UPDATE FROM PART V.48"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -5185,6 +5279,23 @@ bullets([
     "testing it directly is itself worth recording, since it rules out a specific, "
     "previously-untested channel by which two signals' risks could have been correlated in a "
     "real portfolio.",
+    "<b>A multiple-testing correction is only as good as the family it's built from &mdash; "
+    "and not every significance test this project has ever printed belongs in the same "
+    "family.</b> Part V.42 corrected one clean family (21 replication tests). Part V.48 built "
+    "a second, comparable one: all 17 Bear+HighVol crash-interaction tests this project has "
+    "ever run (momentum across three eras, two markets, two legs; low-volatility and MAX per "
+    "Part V.47) &mdash; deliberately excluding decade-breakdown and sub-period checks, which "
+    "are conditional localizations of an already-flagged effect, not independent discovery "
+    "claims, and would inflate the family with non-exchangeable tests if folded in. The result "
+    "was sobering: momentum's own post-2008-09 crash mechanism (p=0.0081 raw, this project's "
+    "explanation for its worst historical loss since Part V.17) does not survive either "
+    "Benjamini-Hochberg (adj. p=0.1384) or Bonferroni correction. This does not mean the "
+    "mechanism is false &mdash; it replicates an out-of-sample, literature-documented "
+    "phenomenon (Daniel &amp; Moskowitz 2016) this project never computed &mdash; but it does "
+    "mean a finding's within-project statistical confidence should be judged against the "
+    "comparable family of tests it belongs to, not the single uncorrected p-value that first "
+    "surfaced it, and a project willing to correct its best replication result should be "
+    "equally willing to correct its own most-trusted risk explanation.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -5481,7 +5592,12 @@ bullets([
     "outside 2008-09, not just untested. Whether it would reactivate in "
     "a genuinely severe future crisis, as opposed to the milder 2011 and "
     "2015-16 episodes, remains open &mdash; this sample has not "
-    "contained one since 2009.",
+    "contained one since 2009. <i>(Qualified, not retracted, by Part "
+    "V.48: this same finding does not survive a formal multiple-testing "
+    "correction across the 17-test family of crash-interaction tests "
+    "this project has run &mdash; see below. Its credibility rests "
+    "substantially on independent literature support (Daniel &amp; "
+    "Moskowitz 2016), not on this project's own p-value alone.)</i>",
     "<b>The tentative NSE post-2008 momentum signal (Part V.18) does not "
     "survive splitting by universe stability &mdash; its own named "
     "caveat, finally tested (Part V.22).</b> NSE's universe grew from "
@@ -6053,6 +6169,26 @@ bullets([
     "crash-risk toolkit, applied honestly to two new candidates that looked like natural "
     "extensions, found nothing, and that clean null is itself worth recording rather than "
     "leaving as an untested assumption.</b>",
+    "<b>A second multiple-testing family, assembled deliberately not to include everything, "
+    "finds this project's own crash-mechanism explanation for its worst historical loss does "
+    "not survive correction (Part V.48).</b> Part V.42 corrected exactly one family (21 "
+    "replication tests); this project has since run other significance tests, most comparably "
+    "the Bear+HighVol crash-interaction test itself (Parts V.17-V.19, V.21, V.47). "
+    "Decade-breakdown and sub-period checks (Parts V.27-V.29, V.35, V.39) are deliberately "
+    "excluded &mdash; they are conditional localizations of an already-flagged effect, not "
+    "independent discovery claims, and folding them in would inflate the family with "
+    "non-exchangeable tests. The comparable family that does exist &mdash; 17 Bear+HighVol "
+    "interaction tests across momentum (three eras, two markets, two legs) and "
+    "low-volatility/MAX (Part V.47's tests) &mdash; finds only momentum's own post-2008-09 "
+    "mechanism significant at raw p&lt;0.05 (p=0.0081), and it does <b>not</b> survive either "
+    "Benjamini-Hochberg (adj. p=0.1384) or Bonferroni correction. <b>This does not retract the "
+    "mechanism</b>: it replicates a specific, out-of-sample, literature-documented phenomenon "
+    "(Daniel &amp; Moskowitz 2016) discovered on datasets this project has never touched, so "
+    "its credibility was never resting on this project's own p-value alone. But it does mean "
+    "this project should hold the <i>within-project statistical confidence</i> of its own "
+    "crash-mechanism claim to the same corrected standard applied to everything else &mdash; "
+    "more cautious than the uncorrected p=0.0081 alone would suggest, and a genuinely sobering "
+    "result about a finding this project has treated as settled since Part V.17.",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -6187,7 +6323,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 46 then ran the India findings through "
+  "needed. Milestones 3 through 47 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -6303,7 +6439,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, forty-three times in a row "
+  "most recent, best-supported-looking result, forty-four times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -6555,13 +6691,21 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "had assumed existed &mdash; both signals live on the same market "
   "&mdash; turned out not to; the one that did exist, on two markets "
   "that share nothing, delivered exactly the diversification a real, "
-  "checked independence should, and finally ran a forty-third check "
+  "checked independence should, ran a forty-third check "
   "(Part V.47) that took the one mechanism behind this project's "
   "worst historical loss and asked whether two other signals built "
   "the same way &mdash; short a leg the theory says should be "
   "dangerous &mdash; were exposed to it too. Neither was, anywhere, "
   "at any level of the same test that had found it so clearly for "
-  "momentum: a shared shape, it turns out, is not a shared risk. "
+  "momentum: a shared shape, it turns out, is not a shared risk, and "
+  "finally ran a forty-fourth check (Part V.48) that gathered every "
+  "version of that same crash test the project had ever run into one "
+  "corrected family and pointed the correction, for the first time, "
+  "at the project's own risk explanation rather than at someone "
+  "else's replication claim. The single number that had justified "
+  "trusting this project's account of its worst loss did not survive "
+  "the same scrutiny that had already been applied to everything "
+  "else. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -6634,10 +6778,13 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "actually there to build &mdash; and that the combination which "
   "WAS there, sitting in two markets with nothing in common, did "
   "exactly what independence is supposed to do to a portfolio instead "
-  "of just being asserted to, and finally discovering that the exact "
+  "of just being asserted to, discovering that the exact "
   "test which had once explained this project's worst historical loss "
   "found nothing at all when pointed at two signals that looked, on "
-  "paper, built the same dangerous way, are "
+  "paper, built the same dangerous way, and finally discovering that "
+  "the same correction the project had used to humble its best "
+  "replication result, turned at last on its own risk explanation, "
+  "humbled that too, are "
   "all "
   "findings: the project never "
   "found a result, an explanation, or even a way of testing an "
@@ -6898,15 +7045,23 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "market they were assumed to share turned out not to exist; the "
   "market pair that did exist, sharing no stocks, no mechanism, and "
   "no calendar, produced a Sharpe ratio neither leg could reach alone "
-  "&mdash; independence, cashed out. And Part V.47 finally took the "
+  "&mdash; independence, cashed out. Part V.47 then took the "
   "one test that had explained this project's worst historical loss "
   "and pointed it at two signals whose only crime was looking, from a "
   "distance, built the same dangerous way. Neither was: the same "
   "regime interaction that lit up unmistakably for momentum came back "
   "flat every time, on every market, on every leg, for signals that "
   "share momentum's short-a-high-beta-leg shape but not, it turns "
-  "out, its risk. What "
-  "remains open, after forty-three checks, is not a "
+  "out, its risk. And Part V.48 finally pointed the project's own "
+  "multiple-testing machinery, built to discipline everyone else's "
+  "replication claims, back at the one number the project itself had "
+  "leaned on hardest: the crash-mechanism finding that named a cause "
+  "for its worst loss. Gathered into the family of seventeen "
+  "comparable crash tests it actually belongs to, that finding did "
+  "not clear the bar either &mdash; not disproven, since it echoes a "
+  "mechanism documented outside this project entirely, but no longer "
+  "resting on this project's own arithmetic alone. What "
+  "remains open, after forty-four checks, is not a "
   "specific finding still standing untested, but the same standing "
   "posture the project started with: no result here is treated as "
   "more final than the next check would find it to be, no comparison "
@@ -6932,14 +7087,17 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "buildable from two independent findings before checking which "
   "markets each one is actually live in, no crash mechanism found for "
   "one signal is assumed to extend to another signal that merely "
-  "looks built the same way, and "
+  "looks built the same way, no explanation for the project's own "
+  "worst result is held to a looser standard than the replication "
+  "claims it corrects everyone else's with, and "
   "the "
   "project's one surviving edge is exactly as well-supported, and "
   "exactly as fragile, as its "
   "most recent, most adversarial test says it is &mdash; no more, no "
   "less. That is "
   "what a research process built to "
-  "distrust its own best-looking result eventually converges on.")
+  "distrust its own best-looking result, and its own favorite "
+  "explanation for its worst one, eventually converges on.")
 
 # ============================================================ GLOSSARY
 story.append(PageBreak())

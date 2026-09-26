@@ -2396,6 +2396,62 @@ nothing where the surface-level analogy might have suggested there should be som
 
 **Reproduce this**: `python investigations/crash_mechanism_lottery_signals.py`.
 
+## Does a fuller multiple-testing correction change what this project's crash-mechanism finding should be trusted at? (Milestone 47)
+
+Milestone 41 corrected exactly one family: the 21 "does signal X replicate on market Y" tests.
+This project has run other kinds of significance tests since — most comparably, the
+Bear+HighVol crash-mechanism regime-interaction test itself, applied repeatedly across
+Milestones 16-18, 20, and 46 to different signals, markets, and eras. Before building a bigger
+correction, this milestone makes an explicit choice most literal readings of "correct
+everything" would skip: **not every p-value this project has ever printed belongs in one
+family.** A decade-by-decade breakdown (Milestones 26-28, 34) or a sub-period check (Milestone
+38) is a *localization* test, conditional on an effect already flagged as worth explaining — not
+a fresh, independent "is this real" discovery claim. Folding those into the same corrected
+family as 21 independent replication attempts would inflate it with tests that aren't
+exchangeable with the others, manufacturing false precision rather than adding rigor.
+
+What does belong in a second, comparable family: the Bear+HighVol interaction test itself,
+applied with the exact same construction to momentum (three eras, two markets, two legs) and,
+per Milestone 46, to low-volatility and MAX (two markets, three legs) — 17 tests in total,
+every p-value computed fresh.
+
+| Test | Coefficient | Raw p | BH-adj p | Bonf-adj p |
+|---|---|---|---|---|
+| Momentum US long leg, post-2008-09 | -0.00218 | 0.0081 | 0.1384 | 0.1384 |
+| Momentum US long leg, full sample | -0.00099 | 0.1353 | 0.9836 | 1.0000 |
+| Momentum US combined leg, post-2008-09 | -0.00231 | 0.2062 | 0.9836 | 1.0000 |
+| *(14 more tests, all not significant)* | | | | |
+
+**Out of 17 tests, only 1 is significant at raw p<0.05 — momentum US's own post-2008-09
+crash-mechanism interaction (p=0.0081), this project's established explanation (Milestone 16)
+for its worst historical loss — and it does *not* survive either correction (BH-adj=0.1384,
+Bonf-adj=0.1384).** This is a genuinely sobering result, not a footnote: the same statistical
+discipline that confirmed ASX momentum's replication survives the harshest correction available
+(Milestone 41) finds that this project's own crash-mechanism explanation, taken purely on this
+project's own data and tested against the comparable family it belongs to, would not clear a
+pre-registered significance bar.
+
+**This does not retract the crash mechanism, but it does properly qualify how much of its
+credibility comes from this project's own data specifically.** The mechanism is not solely an
+in-project finding: it replicates a specific, out-of-sample, literature-documented phenomenon
+(Daniel & Moskowitz 2016), discovered and published years before this project's own 2008-09
+result was ever computed, on datasets this project has never touched. A single p=0.0081 inside
+this project's own data, evaluated against a comparable family of 17 tests this project itself
+ran, does not clear a strict corrected bar — but the mechanism's credibility was never resting
+on this project's p-value alone the way, say, momentum's own headline replication claim rests
+on this project's own tests. This also reinforces, via a completely different statistical
+route, what Milestone 18 already found by isolating the 2008-09 crisis window directly: the
+interaction term itself was not significant there either (p=0.26 long leg) once tested alone,
+with volatility and bear-state mattering independently rather than through their interaction.
+Two different scrutiny methods, run at different times for different reasons, converge on the
+same more-cautious reading. **Updated conclusion**: treat the crash-mechanism explanation as
+theoretically well-motivated and directionally consistent with an established literature, but
+hold its *within-project statistical confidence* to the same corrected standard this project
+now applies to everything else — which is more cautious than the uncorrected p=0.0081 alone
+would suggest.
+
+**Reproduce this**: `python investigations/crash_mechanism_multiple_testing.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2893,6 +2949,15 @@ python investigations/cross_market_combined_portfolio.py
 # "Do low-volatility and MAX carry the same crash-risk mechanism as momentum" above)
 python investigations/crash_mechanism_lottery_signals.py
 
+# Investigation -- a second, comparable multiple-testing family: every Bear+HighVol
+# crash-mechanism interaction test this project has ever run (17 tests, momentum + low-vol +
+# MAX), correcting for the number of hypotheses rather than assuming decade-breakdown checks
+# belong in the same family as fresh discovery tests; momentum's own post-2008-09 crash
+# mechanism (p=0.0081 raw) does NOT survive correction (BH-adj=0.1384), a sobering but not
+# fatal result given its independent literature support; see "Does a fuller multiple-testing
+# correction change what this project's crash-mechanism finding should be trusted at" above
+python investigations/crash_mechanism_multiple_testing.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -3089,7 +3154,15 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    and MAX (short the high-lottery leg). Every Bear+HighVol interaction coefficient, on every
    signal, market, and leg, was statistically indistinguishable from zero (p=0.41-0.98) — a
    clean null showing momentum's crash risk is specific to momentum, not a general property of
-   any strategy that shorts a high-beta-like leg. Momentum's
+   any strategy that shorts a high-beta-like leg. Finally, a second multiple-testing family was
+   assembled and corrected (Milestone 47): all 17 Bear+HighVol crash-interaction tests this
+   project has ever run, deliberately excluding decade-breakdown and sub-period checks as
+   conditional localizations rather than independent discovery claims. Momentum's own
+   post-2008-09 crash mechanism (p=0.0081 raw, this project's own explanation for its worst
+   historical loss) does not survive either correction (BH-adj=0.1384) — a sobering result
+   properly qualifying how much of that mechanism's credibility rests on this project's own
+   data specifically, though the mechanism itself is independently documented in the academic
+   literature (Daniel & Moskowitz 2016) outside anything this project has computed. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -3276,7 +3349,11 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   this sample — so the "active since" framing overstates what was tested. The mechanism is
   confirmed for the one bear market this sample's post-2008 window actually contains, not
   demonstrated to be a standing post-2008 feature. See "Was the 2008-09 crash mechanism a
-  permanent regime change, or a one-off crisis?" below.]**
+  permanent regime change, or a one-off crisis?" below.]** **[Qualified, not retracted, by
+  Milestone 47: this same p=0.008 finding does not survive a formal multiple-testing
+  correction across the 17-test family of crash-interaction tests this project has run — see
+  below. Its credibility rests substantially on independent literature support (Daniel &
+  Moskowitz 2016), not on this project's own p-value alone.]**
 - **The momentum-crash mechanism does not replicate on NSE — but a more rigorous re-test
   finds a tentative NSE momentum signal a cruder test had missed (Milestone 17).**
   Milestone 8's "no significant NSE momentum alpha" used a static full-sample regression;
@@ -3748,3 +3825,22 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   applied honestly to two new candidates that looked like natural extensions, found nothing,
   and that clean null is itself worth recording rather than leaving as an untested
   assumption.**
+- **A second multiple-testing family, assembled deliberately not to include everything, finds
+  this project's own crash-mechanism explanation for its worst historical loss does not
+  survive correction (Milestone 47).** Milestone 41 corrected exactly one family (21
+  replication tests); this project has since run other significance tests, most comparably the
+  Bear+HighVol crash-interaction test itself (Milestones 16-18, 20, 46). Decade-breakdown and
+  sub-period checks (Milestones 26-28, 34, 38) are deliberately excluded — they are conditional
+  localizations of an already-flagged effect, not independent discovery claims, and folding
+  them in would inflate the family with non-exchangeable tests. The comparable family that does
+  exist — 17 Bear+HighVol interaction tests across momentum (three eras, two markets, two legs)
+  and low-volatility/MAX (Milestone 46's tests) — finds only momentum's own post-2008-09
+  mechanism significant at raw p<0.05 (p=0.0081), and it does **not** survive either
+  Benjamini-Hochberg (adj. p=0.1384) or Bonferroni correction. **This does not retract the
+  mechanism**: it replicates a specific, out-of-sample, literature-documented phenomenon
+  (Daniel & Moskowitz 2016) discovered on datasets this project has never touched, so its
+  credibility was never resting on this project's own p-value alone. But it does mean this
+  project should hold the *within-project statistical confidence* of its own crash-mechanism
+  claim to the same corrected standard applied to everything else — more cautious than the
+  uncorrected p=0.0081 alone would suggest, and a genuinely sobering result about a finding
+  this project has treated as settled since Milestone 16.**
