@@ -578,6 +578,19 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   be crossed rather than left as parallel, independently-varying checks — the interaction term
   is sometimes the more decision-relevant number than either marginal effect alone, and finding
   it small is itself a useful, reportable result, not a null finding to discard.**
+- **Milestone 44 extended the cost-realism lens (built for momentum, Milestone 35) to this
+  project's other live findings, and found momentum's cost-robustness is the exception, not the
+  norm.** Before sweeping costs, checking what there was to protect first: MAX and long-term
+  reversal have no positive finding anywhere in this project, so there was nothing to test for
+  either. Of the two remaining live findings, ASX low-volatility's long leg was only ever
+  marginally significant before any cost and barely survives this project's own standing 10bps
+  baseline; turn-of-month, a long-only market-timing strategy that pays a round-trip cost on
+  100% of notional roughly 12 times a year (unlike a decile rebalance's partial monthly
+  turnover), collapses to statistical noise on the US mirror at that same 10bps baseline. **Rule:
+  a signal's cost-robustness is a property of ITS OWN structure (how much of the book turns over,
+  how large the round-trip is relative to the edge), not a project-wide default — never assume
+  one signal's demonstrated cost-robustness generalizes to another signal's practical viability
+  without checking that signal's own turnover and trading structure directly.**
 
 ## 2. Risk-management lessons
 

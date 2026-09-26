@@ -3754,6 +3754,78 @@ box(
     "estimate at all with any precision.",
     title="A REAL POSITION CONFIRMS THE SIMULATION'S WARNING"
 )
+box(
+    "Section 5.45 extends the cost-realism lens built for momentum "
+    "(Section 5.36) to this project's other live findings, and finds "
+    "momentum's cost-robustness is the exception, not the norm.",
+    kind="fact", title="UPDATE FROM SECTION 5.45"
+)
+
+h1("5.45  Milestone 44 &mdash; Do the project's other signals survive realistic trading costs?")
+p("Sections 5.36-5.37 and 5.40 applied this project's flat-cost "
+  "breakeven sweep to momentum and the momentum-vs-composite "
+  "comparison, but never to the other four signals this project has "
+  "coded. Before running a pointless sweep, this section first checks "
+  "what there actually is to protect: MAX's only notable result was "
+  "shown by Section 5.30 to be low-volatility's own mechanism, not an "
+  "independent finding, and long-term reversal replicated on no "
+  "market at all (Section 5.31) &mdash; nothing to cost-test for "
+  "either. That leaves exactly two live positive findings never "
+  "checked against costs: ASX low-volatility's long leg alone "
+  "(Section 5.26, the only leg/market where this signal showed "
+  "anything) and turn-of-month on NSE/US (Section 5.39).")
+p("Turn-of-month needed a genuinely different cost model: it's a "
+  "long-only market-timing strategy, not a decile rebalance, so a "
+  "strategy trading only its ~4-day window enters the market at the "
+  "start of each occurrence and exits back to cash at the end "
+  "&mdash; a round-trip cost roughly 12 times a year, charged here at "
+  "the same 10-200bps sweep values used everywhere else in this "
+  "project.")
+data_table(
+    ["Cost", "ASX low-vol, monthly p", "NSE ToM add-on/day, p", "US ToM add-on/day, p"],
+    [
+        ["10bps (baseline)", "0.0473", "+0.1918%, p=0.0001", "+0.0340%, p=0.2101"],
+        ["25bps", "0.0550", "+0.1165%, p=0.0152", "-0.0411%, p=0.1306"],
+        ["50bps", "0.0702", "-0.0090%, p=0.8518", "-0.1663%, p=0.0000"],
+        ["100bps", "0.1103 (n.s.)", "-0.2599%, p=0.0000", "-0.4167%, p=0.0000"],
+        ["200bps", "0.2377 (n.s.)", "-0.7619%, p=0.0000", "-0.9176%, p=0.0000"],
+    ],
+    col_widths=[1.3*inch, 1.5*inch, 1.9*inch, 1.9*inch], small=True,
+)
+p("<b>Turn-of-month is far more cost-fragile than momentum ever "
+  "was.</b> The US mirror's turn-of-month effect (p=0.0020 with no "
+  "cost, per Section 5.39's own report) is already down to p=0.21 "
+  "&mdash; statistically indistinguishable from noise &mdash; at this "
+  "project's own standing 10bps baseline, because a long-only "
+  "market-timing strategy pays a round-trip cost on the FULL notional "
+  "roughly 24 times a year, unlike a decile rebalance that only turns "
+  "over a fraction of the book. NSE's stronger baseline result "
+  "survives 10-25bps but crosses zero between 25-50bps and turns "
+  "significantly <i>negative</i> beyond that (the guaranteed cost "
+  "simply exceeds the tiny daily edge &mdash; expected once cost "
+  "dominates, not a new anomaly). <b>ASX low-volatility's long leg "
+  "was only ever marginally significant</b> (p=0.0099 monthly with no "
+  "cost, per Section 5.26) <b>and this project's own 10bps baseline "
+  "alone pushes it to p=0.0473</b> &mdash; barely surviving &mdash; "
+  "before losing conventional significance entirely by 100bps, though "
+  "its point estimate stays positive (+7.56% to +4.44%) throughout "
+  "the sweep since this signal's turnover is naturally low "
+  "(13.7%/month).")
+box(
+    "Momentum's relative cost-robustness (Section 5.36: ASX momentum "
+    "significant to 200bps) is not the norm for this project's "
+    "signals &mdash; it's the exception. Every other live positive "
+    "finding this project has ever produced is meaningfully or "
+    "completely cost-fragile at levels well inside a realistic "
+    "trading-cost range, for two different structural reasons: "
+    "turn-of-month's round-trip market-timing structure pays cost on "
+    "100% of notional per trade, and ASX low-volatility's edge was "
+    "never more than marginal before any cost was applied. Momentum "
+    "remains the only signal in this project's history that is both "
+    "statistically confirmed and demonstrated to survive realistic "
+    "trading costs.",
+    title="MOMENTUM'S COST-ROBUSTNESS IS THE EXCEPTION, NOT THE RULE"
+)
 
 # MARKER_END_PART5
 
@@ -4255,6 +4327,14 @@ box(
     "excluding a known data confound (Part V.16), settles at 1.71x "
     "for 99.9% CVaR, still exceeding Q1's own hypothetical 1.65x.",
     kind="fact", title="UPDATE FROM PART V.44"
+)
+box(
+    "Part V.45 extended the cost-realism lens built for momentum "
+    "to this project's other live findings. Momentum's cost-robustness "
+    "turns out to be the exception: turn-of-month collapses to noise "
+    "on the US mirror at this project's own 10bps baseline, and ASX "
+    "low-volatility's already-marginal result barely survives it.",
+    kind="fact", title="UPDATE FROM PART V.45"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -4912,6 +4992,20 @@ bullets([
     "confidence intervals on every far-tail estimate are the second half of the same "
     "discipline: a single 99.9% VaR/CVaR number from a few thousand days of data is a point "
     "estimate with real, sometimes wide, uncertainty around it, not a fact.",
+    "<b>Part V.45 extended the cost-realism lens built for momentum to this project's other "
+    "live findings, and found momentum's cost-robustness is the exception, not the norm.</b> "
+    "Before sweeping costs, checking what there was to protect first: MAX and long-term "
+    "reversal have no positive finding anywhere in this project, so there was nothing to test "
+    "for either. Of the two remaining live findings, ASX low-volatility's long leg was only "
+    "ever marginally significant before any cost and barely survives this project's own "
+    "standing 10bps baseline; turn-of-month, a long-only market-timing strategy that pays a "
+    "round-trip cost on 100% of notional roughly 12 times a year (unlike a decile rebalance's "
+    "partial monthly turnover), collapses to statistical noise on the US mirror at that same "
+    "10bps baseline. A signal's cost-robustness is a property of its own structure &mdash; how "
+    "much of the book turns over, how large the round-trip is relative to the edge &mdash; not "
+    "a project-wide default; never assume one signal's demonstrated cost-robustness "
+    "generalizes to another signal's practical viability without checking that signal's own "
+    "turnover and trading structure directly.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -5633,7 +5727,11 @@ bullets([
     "+61%/yr on NSE) are illustrative only, since no real strategy can "
     "be long only a 4-day window twelve times a year without incurring "
     "real switching costs this project's flat-cost model (Parts "
-    "V.36-37) would need to account for.",
+    "V.36-37) would need to account for. <b>Tested directly by Part "
+    "V.45</b>: those switching costs are not a minor caveat &mdash; "
+    "even a 10bps round-trip cost pushes the US mirror's result to "
+    "statistical noise (p=0.21) and the NSE result loses significance "
+    "by 50bps, see below.",
     "<b>Part V.32's finding that the full equal-weighted composite beats a momentum-only "
     "variant on gross returns was correct as stated, but was drawn on exactly the cost-free "
     "basis Part V.36 later found is not a safe assumption &mdash; and once realistic costs "
@@ -5719,6 +5817,23 @@ bullets([
     "&mdash; even the US mirror's ~9,000-day cleaned series gives a 99.9% CVaR estimate with "
     "a genuinely wide interval (roughly 8%-10%), and this project's risk playbook should "
     "size against that empirical range, not a single Gaussian point estimate.</b>",
+    "<b>Momentum's relative robustness to realistic trading costs (Part V.36) is the "
+    "exception in this project, not the norm &mdash; every other live positive finding is "
+    "meaningfully or completely cost-fragile at levels well inside a realistic range (Part "
+    "V.45).</b> MAX (Part V.30) and long-term reversal (Part V.31) have no positive finding "
+    "anywhere to cost-test in the first place. Of the two that do, ASX low-volatility's long "
+    "leg was only ever marginally significant (p=0.0099 monthly with no cost) and this "
+    "project's own standing 10bps baseline alone pushes it to p=0.0473 &mdash; barely "
+    "surviving &mdash; before losing conventional significance by 100bps. Turn-of-month is "
+    "worse: because it is a long-only market-timing strategy that pays a round-trip cost on "
+    "100% of notional roughly 12 times a year (unlike a decile rebalance's partial turnover), "
+    "the US mirror's already-modest full-sample result (p=0.0020 with no cost) collapses to "
+    "p=0.21 at this project's own 10bps baseline, and NSE's stronger result loses "
+    "significance by 50bps and turns significantly negative beyond that once the guaranteed "
+    "cost exceeds the tiny daily edge. <b>Anyone building a practical framework from this "
+    "project's findings should treat momentum's cost-robustness as specific to that one "
+    "signal's structure (a fractional monthly rebalance), not as evidence any of this "
+    "project's live findings can absorb realistic trading costs by default.</b>",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -5853,7 +5968,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 43 then ran the India findings through "
+  "needed. Milestones 3 through 44 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -5969,7 +6084,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, forty times in a row "
+  "most recent, best-supported-looking result, forty-one times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -6197,7 +6312,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "reporting but small: real spreads widening exactly when a crash "
   "hits move the stress estimate by about a percentage point, not "
   "enough to change which risk actually drives the number, and "
-  "finally ran a fortieth check (Part V.44) that took the project's "
+  "ran a fortieth check (Part V.44) that took the project's "
   "own risk-management playbook back to first principles: not "
   "whether a hypothetical simulated book showed fat tails, which it "
   "was built to show, but whether momentum's own real return series "
@@ -6207,7 +6322,14 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "window this project had already learned, the hard way, not to "
   "trust. Excluding it left a smaller but still real gap between what "
   "a calm-regime model would have assumed and what the data actually "
-  "showed. "
+  "showed, and finally ran a forty-first check (Part V.45) that took "
+  "the cost lens built for one signal and pointed it at every other "
+  "live finding this project had, rather than assuming a lesson "
+  "learned once generalized on its own. It didn't: a long-only "
+  "calendar strategy paying full round-trip costs a dozen times a "
+  "year gave back its entire US edge at the same baseline cost that "
+  "barely dents momentum, and an already-marginal result on a third "
+  "market barely survived that same baseline at all. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -6261,13 +6383,20 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "with each other almost exactly once crossed &mdash; the crisis this "
   "project cannot rule out getting worse for longer is not, it turns "
   "out, one that also gets meaningfully worse because trading through "
-  "it costs more, and finally discovering that its own real return "
+  "it costs more, discovering that its own real return "
   "series, not just a hypothetical one built to illustrate a point, "
   "carried the exact fat-tailed signature the hypothetical book had "
   "assumed &mdash; and discovering, in the same breath, that the "
   "number making that case most dramatically was inflated by data "
   "this project had already learned not to trust, and stayed real, "
-  "just smaller, once that inflation was removed, are "
+  "just smaller, once that inflation was removed, and finally "
+  "discovering that the one signal whose edge had shrugged off costs "
+  "up to twenty times its baseline rate was not a preview of how the "
+  "project's other findings would behave, but a special case built on "
+  "a rebalance that only ever trades a slice of the book at once "
+  "&mdash; a calendar strategy that trades the whole book, twice, a "
+  "dozen times a year gave its entire edge back at the gentlest cost "
+  "assumption this project has ever used, are "
   "all "
   "findings: the project never "
   "found a result, an explanation, or even a way of testing an "
@@ -6507,7 +6636,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "with it &mdash; instead of leaving them as two separate, "
   "permanently open questions answered independently, and found the "
   "interaction real, worth reporting, and small: worse, not "
-  "dramatically worse. And Part V.44 finally turned this project's own "
+  "dramatically worse. Part V.44 then turned this project's own "
   "risk playbook back on the position it was actually written for: not "
   "a hypothetical simulated book built to illustrate that Gaussian "
   "models miss fat tails, but momentum's own real, hedged return "
@@ -6516,8 +6645,14 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "turned out to be sitting inside the exact thin, glitched window "
   "Part V.16's own correction had flagged many checks earlier; "
   "excluding it left the finding smaller, still real, and finally "
-  "trustworthy. What "
-  "remains open, after forty checks, is not a "
+  "trustworthy. And Part V.45 finally asked whether momentum's own "
+  "cost-robustness was a lesson about this project's signals in "
+  "general or a fact about momentum's own construction in particular. "
+  "It was the latter: the two other live findings this project still "
+  "had left, tested the same way for the first time, did not share "
+  "it, one of them losing its entire edge at the gentlest cost "
+  "assumption this project has ever applied. What "
+  "remains open, after forty-one checks, is not a "
   "specific finding still standing untested, but the same standing "
   "posture the project started with: no result here is treated as "
   "more final than the next check would find it to be, no comparison "
@@ -6536,7 +6671,10 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "same underlying risk are left as separate, independently-varying "
   "questions once both exist and could be crossed, no risk finding "
   "demonstrated only on a hypothetical book is treated as demonstrated "
-  "on a real position until it has actually been checked there, and "
+  "on a real position until it has actually been checked there, no "
+  "signal's demonstrated cost-robustness is assumed to generalize to "
+  "another signal without checking that signal's own turnover and "
+  "trading structure directly, and "
   "the "
   "project's one surviving edge is exactly as well-supported, and "
   "exactly as fragile, as its "

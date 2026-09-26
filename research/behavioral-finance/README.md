@@ -2256,6 +2256,55 @@ estimate at all with any precision.
 
 **Reproduce this**: `python investigations/momentum_var_cvar_profile.py`.
 
+## Do the project's other signals survive realistic trading costs? (Milestone 44)
+
+Milestones 35-36 and 39 applied this project's flat-cost breakeven sweep to momentum and the
+momentum-vs-composite comparison, but never to the other four signals this project has coded.
+Before running a pointless sweep, this milestone first checks what there actually is to protect:
+MAX's only notable result was shown by Milestone 29 to be low-volatility's own mechanism, not an
+independent finding, and long-term reversal replicated on no market at all (Milestone 30) —
+nothing to cost-test for either. That leaves exactly two live positive findings never checked
+against costs: ASX low-volatility's long leg alone (Milestone 25, the only leg/market where this
+signal showed anything) and turn-of-month on NSE/US (Milestone 38).
+
+Turn-of-month needed a genuinely different cost model: it's a long-only market-timing strategy,
+not a decile rebalance, so a strategy trading only its ~4-day window enters the market at the
+start of each occurrence and exits back to cash at the end — a round-trip cost (entry + exit)
+roughly 12 times a year, charged here at the same 10-200bps sweep values used everywhere else in
+this project.
+
+| Cost | ASX low-vol long leg, monthly p | NSE turn-of-month add-on/day, p | US turn-of-month add-on/day, p |
+|---|---|---|---|
+| 10bps (baseline) | 0.0473 | +0.1918%, p=0.0001 | +0.0340%, p=0.2101 |
+| 25bps | 0.0550 | +0.1165%, p=0.0152 | -0.0411%, p=0.1306 |
+| 50bps | 0.0702 | -0.0090%, p=0.8518 | -0.1663%, p=0.0000 |
+| 100bps | 0.1103 (n.s.) | -0.2599%, p=0.0000 | -0.4167%, p=0.0000 |
+| 200bps | 0.2377 (n.s.) | -0.7619%, p=0.0000 | -0.9176%, p=0.0000 |
+
+**Turn-of-month is far more cost-fragile than momentum ever was.** The US mirror's turn-of-month
+effect (p=0.0020 with no cost, per Milestone 38's own report) is already down to p=0.21 —
+statistically indistinguishable from noise — at this project's own standing 10bps baseline,
+because a long-only market-timing strategy pays a round-trip cost on the FULL notional roughly
+24 times a year, unlike a decile rebalance that only turns over a fraction of the book. NSE's
+stronger baseline result survives 10-25bps but crosses zero between 25-50bps and turns
+significantly *negative* beyond that (the guaranteed cost simply exceeds the tiny daily edge —
+expected once cost dominates, not a new anomaly). **ASX low-volatility's long leg was only ever
+marginally significant (p=0.0099 monthly with no cost, per Milestone 25) and this project's own
+10bps baseline alone pushes it to p=0.0473** — barely surviving — before losing conventional
+significance entirely by 100bps, though its point estimate stays positive (+7.56% to +4.44%)
+throughout the sweep since this signal's turnover is naturally low (13.7%/month).
+
+**Updated conclusion**: momentum's relative cost-robustness (Milestone 35: ASX momentum
+significant to 200bps) is not the norm for this project's signals — it's the exception. Every
+other live positive finding this project has ever produced is meaningfully or completely
+cost-fragile at levels well inside a realistic trading-cost range, for two different structural
+reasons: turn-of-month's round-trip market-timing structure pays cost on 100% of notional per
+trade, and ASX low-volatility's edge was never more than marginal before any cost was applied.
+Momentum remains the only signal in this project's history that is both statistically confirmed
+and demonstrated to survive realistic trading costs.
+
+**Reproduce this**: `python investigations/cost_realism_remaining_signals.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2731,6 +2780,14 @@ python investigations/crash_cost_interaction.py
 # momentum's actual returns show the same fat-tail gap Q1's simulation warned about" above)
 python investigations/momentum_var_cvar_profile.py
 
+# Investigation -- do the project's other live findings (ASX low-vol's long leg, turn-of-month
+# on NSE/US) survive realistic trading costs the way momentum does (MAX and long-term reversal
+# have no positive finding anywhere to cost-test); turn-of-month collapses almost immediately
+# on the US mirror even at this project's own 10bps baseline, and ASX low-vol's already-marginal
+# result barely survives it; see "Do the project's other signals survive realistic trading
+# costs" above)
+python investigations/cost_realism_remaining_signals.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -2908,7 +2965,15 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    CVaR understated by 2.95x) until the exact 1972-77 window Milestone 15 had already flagged
    as data-glitched was excluded, after which the gap settled at 1.71x — still real, still
    larger than Q1's own hypothetical 1.65x, but an honestly smaller and more defensible number
-   once a known confound was checked rather than left in. Momentum's
+   once a known confound was checked rather than left in. Finally, the cost-realism lens built
+   for momentum was extended to this project's other live findings (Milestone 44): MAX and
+   long-term reversal have no positive finding anywhere to cost-test, but turn-of-month on the
+   US mirror collapses to statistical noise at this project's own 10bps baseline cost (a
+   long-only market-timing strategy pays round-trip cost on 100% of notional ~12 times a year),
+   and ASX low-volatility's already-marginal long-leg result barely survives that same
+   baseline before losing significance by 100bps — momentum remains the only signal in this
+   project's history both confirmed and demonstrated to survive realistic trading costs.
+   Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -3432,6 +3497,9 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   implied annualized premiums (up to +61%/yr on NSE) are illustrative only, since no real
   strategy can be long only a 4-day window twelve times a year without incurring real
   switching costs this project's flat-cost model (Milestones 35-36) would need to account for.
+  **Tested directly by Milestone 44**: those switching costs are not a minor caveat — even a
+  10bps round-trip cost pushes the US mirror's result to statistical noise (p=0.21) and the
+  NSE result loses significance by 50bps, see below.
 - **Milestone 31's finding that the full equal-weighted composite beats a momentum-only
   variant on gross returns was correct as stated, but was drawn on exactly the cost-free basis
   Milestone 35 later found is not a safe assumption — and once realistic costs are applied,
@@ -3511,3 +3579,19 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   mirror's ~9,000-day cleaned series gives a 99.9% CVaR estimate with a genuinely wide
   interval (roughly 8%-10%), and this project's risk playbook should size against that
   empirical range, not a single Gaussian point estimate.**
+- **Momentum's relative robustness to realistic trading costs (Milestone 35) is the exception
+  in this project, not the norm — every other live positive finding is meaningfully or
+  completely cost-fragile at levels well inside a realistic range (Milestone 44).** MAX
+  (Milestone 29) and long-term reversal (Milestone 30) have no positive finding anywhere to
+  cost-test in the first place. Of the two that do, ASX low-volatility's long leg was only
+  ever marginally significant (p=0.0099 monthly with no cost) and this project's own standing
+  10bps baseline alone pushes it to p=0.0473 — barely surviving — before losing conventional
+  significance by 100bps. Turn-of-month is worse: because it is a long-only market-timing
+  strategy that pays a round-trip cost on 100% of notional roughly 12 times a year (unlike a
+  decile rebalance's partial turnover), the US mirror's already-modest full-sample result
+  (p=0.0020 with no cost) collapses to p=0.21 at this project's own 10bps baseline, and NSE's
+  stronger result loses significance by 50bps and turns significantly negative beyond that
+  once the guaranteed cost exceeds the tiny daily edge. **Anyone building a practical framework
+  from this project's findings should treat momentum's cost-robustness as specific to that one
+  signal's structure (a fractional monthly rebalance), not as evidence any of this project's
+  live findings can absorb realistic trading costs by default.**
