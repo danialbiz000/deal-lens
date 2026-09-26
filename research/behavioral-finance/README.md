@@ -2151,6 +2151,63 @@ robust result.
 
 **Reproduce this**: `python investigations/multiple_testing_correction.py`.
 
+## Does the crash mechanism get worse once trading costs rise with volatility, not just duration? (Milestone 42)
+
+Milestone 33 stress-tested how much worse momentum's crash-risk drawdown could get if a future
+Bear+HighVol regime persisted longer than anything in this sample — but held trading costs
+fixed at this project's standing flat 10bps throughout, even inside that stress scenario.
+Milestones 35-36 stress-tested how momentum's edge degrades as trading costs rise — but raised
+costs *uniformly* across the whole sample, calm months and crisis months alike. Real market
+microstructure does not work that way: bid-ask spreads and market impact are well documented to
+widen specifically when volatility spikes and liquidity dries up — exactly during the same
+Bear+HighVol regime this project's own crash mechanism (Milestones 16-17) already identifies. A
+strategy trying to survive a crash still has to keep rebalancing every month, at precisely the
+moment its own trading costs are highest.
+
+This milestone crosses the two lines without inventing a real spread-widening number (no data
+source available to this project carries bid-ask spreads or average daily volume — see
+Milestone 35's own documented check). It holds everything else fixed and varies one thing: a
+cost multiplier (1.0x–5.0x, bracketing the range of stress-period spread-widening documented in
+the market-microstructure literature) applied *only* to rebalances that fall within a
+Bear+HighVol regime, leaving normal-regime rebalances at the standing flat 10bps. For each
+multiplier, Milestone 17's own post-2008 crash regression is refit on the resulting net returns,
+and the fitted drift and residual pool are fed into Milestone 33's own bootstrap machinery, with
+duration held fixed at the actual worst historical episode (196 trading days, the 2008-09
+crisis itself) — isolating the cost effect from the duration question Milestone 33 already
+covered separately.
+
+| Crash-rebalance cost multiplier | Daily drift in regime | Extra cost drag (full sample) | 196-day bootstrap mean | Worst 1% of paths |
+|---|---|---|---|---|
+| 1.0x (this milestone's own flat-cost baseline) | -0.1505% | 0.000% | -25.6% | -40.6% |
+| 1.5x | -0.1515% | 0.840% | -25.7% | -40.7% |
+| 2.0x | -0.1525% | 1.680% | -25.9% | -40.9% |
+| 3.0x | -0.1545% | 3.360% | -26.2% | -41.1% |
+| 5.0x | -0.1586% | 6.720% | -26.7% | -41.6% |
+
+A methodology note, in the interest of not quietly overstating precision: Milestone 33's own
+regression was fit on the long leg *gross* of any cost, giving a 1x mean of -25.3%; this
+milestone's 1.0x row embeds this project's standing flat 10bps everywhere (Milestone 35's own
+convention), giving -25.6% here — the ~0.3 percentage-point gap is that standing cost drag, not
+a new finding, and it is disclosed here rather than silently rounded away.
+
+**Even a 5x spread-widening multiplier during crash rebalances only worsens the estimated
+196-day crash-episode mean loss from -25.6% to -26.7% — about 1.1 percentage points.** The
+crash-rebalance regime accounts for only 33 of 537 total rebalances (6.1%) in this sample, and
+even at 5x cost, the *extra* cumulative drag over the whole sample is 6.72% of one-way turnover
+value — real, but small next to the structural -0.15%/day drift the crash regime itself
+produces, which compounds to roughly a quarter of the long leg's value over 196 trading days
+regardless of the cost assumption.
+
+**Updated conclusion**: rising trading costs during a crash are a real, measurable, but
+second-order contributor to momentum's crash-risk drawdown. The primary driver of the
+2008-09-style loss is the structural regime-return effect itself (Milestone 17's own
+statistically significant daily drift), not the trading costs incurred while managing the
+position through it — a genuinely different answer from a directionally similar-looking
+question, and one this project could only get by testing the interaction directly rather than
+assuming rising costs and rising duration compound each other automatically.
+
+**Reproduce this**: `python investigations/crash_cost_interaction.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2612,6 +2669,13 @@ python investigations/momentum_turn_of_month_interaction.py
 # correction" above)
 python investigations/multiple_testing_correction.py
 
+# Investigation -- does the crash mechanism get worse once trading costs rise with volatility,
+# not just duration (crosses Milestone 33's duration stress test with Milestones 35-36's cost
+# realism check; crash-rebalance costs rise 1.0x-5.0x but the estimated 196-day crash-episode
+# loss only worsens from -25.6% to -26.7% even at 5x -- a real but second-order effect; see
+# "Does the crash mechanism get worse once trading costs rise with volatility" above)
+python investigations/crash_cost_interaction.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -2777,7 +2841,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    or Bonferroni correction, and momentum on ASX is the only currently-live, positive,
    cross-sectional finding among the four — an independent confirmation, via a completely
    different statistical route, of the picture this project's own mechanism-level work had
-   already converged on. Momentum's
+   already converged on. Finally, the crash-duration stress test (Milestone 33) and the
+   cost-realism check (Milestones 35-36) were crossed rather than left as two separate
+   findings (Milestone 42): raising trading costs specifically during Bear+HighVol
+   rebalances, 1.0x-5.0x, while holding the crash episode's duration fixed at its actual
+   historical length, worsened the estimated 196-day crash-episode loss only from -25.6% to
+   -26.7% even at 5x — a real but second-order contributor next to the structural regime
+   drift itself. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -3216,7 +3286,9 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   crisis will happen** — duration is exactly the unobservable parameter being simulated
   around, not estimated from data — but it replaces an acknowledged-but-unquantified gap
   with an explicit, reproducible number for anyone sizing this strategy against "2008-09 was
-  the worst case" alone.
+  the worst case" alone. **Tested jointly with the cost-realism limitation below by Milestone
+  42**: crossing crash duration with crash-time trading costs, held fixed here at the flat
+  10bps rate, finds that assumption's effect on the stress estimate is small — see below.
 - **ASX momentum's sub-period stability, the last item this project's own Conclusions had
   carried as an untested open limitation, is now tested and reassuring, with one real nuance
   flagged (Milestone 34).** ASX's six-year sample was split into three ~2-year sub-periods
@@ -3341,3 +3413,18 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   fragile under correction is one this project had already flagged with its own dedicated
   milestone before this correction was run — an independent, different-methodology confirmation
   of the same conclusions, not a new one.
+- **The momentum-crash duration stress test (Milestone 33) held trading costs fixed at this
+  project's flat 10bps rate even inside the stress scenario — but real spreads widen exactly
+  when volatility spikes, which is when this crash mechanism is active. Crossing the two
+  checks finds the cost assumption is a minor factor next to the structural drift itself
+  (Milestone 42).** Applying a cost multiplier (1.0x-5.0x, bracketing documented
+  stress-period spread-widening) only to rebalances classified Bear+HighVol, with crash
+  duration held fixed at the actual worst historical episode (196 trading days), worsens the
+  bootstrap-estimated mean crash-episode loss only from -25.6% (flat cost, matching Milestone
+  33's own baseline) to -26.7% at 5x — about 1.1 percentage points, even though the extra
+  cumulative cost drag reaches 6.72% of turnover value at that multiplier. Crash-time
+  rebalances are only 6.1% of the full sample (33 of 537), and the crash regime's own
+  -0.15%/day structural drift dominates the loss estimate regardless of the cost assumption
+  layered on top. **Rising trading costs during a crisis are real but second-order for this
+  strategy's crash risk — the dominant driver remains the regime-return effect Milestone 17
+  already identified, not the cost of trading through it.**

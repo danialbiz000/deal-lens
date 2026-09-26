@@ -563,6 +563,21 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   methods converge on the same set of fragile versus robust findings, that convergence is
   stronger evidence than either method alone, and a project that has already been honest about
   each individual finding's limitations should expect, not fear, this kind of check.**
+- **Milestone 42 crossed two previously-separate stress tests — crash duration (Milestone 33)
+  and cost realism (Milestones 35-36) — rather than leaving them as independent findings.**
+  Real bid-ask spreads and market impact widen specifically during high-volatility, illiquid
+  regimes, exactly the Bear+HighVol conditions this project's own crash mechanism (Milestone
+  17) already identifies — a duration stress test that holds costs flat, or a cost stress test
+  applied uniformly across calm and crisis months alike, both miss the case where a strategy
+  has to keep trading through the crisis it's modeling. Raising costs 1.0x-5.0x specifically on
+  crash-regime rebalances, with duration held fixed at the actual worst historical episode,
+  worsened the estimated crash-episode loss only modestly (-25.6% to -26.7% at 5x) — the
+  structural regime-return drift dominates, and rising costs during a crisis are a real but
+  second-order amplifier, not the primary driver of tail risk. **Rule: two stress tests that
+  each vary one dimension of the same underlying risk (here, a crash episode) should eventually
+  be crossed rather than left as parallel, independently-varying checks — the interaction term
+  is sometimes the more decision-relevant number than either marginal effect alone, and finding
+  it small is itself a useful, reportable result, not a null finding to discard.**
 
 ## 2. Risk-management lessons
 
