@@ -2208,6 +2208,54 @@ assuming rising costs and rising duration compound each other automatically.
 
 **Reproduce this**: `python investigations/crash_cost_interaction.py`.
 
+## Does a real VaR/CVaR profile on momentum's actual returns show the same fat-tail gap Q1's simulation warned about? (Milestone 43)
+
+This project's entire risk-management playbook (`FRAMEWORK.md` Section 2) is derived from
+`risk_simulation/fat_tails_vs_normal.py` — a stylized Monte Carlo simulation of a hypothetical,
+LTCM-style leveraged book, explicitly flagged since this project's first commit as illustrative,
+not a real position. That simulation found a Gaussian, calm-regime-calibrated VaR model
+understates the 99.9% tail loss by ~1.3x and expected shortfall by ~1.65x. This milestone asks
+whether the same gap shows up on a REAL position this project actually has: momentum's own
+out-of-sample-hedged daily return series, the same series used for every significance test since
+Milestone 7. For each series: empirical (historical, no distributional assumption) VaR/CVaR at
+95%, 99%, and 99.9%, next to a Gaussian VaR/CVaR computed from the same series's own mean and
+standard deviation, plus a 90% bootstrap confidence interval on each empirical estimate — because
+a 99.9% VaR needs roughly one observation in a thousand beyond it, and this project's samples
+don't all have that many.
+
+The US mirror's full-sample series showed extreme excess kurtosis (+21.0) and a 99.9% CVaR ratio
+of 2.95x — nearly double Q1's own hypothetical simulation's gap. Before trusting that number, this
+project's own Milestone 15 precedent applied directly: the single worst day in the whole series
+(1973-06-19, -25.28%) falls exactly inside the 1972-1977 window Milestone 15 already found to be
+thin (2-4 stocks), survivorship-biased, and partly data-glitched.
+
+| Series | Excess kurtosis | Gaussian 99.9% CVaR | Empirical 99.9% CVaR | Ratio | Tail observations |
+|---|---|---|---|---|---|
+| US mirror, full sample (contaminated by Milestone 15's flagged window) | +21.01 | 6.470% | 19.071% | 2.95x | ~12 |
+| US mirror, from 1978-01-01 (excluding that window) | +3.84 | 5.299% | 9.078% | 1.71x | ~11 |
+| ASX mirror, full sample | +1.11 | 3.676% | 4.466% | 1.21x | ~2 |
+
+**Excluding the known-contaminated 1972-77 window cuts the US mirror's 99.9% CVaR ratio from
+2.95x to 1.71x, and its excess kurtosis from +21.0 to +3.8** — still meaningfully fat-tailed and
+still exceeding Q1's own hypothetical 1.65x, but a fundamentally different, more honest number
+than the contaminated one, with the single worst day shifting from a glitched 1973 observation
+to a genuine one (2001-01-03, -11.85%). ASX's short six-year sample shows only mild
+fat-tailedness (1.04x-1.24x across confidence levels) — but has only ~2 raw observations beyond
+its own 99.9% threshold, so this should be read as "not enough data to see fat tails yet," not
+"ASX is safer."
+
+**Updated conclusion**: the qualitative finding Q1's simulation was built to illustrate —
+Gaussian VaR meaningfully understates real tail risk — replicates on momentum's actual position,
+not just a hypothetical one, and by a comparable or larger margin once the known data-quality
+confound is excluded. This project's risk playbook should size against the empirical CVaR, not a
+Gaussian approximation, for the same reason Q1 argued in the abstract: this project's own real
+data now confirms it concretely. The bootstrap CIs are also a caution in the other direction —
+even the US mirror's ~9,000-day sample gives a 99.9% CVaR estimate with a real, wide confidence
+interval (roughly 8%-10% in the cleaned series), and ASX's 6-year sample cannot support a 99.9%
+estimate at all with any precision.
+
+**Reproduce this**: `python investigations/momentum_var_cvar_profile.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2676,6 +2724,13 @@ python investigations/multiple_testing_correction.py
 # "Does the crash mechanism get worse once trading costs rise with volatility" above)
 python investigations/crash_cost_interaction.py
 
+# Investigation -- does a real VaR/CVaR profile on momentum's actual hedged returns show the
+# same Gaussian-underestimates-fat-tails gap Q1's hypothetical simulation warned about (the
+# real US series shows an even bigger gap until a known Milestone 15 data confound is excluded,
+# after which it settles near Q1's own hypothetical ratio; see "Does a real VaR/CVaR profile on
+# momentum's actual returns show the same fat-tail gap Q1's simulation warned about" above)
+python investigations/momentum_var_cvar_profile.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -2847,7 +2902,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    rebalances, 1.0x-5.0x, while holding the crash episode's duration fixed at its actual
    historical length, worsened the estimated 196-day crash-episode loss only from -25.6% to
    -26.7% even at 5x — a real but second-order contributor next to the structural regime
-   drift itself. Momentum's
+   drift itself. Finally, the Q1 risk simulation's own central finding — a Gaussian VaR model
+   understates real tail risk — was tested on a real position rather than a hypothetical one
+   (Milestone 43): momentum's actual hedged return series showed an even larger gap (99.9%
+   CVaR understated by 2.95x) until the exact 1972-77 window Milestone 15 had already flagged
+   as data-glitched was excluded, after which the gap settled at 1.71x — still real, still
+   larger than Q1's own hypothetical 1.65x, but an honestly smaller and more defensible number
+   once a known confound was checked rather than left in. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -2898,7 +2959,10 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   illustrative, calibrated loosely to the LTCM episode's qualitative shape** (correlations
   that were low/moderate in normal times moving toward 1 in the crisis), not fit to LTCM's
   actual undisclosed book. Treat the multiple as "this is the order of magnitude of the
-  effect," not a precise historical reconstruction.
+  effect," not a precise historical reconstruction. **Tested against a real position, not a
+  hypothetical one, by Milestone 43**: the qualitative Gaussian-understates-tail-risk finding
+  replicates on momentum's actual hedged returns, with a comparable or larger multiple once a
+  known data confound is excluded — see below.
 - **The 52-week-high signal's cause: resolved, and it's the boring answer.** Two
   behavioral/statistical explanations were ruled out by direct test — not purely the
   2008/2020 crash windows (Milestone 2), not a value/growth confound (Milestone 3), not
@@ -3420,11 +3484,30 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   (Milestone 42).** Applying a cost multiplier (1.0x-5.0x, bracketing documented
   stress-period spread-widening) only to rebalances classified Bear+HighVol, with crash
   duration held fixed at the actual worst historical episode (196 trading days), worsens the
-  bootstrap-estimated mean crash-episode loss only from -25.6% (flat cost, matching Milestone
-  33's own baseline) to -26.7% at 5x — about 1.1 percentage points, even though the extra
-  cumulative cost drag reaches 6.72% of turnover value at that multiplier. Crash-time
-  rebalances are only 6.1% of the full sample (33 of 537), and the crash regime's own
-  -0.15%/day structural drift dominates the loss estimate regardless of the cost assumption
-  layered on top. **Rising trading costs during a crisis are real but second-order for this
-  strategy's crash risk — the dominant driver remains the regime-return effect Milestone 17
-  already identified, not the cost of trading through it.**
+  bootstrap-estimated mean crash-episode loss only from -25.6% (this milestone's own flat
+  10bps-everywhere baseline — note this differs slightly from Milestone 33's original -25.3%,
+  which was fit cost-free; the ~0.3pp gap is that standing cost drag, not a new finding) to
+  -26.7% at 5x — about 1.1 percentage points, even though the extra cumulative cost drag
+  reaches 6.72% of turnover value at that multiplier. Crash-time rebalances are only 6.1% of
+  the full sample (33 of 537), and the crash regime's own -0.15%/day structural drift
+  dominates the loss estimate regardless of the cost assumption layered on top. **Rising
+  trading costs during a crisis are real but second-order for this strategy's crash risk —
+  the dominant driver remains the regime-return effect Milestone 17 already identified, not
+  the cost of trading through it.**
+- **The Q1 simulation's central risk finding — Gaussian VaR understates real tail risk — was
+  never tested against a real position, only a hypothetical one, until Milestone 43.**
+  Computing empirical vs. Gaussian VaR/CVaR directly on momentum's actual out-of-sample-hedged
+  return series found an even larger gap than Q1's own simulation on the US mirror's raw
+  full-sample series (99.9% CVaR understated by 2.95x, excess kurtosis +21.0) — but the single
+  worst day in that series (1973-06-19, -25.28%) fell exactly inside the 1972-77 window
+  Milestone 15 had already flagged as thin, survivorship-biased, and data-glitched. Excluding
+  that window (from 1978-01-01) cut the gap to 1.71x and excess kurtosis to +3.8 — still real,
+  still exceeding Q1's own hypothetical 1.65x, but an honestly smaller number once a known
+  confound was checked rather than left in. ASX's short six-year sample shows only mild
+  fat-tailedness (1.04x-1.24x across confidence levels) but has just ~2 raw observations
+  beyond its own 99.9% threshold — not enough data to see fat tails yet, not evidence ASX is
+  safer. **Bootstrap 90% confidence intervals on every empirical estimate make explicit how
+  much a far-tail number can actually be trusted given each sample's real size — even the US
+  mirror's ~9,000-day cleaned series gives a 99.9% CVaR estimate with a genuinely wide
+  interval (roughly 8%-10%), and this project's risk playbook should size against that
+  empirical range, not a single Gaussian point estimate.**

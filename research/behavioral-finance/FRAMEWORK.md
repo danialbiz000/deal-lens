@@ -1002,6 +1002,23 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     reliably prefer a decaying or inverted anomaly over a genuine, if less flashy, edge; the
     economic interpretation this project applied to each candidate (not the p-value alone) is
     what actually separated the two.**
+38. **A risk model's central finding, illustrated on a hypothetical book, is not yet
+    demonstrated on the position you actually hold — test it there too, and re-apply the
+    project's own confound-checking discipline when the real number looks too dramatic.**
+    Milestone 43 computed empirical vs. Gaussian VaR/CVaR directly on momentum's real
+    out-of-sample-hedged return series, the same one every significance test in this project
+    already uses, rather than trusting Q1's stylized Monte Carlo simulation as the final word.
+    The raw full-sample US result looked almost too good at illustrating Q1's point (a 2.95x
+    99.9% CVaR understatement, nearly double Q1's own hypothetical 1.65x) — until the single
+    worst day in the series turned out to sit inside the exact 1972-77 window Milestone 15 had
+    already flagged as thin and data-glitched. Excluding it cut the gap to 1.71x, still real but
+    materially smaller. **Rule: a real-data result that confirms a hypothesis dramatically is
+    exactly the moment to re-run your project's own established confound checks against it, not
+    the moment to stop checking because the number already supports the story you expected.**
+    Bootstrap confidence intervals on every far-tail estimate are the second half of the same
+    discipline: a single 99.9% VaR/CVaR number from a few thousand days of data is not a fact,
+    it is a point estimate with real, sometimes wide, uncertainty around it, and a risk
+    playbook should size against that range, not the point estimate alone.
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
