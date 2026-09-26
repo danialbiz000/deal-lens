@@ -2305,6 +2305,54 @@ and demonstrated to survive realistic trading costs.
 
 **Reproduce this**: `python investigations/cost_realism_remaining_signals.py`.
 
+## Does combining this project's two independent findings into one practical book produce real diversification? (Milestone 45)
+
+Milestone 40 showed momentum and the turn-of-month effect don't share a mechanism, and
+Milestone 41 showed both survive a formal multiple-testing correction — this project's two
+genuinely independent, currently-live findings. This milestone tries to build them into one
+practical, cost-adjusted product for the first time, but checks the premise before building
+anything: does any ONE market actually have both signals live at once? It does not. Milestone
+38 found turn-of-month significant on NSE and the US mirror but explicitly *not* on ASX
+(p=0.5548) — ASX has nothing on the calendar side to add. And this project's own first
+empirical table showed NSE momentum has no edge at all (flat to slightly negative, never
+rigorously confirmed). The only two signal/market pairs where this project actually has a
+currently-live, statistically real edge are ASX momentum (this project's cleanest,
+most-stress-tested finding) and NSE turn-of-month (Milestone 38's strongest calendar result) —
+in different markets. That turns out to be the more interesting construction anyway: two
+structurally unrelated bets (cross-sectional stock selection vs. calendar market-timing) in two
+economically unrelated markets, combined into one book — the closest thing to a genuine
+diversification test this project can run. Both legs are cost-adjusted at this project's own
+10bps baseline (ASX via Milestone 35's decile-rebalance model, NSE via Milestone 44's
+round-trip market-timing model), and the combined book is evaluated over ASX's own ~5-year date
+range (2010-11 to 2015-11) — not NSE's much longer history, which would otherwise dilute the
+book with years the ASX leg was never actually allocated to.
+
+| | ASX momentum alone | NSE turn-of-month alone | 50/50 combined |
+|---|---|---|---|
+| Ann. return (same window) | +31.77% | +8.18% | +19.90% |
+| Sharpe | +1.69 | +1.24 | **+2.00** |
+| Max drawdown | -16.50% | -7.63% | -9.01% |
+| p (mean=0) | 0.0007 | 0.0077 | 0.0001 |
+
+Correlation between the two legs' daily returns over their 1,160 overlapping trading days:
+**+0.0200** — indistinguishable from zero, exactly what genuine independence predicts.
+
+**The combined book's Sharpe ratio (+2.00) exceeds both individual legs' Sharpes (+1.69, +1.24)
+and the simple average of the two (+1.46), while its max drawdown (-9.01%) is far below ASX
+alone's (-16.50%).** This is not an assumed diversification benefit — it is the real, checked
+consequence of combining two return streams with near-zero correlation, exactly what Milestone
+40's independence test and Milestone 41's multiple-testing survival predicted should be
+possible if both findings are genuinely real and genuinely separate.
+
+**Updated conclusion**: this is the first practical product this project has actually built and
+tested end-to-end, rather than described in the abstract (`FRAMEWORK.md`'s Behavioral
+Mispricing Score has never been backtested as a literal combined position the way this book
+has). The naive "combine two signals in one market" framing this milestone set out to test does
+not exist in this project's own data — but the cross-market version does, and it delivers a
+genuine, measurable diversification benefit rather than a merely assumed one.
+
+**Reproduce this**: `python investigations/cross_market_combined_portfolio.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2788,6 +2836,14 @@ python investigations/momentum_var_cvar_profile.py
 # costs" above)
 python investigations/cost_realism_remaining_signals.py
 
+# Investigation -- does combining this project's two genuinely independent findings (ASX
+# momentum + NSE turn-of-month, the only real cross-market pairing since ASX has no
+# turn-of-month edge and NSE has no momentum edge) into one cost-adjusted book produce real
+# diversification (Sharpe +2.00 combined vs. +1.69/+1.24 standalone, near-zero correlation
+# +0.02, see "Does combining this project's two independent findings into one practical book
+# produce real diversification" above)
+python investigations/cross_market_combined_portfolio.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -2973,7 +3029,12 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    and ASX low-volatility's already-marginal long-leg result barely survives that same
    baseline before losing significance by 100bps — momentum remains the only signal in this
    project's history both confirmed and demonstrated to survive realistic trading costs.
-   Momentum's
+   Finally, this project built and tested its first genuinely combined practical product
+   (Milestone 45): ASX momentum and NSE turn-of-month, the only cross-market pairing this
+   project's own data actually supports (ASX has no turn-of-month edge, NSE has no momentum
+   edge), combined into one cost-adjusted 50/50 book delivered a real diversification benefit
+   — Sharpe +2.00 combined vs. +1.69 and +1.24 standalone, with near-zero (+0.02) correlation
+   between the two legs, exactly what genuine independence should produce. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -3527,7 +3588,10 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   checked diversification benefit for anyone considering both signals in a practical
   framework** — their edges don't come from the same underlying days, so combining them adds
   two separate sources of return rather than double-counting one, unlike the MAX/low-volatility
-  case where a direct regression found the opposite.
+  case where a direct regression found the opposite. **Actually built and tested as one
+  combined position by Milestone 45**: since ASX has no turn-of-month edge and NSE has no
+  momentum edge, the real combination turned out to be cross-market (ASX momentum + NSE
+  turn-of-month), and it delivered a genuine Sharpe improvement — see below.
 - **A formal multiple-testing correction across all 21 "does signal X replicate on market Y"
   tests this project has ever run does not contradict the project's accumulated findings — it
   independently reproduces the same picture (Milestone 41).** Assembling the one comparable
@@ -3595,3 +3659,19 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   from this project's findings should treat momentum's cost-robustness as specific to that one
   signal's structure (a fractional monthly rebalance), not as evidence any of this project's
   live findings can absorb realistic trading costs by default.**
+- **This project's first genuinely combined, end-to-end-tested practical product does not
+  exist where the naive framing assumed it would (Milestone 45).** `FRAMEWORK.md`'s Behavioral
+  Mispricing Score has been described since the project's first milestone but never literally
+  backtested as a combined position built from this project's own currently-live findings.
+  Attempting exactly that for momentum and turn-of-month — the two findings shown independent
+  by Milestone 40 and confirmed by Milestone 41's correction — found no single market where
+  both are simultaneously live: turn-of-month is not significant on ASX (Milestone 38), and
+  NSE momentum has never shown an edge at all (this project's own first empirical table). The
+  only real pairing is cross-market — ASX momentum with NSE turn-of-month, both cost-adjusted
+  at this project's standing 10bps baseline, evaluated over ASX's own ~5-year date range (not
+  NSE's much longer history, which would otherwise dilute the book with years the ASX leg was
+  never allocated to). **The combined 50/50 book's Sharpe ratio (+2.00) exceeds both standalone
+  legs (+1.69, +1.24) and their simple average (+1.46), with near-zero correlation (+0.0200)
+  between the two return streams — a genuine, checked diversification benefit, not an assumed
+  one, and the first time this project has actually built and tested a multi-signal position
+  rather than described one in the abstract.**

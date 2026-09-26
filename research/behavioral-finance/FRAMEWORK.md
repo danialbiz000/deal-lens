@@ -591,6 +591,21 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   how large the round-trip is relative to the edge), not a project-wide default — never assume
   one signal's demonstrated cost-robustness generalizes to another signal's practical viability
   without checking that signal's own turnover and trading structure directly.**
+- **Milestone 45 tried to build this project's first genuinely combined, end-to-end-tested
+  practical product — and found the naive framing didn't match the project's own accumulated
+  evidence.** Momentum and turn-of-month were shown independent (Milestone 40) and both
+  survive a formal multiple-testing correction (Milestone 41), so combining them looked like
+  the obvious next step. But no single market has both live at once: turn-of-month is not
+  significant on ASX, and NSE momentum has never shown an edge at all. The real combination
+  is cross-market — ASX momentum with NSE turn-of-month — and, evaluated cost-adjusted over
+  a fair, comparable date window, it delivered a genuine diversification benefit: a combined
+  Sharpe ratio (+2.00) exceeding both standalone legs (+1.69, +1.24) and their simple average
+  (+1.46), with near-zero correlation (+0.02) between the two return streams. **Rule: before
+  building a combined position from two "independent" findings, check which markets each
+  finding is actually live in — independence between two signals says nothing about whether
+  they happen to be live in the same place, and the naive same-market combination this
+  project assumed at the outset turned out not to exist, while a better one (cross-market)
+  did.**
 
 ## 2. Risk-management lessons
 

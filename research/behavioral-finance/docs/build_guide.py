@@ -3826,6 +3826,77 @@ box(
     "trading costs.",
     title="MOMENTUM'S COST-ROBUSTNESS IS THE EXCEPTION, NOT THE RULE"
 )
+box(
+    "Section 5.46 tries to build this project's first genuinely "
+    "combined, end-to-end-tested practical product from momentum and "
+    "turn-of-month &mdash; and finds the naive same-market framing "
+    "doesn't match the data, while a cross-market version does.",
+    kind="fact", title="UPDATE FROM SECTION 5.46"
+)
+
+h1("5.46  Milestone 45 &mdash; Does combining this project's two independent findings into one practical book produce real diversification?")
+p("Section 5.41 showed momentum and the turn-of-month effect don't "
+  "share a mechanism, and Section 5.42 showed both survive a formal "
+  "multiple-testing correction &mdash; this project's two genuinely "
+  "independent, currently-live findings. This section tries to build "
+  "them into one practical, cost-adjusted product for the first time, "
+  "but checks the premise before building anything: does any ONE "
+  "market actually have both signals live at once? It does not. "
+  "Section 5.39 found turn-of-month significant on NSE and the US "
+  "mirror but explicitly <i>not</i> on ASX (p=0.5548) &mdash; ASX has "
+  "nothing on the calendar side to add. And this project's own first "
+  "empirical table showed NSE momentum has no edge at all (flat to "
+  "slightly negative, never rigorously confirmed). The only two "
+  "signal/market pairs where this project actually has a "
+  "currently-live, statistically real edge are ASX momentum (this "
+  "project's cleanest, most-stress-tested finding) and NSE "
+  "turn-of-month (Section 5.39's strongest calendar result) &mdash; "
+  "in different markets. That turns out to be the more interesting "
+  "construction anyway: two structurally unrelated bets "
+  "(cross-sectional stock selection vs. calendar market-timing) in "
+  "two economically unrelated markets, combined into one book "
+  "&mdash; the closest thing to a genuine diversification test this "
+  "project can run. Both legs are cost-adjusted at this project's own "
+  "10bps baseline (ASX via Section 5.36's decile-rebalance model, NSE "
+  "via Section 5.45's round-trip market-timing model), and the "
+  "combined book is evaluated over ASX's own ~5-year date range "
+  "(2010-11 to 2015-11) &mdash; not NSE's much longer history, which "
+  "would otherwise dilute the book with years the ASX leg was never "
+  "actually allocated to.")
+data_table(
+    ["", "ASX momentum alone", "NSE turn-of-month alone", "50/50 combined"],
+    [
+        ["Ann. return (same window)", "+31.77%", "+8.18%", "+19.90%"],
+        ["Sharpe", "+1.69", "+1.24", "+2.00"],
+        ["Max drawdown", "-16.50%", "-7.63%", "-9.01%"],
+        ["p (mean=0)", "0.0007", "0.0077", "0.0001"],
+    ],
+    col_widths=[1.7*inch, 1.6*inch, 1.9*inch, 1.4*inch], small=True,
+)
+p("Correlation between the two legs' daily returns over their 1,160 "
+  "overlapping trading days: <b>+0.0200</b> &mdash; indistinguishable "
+  "from zero, exactly what genuine independence predicts.")
+p("<b>The combined book's Sharpe ratio (+2.00) exceeds both "
+  "individual legs' Sharpes (+1.69, +1.24) and the simple average of "
+  "the two (+1.46), while its max drawdown (-9.01%) is far below ASX "
+  "alone's (-16.50%).</b> This is not an assumed diversification "
+  "benefit &mdash; it is the real, checked consequence of combining "
+  "two return streams with near-zero correlation, exactly what "
+  "Section 5.41's independence test and Section 5.42's "
+  "multiple-testing survival predicted should be possible if both "
+  "findings are genuinely real and genuinely separate.")
+box(
+    "This is the first practical product this project has actually "
+    "built and tested end-to-end, rather than described in the "
+    "abstract (the Behavioral Mispricing Score, Part VI.1, has never "
+    "been backtested as a literal combined position the way this "
+    "book has). The naive &quot;combine two signals in one "
+    "market&quot; framing this section set out to test does not "
+    "exist in this project's own data &mdash; but the cross-market "
+    "version does, and it delivers a genuine, measurable "
+    "diversification benefit rather than a merely assumed one.",
+    title="THE FIRST PRACTICAL PRODUCT THIS PROJECT HAS ACTUALLY BUILT"
+)
 
 # MARKER_END_PART5
 
@@ -4335,6 +4406,15 @@ box(
     "on the US mirror at this project's own 10bps baseline, and ASX "
     "low-volatility's already-marginal result barely survives it.",
     kind="fact", title="UPDATE FROM PART V.45"
+)
+box(
+    "Part V.46 built and tested this project's first genuinely combined "
+    "practical product: ASX momentum + NSE turn-of-month, the only real "
+    "cross-market pairing this project's data supports. The combined "
+    "book's Sharpe (+2.00) beat both standalone legs, with near-zero "
+    "(+0.02) correlation between them &mdash; a real, checked "
+    "diversification benefit.",
+    kind="fact", title="UPDATE FROM PART V.46"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -5006,6 +5086,21 @@ bullets([
     "a project-wide default; never assume one signal's demonstrated cost-robustness "
     "generalizes to another signal's practical viability without checking that signal's own "
     "turnover and trading structure directly.",
+    "<b>Part V.46 tried to build this project's first genuinely combined, end-to-end-tested "
+    "practical product &mdash; and found the naive framing didn't match the project's own "
+    "accumulated evidence.</b> Momentum and turn-of-month were shown independent (Part V.41) "
+    "and both survive a formal multiple-testing correction (Part V.42), so combining them "
+    "looked like the obvious next step. But no single market has both live at once: "
+    "turn-of-month is not significant on ASX, and NSE momentum has never shown an edge at "
+    "all. The real combination is cross-market &mdash; ASX momentum with NSE turn-of-month "
+    "&mdash; and, evaluated cost-adjusted over a fair, comparable date window, it delivered a "
+    "genuine diversification benefit: a combined Sharpe ratio (+2.00) exceeding both "
+    "standalone legs (+1.69, +1.24) and their simple average (+1.46), with near-zero "
+    "correlation (+0.02) between the two return streams. Before building a combined position "
+    "from two &quot;independent&quot; findings, check which markets each finding is actually "
+    "live in &mdash; independence between two signals says nothing about whether they happen "
+    "to be live in the same place, and the naive same-market combination this project assumed "
+    "at the outset turned out not to exist, while a better one (cross-market) did.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -5761,7 +5856,10 @@ bullets([
     "considering both signals in a practical framework</b> &mdash; their edges don't come from "
     "the same underlying days, so combining them adds two separate sources of return rather "
     "than double-counting one, unlike the MAX/low-volatility case where a direct regression "
-    "found the opposite.",
+    "found the opposite. <b>Actually built and tested as one combined position by Part "
+    "V.46</b>: since ASX has no turn-of-month edge and NSE has no momentum edge, the real "
+    "combination turned out to be cross-market (ASX momentum + NSE turn-of-month), and it "
+    "delivered a genuine Sharpe improvement &mdash; see below.",
     "<b>A formal multiple-testing correction across all 21 &quot;does signal X replicate on "
     "market Y&quot; tests this project has ever run does not contradict the project's "
     "accumulated findings &mdash; it independently reproduces the same picture (Part "
@@ -5834,6 +5932,23 @@ bullets([
     "project's findings should treat momentum's cost-robustness as specific to that one "
     "signal's structure (a fractional monthly rebalance), not as evidence any of this "
     "project's live findings can absorb realistic trading costs by default.</b>",
+    "<b>This project's first genuinely combined, end-to-end-tested practical product does "
+    "not exist where the naive framing assumed it would (Part V.46).</b> The Behavioral "
+    "Mispricing Score (Part VI.1) has been described since the project's first milestone but "
+    "never literally backtested as a combined position built from this project's own "
+    "currently-live findings. Attempting exactly that for momentum and turn-of-month &mdash; "
+    "the two findings shown independent by Part V.41 and confirmed by Part V.42's correction "
+    "&mdash; found no single market where both are simultaneously live: turn-of-month is not "
+    "significant on ASX (Part V.39), and NSE momentum has never shown an edge at all (this "
+    "project's own first empirical table). The only real pairing is cross-market &mdash; ASX "
+    "momentum with NSE turn-of-month, both cost-adjusted at this project's standing 10bps "
+    "baseline, evaluated over ASX's own ~5-year date range (not NSE's much longer history, "
+    "which would otherwise dilute the book with years the ASX leg was never allocated to). "
+    "<b>The combined 50/50 book's Sharpe ratio (+2.00) exceeds both standalone legs (+1.69, "
+    "+1.24) and their simple average (+1.46), with near-zero correlation (+0.0200) between "
+    "the two return streams &mdash; a genuine, checked diversification benefit, not an "
+    "assumed one, and the first time this project has actually built and tested a "
+    "multi-signal position rather than described one in the abstract.</b>",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -5968,7 +6083,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 44 then ran the India findings through "
+  "needed. Milestones 3 through 45 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -6084,7 +6199,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, forty-one times in a row "
+  "most recent, best-supported-looking result, forty-two times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -6322,14 +6437,21 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "window this project had already learned, the hard way, not to "
   "trust. Excluding it left a smaller but still real gap between what "
   "a calm-regime model would have assumed and what the data actually "
-  "showed, and finally ran a forty-first check (Part V.45) that took "
+  "showed, ran a forty-first check (Part V.45) that took "
   "the cost lens built for one signal and pointed it at every other "
   "live finding this project had, rather than assuming a lesson "
   "learned once generalized on its own. It didn't: a long-only "
   "calendar strategy paying full round-trip costs a dozen times a "
   "year gave back its entire US edge at the same baseline cost that "
   "barely dents momentum, and an already-marginal result on a third "
-  "market barely survived that same baseline at all. "
+  "market barely survived that same baseline at all, and finally ran "
+  "a forty-second check (Part V.46) that tried to build something "
+  "practical out of two findings proven separate rather than just "
+  "leaving that proof in a table. The one combination the project "
+  "had assumed existed &mdash; both signals live on the same market "
+  "&mdash; turned out not to; the one that did exist, on two markets "
+  "that share nothing, delivered exactly the diversification a real, "
+  "checked independence should. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -6396,7 +6518,13 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "a rebalance that only ever trades a slice of the book at once "
   "&mdash; a calendar strategy that trades the whole book, twice, a "
   "dozen times a year gave its entire edge back at the gentlest cost "
-  "assumption this project has ever used, are "
+  "assumption this project has ever used, and finally discovering "
+  "that the one combination the project had assumed it could just "
+  "build, two proven-independent findings sharing a market, was never "
+  "actually there to build &mdash; and that the combination which "
+  "WAS there, sitting in two markets with nothing in common, did "
+  "exactly what independence is supposed to do to a portfolio instead "
+  "of just being asserted to, are "
   "all "
   "findings: the project never "
   "found a result, an explanation, or even a way of testing an "
@@ -6645,14 +6773,20 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "turned out to be sitting inside the exact thin, glitched window "
   "Part V.16's own correction had flagged many checks earlier; "
   "excluding it left the finding smaller, still real, and finally "
-  "trustworthy. And Part V.45 finally asked whether momentum's own "
+  "trustworthy. Part V.45 then asked whether momentum's own "
   "cost-robustness was a lesson about this project's signals in "
   "general or a fact about momentum's own construction in particular. "
   "It was the latter: the two other live findings this project still "
   "had left, tested the same way for the first time, did not share "
   "it, one of them losing its entire edge at the gentlest cost "
-  "assumption this project has ever applied. What "
-  "remains open, after forty-one checks, is not a "
+  "assumption this project has ever applied. And Part V.46 finally "
+  "tried to spend two proven-independent findings on something a "
+  "spreadsheet of p-values can't be: an actual combined position. The "
+  "market they were assumed to share turned out not to exist; the "
+  "market pair that did exist, sharing no stocks, no mechanism, and "
+  "no calendar, produced a Sharpe ratio neither leg could reach alone "
+  "&mdash; independence, cashed out. What "
+  "remains open, after forty-two checks, is not a "
   "specific finding still standing untested, but the same standing "
   "posture the project started with: no result here is treated as "
   "more final than the next check would find it to be, no comparison "
@@ -6674,7 +6808,9 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "on a real position until it has actually been checked there, no "
   "signal's demonstrated cost-robustness is assumed to generalize to "
   "another signal without checking that signal's own turnover and "
-  "trading structure directly, and "
+  "trading structure directly, no combined position is assumed "
+  "buildable from two independent findings before checking which "
+  "markets each one is actually live in, and "
   "the "
   "project's one surviving edge is exactly as well-supported, and "
   "exactly as fragile, as its "
