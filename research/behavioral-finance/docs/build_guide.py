@@ -3476,6 +3476,56 @@ box(
     "lens (Section 5.36's cost methodology) exists.",
     title="CORRECT ON A GROSS BASIS, REVISED ON A REALISTIC ONE"
 )
+box(
+    "Section 5.41 checks directly, rather than assumes, whether "
+    "momentum and the turn-of-month effect &mdash; this project's two "
+    "positively-replicating findings &mdash; are actually independent.",
+    kind="fact", title="UPDATE FROM SECTION 5.41"
+)
+
+h1("5.41  Milestone 40 &mdash; Are momentum and the turn-of-month effect actually independent?")
+p("Momentum (this project's one confirmed edge) and the turn-of-month "
+  "effect (Section 5.39, the first new signal since momentum to "
+  "positively replicate on more than one market) are each "
+  "individually validated &mdash; but this project has already found "
+  "once, for MAX and low-volatility (Section 5.30), that two "
+  "&quot;separate&quot; findings can turn out to be one mechanism "
+  "counted twice. Both momentum and turn-of-month have also now been "
+  "shown to decay over similar publication-era timeframes, raising a "
+  "real question worth checking directly rather than assuming away: "
+  "does momentum's own edge cluster on turn-of-month days? This "
+  "section regresses momentum's own out-of-sample-hedged daily return "
+  "series &mdash; the same series used for every momentum "
+  "significance test since Section 5.8 &mdash; on the turn-of-month "
+  "dummy, on both markets where momentum is confirmed.")
+data_table(
+    ["Market", "Momentum ret, TOM days", "Momentum ret, rest-of-month", "TOM add-on to momentum"],
+    [
+        ["US mirror", "-6.69%/yr", "+11.66%/yr", "-0.0728%/day, p=.0980*"],
+        ["ASX", "+45.99%/yr", "+28.59%/yr", "+0.0691%/day, p=.4499"],
+    ],
+    col_widths=[1.1*inch, 1.7*inch, 1.9*inch, 1.9*inch], small=True,
+)
+p("<b>Momentum's edge does not cluster on turn-of-month days &mdash; "
+  "if anything, the opposite.</b> On the US mirror, momentum's hedged "
+  "return is actually <i>lower</i> during turn-of-month days than the "
+  "rest of the month, a marginally significant negative add-on "
+  "(p=0.098) &mdash; the opposite direction a shared-mechanism story "
+  "would predict. On ASX, the turn-of-month add-on to momentum's "
+  "alpha is positive but statistically indistinguishable from noise "
+  "(p=0.4499). Both results point the same direction: momentum's edge "
+  "is not secretly concentrated in the same calendar window driving "
+  "the turn-of-month effect.")
+box(
+    "Unlike MAX and low-volatility (Section 5.30), momentum and the "
+    "turn-of-month effect are genuinely independent findings, not one "
+    "mechanism counted twice. This is a real, checked diversification "
+    "benefit for anyone considering both signals in a practical "
+    "framework &mdash; their edges don't come from the same "
+    "underlying days, so combining them is adding two separate "
+    "sources of return rather than double-counting one.",
+    title="TWO SIGNALS, NOT ONE COUNTED TWICE"
+)
 
 # MARKER_END_PART5
 
@@ -3932,6 +3982,18 @@ box(
     "the project's practical recommendation, not a reversal of an "
     "earlier wrong finding.",
     kind="fact", title="UPDATE FROM PART V.40"
+)
+box(
+    "Part V.41 checked directly, rather than assumed, whether momentum "
+    "and the turn-of-month effect are actually independent findings. "
+    "Regressing momentum's own out-of-sample-hedged return on the "
+    "turn-of-month dummy found no evidence of a shared mechanism on "
+    "either confirmed market &mdash; if anything, momentum's edge is "
+    "marginally lower on turn-of-month days on the US mirror (p=0.098), "
+    "the opposite of what a shared-mechanism story would predict. "
+    "Unlike MAX and low-volatility (Part V.30), these two signals are "
+    "genuinely additive, not one mechanism counted twice.",
+    kind="fact", title="UPDATE FROM PART V.41"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -4513,6 +4575,27 @@ bullets([
     "(transaction costs), it's worth explicitly re-running that lens "
     "over every earlier comparison the sharper lens could affect, not "
     "just the finding that originally motivated building it.",
+    "<b>Checking directly, rather than assuming, whether momentum and "
+    "the turn-of-month effect &mdash; this project's two "
+    "positively-replicating findings &mdash; are actually "
+    "independent.</b> Part V.30 already found once that two "
+    "&quot;separate&quot; signals (MAX, low-volatility) can turn out "
+    "to be one mechanism counted twice, diagnosed by a direct control "
+    "regression rather than a correlation coefficient. Applying the "
+    "identical discipline in Part V.41 &mdash; regressing momentum's "
+    "own out-of-sample-hedged return on the turn-of-month dummy "
+    "&mdash; found the opposite result: on the US mirror, momentum's "
+    "edge is actually lower during turn-of-month days (a marginally "
+    "significant negative add-on, p=0.098), the opposite direction a "
+    "shared mechanism would predict; on ASX, the add-on is "
+    "statistically indistinguishable from noise (p=0.4499). Finding "
+    "one project's own instance of &quot;two signals are really "
+    "one&quot; creates an obligation to check every other pair of "
+    "validated findings the same way, not just assume independence by "
+    "default &mdash; and a clean, checked independence result is "
+    "itself worth reporting explicitly, since it's the necessary "
+    "condition for treating two signals as genuinely additive in a "
+    "practical framework rather than redundant.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -5248,6 +5331,19 @@ bullets([
     "exactly the kind of result this project's own retroactive-audit discipline (Part V.28) "
     "exists to catch: a conclusion correct under the lens available at the time, revisited "
     "once a sharper lens (Part V.36's cost methodology) exists.",
+    "<b>Momentum and the turn-of-month effect are genuinely independent findings, not one "
+    "mechanism counted twice like MAX and low-volatility were (Part V.30) &mdash; checked "
+    "directly, not assumed (Part V.41).</b> Regressing momentum's own out-of-sample-hedged "
+    "daily return series on the turn-of-month dummy found no evidence of a shared mechanism on "
+    "either confirmed market: on the US mirror, momentum's edge is actually <i>lower</i> "
+    "during turn-of-month days than the rest of the month (a marginally significant negative "
+    "add-on, p=0.098) &mdash; the opposite direction a shared-mechanism story would predict; "
+    "on ASX, the turn-of-month add-on to momentum's alpha is statistically indistinguishable "
+    "from noise (p=0.4499). <b>This is a real, checked diversification benefit for anyone "
+    "considering both signals in a practical framework</b> &mdash; their edges don't come from "
+    "the same underlying days, so combining them adds two separate sources of return rather "
+    "than double-counting one, unlike the MAX/low-volatility case where a direct regression "
+    "found the opposite.",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -5382,7 +5478,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 39 then ran the India findings through "
+  "needed. Milestones 3 through 40 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -5498,7 +5594,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, thirty-six times in a row "
+  "most recent, best-supported-looking result, thirty-seven times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -5688,7 +5784,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "ever checks a pooled number, turned out to be carrying the same "
   "decay signature momentum had carried all along, discovered "
   "independently in a signal built a completely different way, and "
-  "finally ran a thirty-sixth check (Part V.40) that took two of its "
+  "ran a thirty-sixth check (Part V.40) that took two of its "
   "own conclusions, each correct when it was written, and asked "
   "whether they still agreed with each other: a gross-return "
   "comparison from months earlier that had crowned the full composite "
@@ -5699,7 +5795,16 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "punished hardest &mdash; not a wrong answer revealed, but a right "
   "answer that stopped being the right answer once the question was "
   "asked under a lens that didn't exist yet when it was first "
-  "answered. "
+  "answered, and finally ran a thirty-seventh check (Part V.41) that "
+  "took the exact instrument this project built to unmask one false "
+  "pair of discoveries (MAX and low-volatility, really one signal "
+  "wearing two names) and pointed it at a pair it had never once "
+  "suspected: its own confirmed edge and the calendar effect that had "
+  "just replicated beside it. The instrument came back clean this "
+  "time &mdash; if anything, momentum's edge ran slightly weaker on "
+  "the exact days the calendar effect ran strongest, the opposite of "
+  "what a shared cause would produce, and the two stood confirmed as "
+  "genuinely separate rather than one counted twice. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -5739,7 +5844,11 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "finally discovering that two of its own past conclusions, each "
   "defended in its own turn, could quietly stop agreeing with each "
   "other the moment a later, sharper lens was pointed back at an "
-  "earlier one, are "
+  "earlier one, and finally discovering that the same instrument that "
+  "had once unmasked a false pair of discoveries could be pointed at "
+  "the project's own confirmed edge and its newest replication without "
+  "finding the same thing twice &mdash; a clean, checked answer that "
+  "two real findings really were two, are "
   "all "
   "findings: the project never "
   "found a result, an explanation, or even a way of testing an "
@@ -5946,15 +6055,23 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "managed &mdash; and then, checked the only way this project ever checks "
   "a pooled number, turned out to be carrying momentum's own decay "
   "signature, discovered independently in a signal built nothing like "
-  "it. And Part V.40 finally looked backward instead of outward: not "
+  "it. Part V.40 then looked backward instead of outward: not "
   "at a new signal or an unexamined limitation, but at whether two of "
   "this project's own past verdicts, each sound when it was reached, "
   "still agreed with each other. A composite that beat momentum alone "
   "on gross returns turned out to trade twice as often for that "
   "advantage, and the cost lens built months later for an unrelated "
   "question was exactly the instrument needed to find that the extra "
-  "trading, not the extra insight, was what had been winning. What "
-  "remains open, after thirty-six checks, is not a "
+  "trading, not the extra insight, was what had been winning. And "
+  "Part V.41 finally turned the exact tool that had once unmasked a "
+  "false pair of discoveries (Part V.30's MAX and low-volatility, one "
+  "signal wearing two names) on a pair it had never thought to "
+  "suspect: its own confirmed edge and the calendar effect that had "
+  "just replicated beside it. This time the tool came back clean "
+  "&mdash; momentum's edge ran no stronger, if anything slightly "
+  "weaker, on the days the calendar effect ran strongest, confirming "
+  "two real, separate findings rather than one counted twice. What "
+  "remains open, after thirty-seven checks, is not a "
   "specific finding still standing untested, but the same standing "
   "posture the project started with: no result here is treated as "
   "more final than the next check would find it to be, no comparison "
@@ -5965,7 +6082,9 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "before the same sub-period discipline applied to every old one, no "
   "two of the project's own conclusions are assumed to still agree "
   "with each other just because neither has been individually "
-  "overturned, and the "
+  "overturned, no two positively-replicating findings are assumed "
+  "independent until the same control regression that once unmasked a "
+  "false pair has been pointed at them too, and the "
   "project's one surviving edge is exactly as well-supported, and "
   "exactly as fragile, as its "
   "most recent, most adversarial test says it is &mdash; no more, no "

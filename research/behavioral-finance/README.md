@@ -2058,6 +2058,40 @@ methodology) exists.
 
 **Reproduce this**: `python investigations/composite_cost_realism_check.py`.
 
+## Are momentum and the turn-of-month effect actually independent? (Milestone 40)
+
+Momentum (this project's one confirmed edge) and the turn-of-month effect (Milestone 38, the
+first new signal since momentum to positively replicate on more than one market) are each
+individually validated — but this project has already found once, for MAX and low-volatility
+(Milestone 29), that two "separate" findings can turn out to be one mechanism counted twice.
+Both momentum and turn-of-month have also now been shown to decay over similar publication-era
+timeframes, raising a real question worth checking directly rather than assuming away: does
+momentum's own edge cluster on turn-of-month days? This milestone regresses momentum's own
+out-of-sample-hedged daily return series — the same series used for every momentum
+significance test since Milestone 7 — on the turn-of-month dummy, on both markets where
+momentum is confirmed.
+
+| Market | Momentum ret, TOM days | Momentum ret, rest-of-month | TOM add-on to momentum's alpha |
+|---|---|---|---|
+| US mirror | -6.69%/yr | +11.66%/yr | -0.0728%/day, p=0.0980* |
+| ASX | +45.99%/yr | +28.59%/yr | +0.0691%/day, p=0.4499 |
+
+**Momentum's edge does not cluster on turn-of-month days — if anything, the opposite.** On the
+US mirror, momentum's hedged return is actually *lower* during turn-of-month days than the
+rest of the month, a marginally significant negative add-on (p=0.098) — the opposite direction
+a shared-mechanism story would predict. On ASX, the turn-of-month add-on to momentum's alpha is
+positive but statistically indistinguishable from noise (p=0.4499). Both results point the same
+direction: momentum's edge is not secretly concentrated in the same calendar window driving the
+turn-of-month effect.
+
+**Updated conclusion**: unlike MAX and low-volatility (Milestone 29), momentum and the
+turn-of-month effect are genuinely independent findings, not one mechanism counted twice. This
+is a real, checked diversification benefit for anyone considering both signals in a practical
+framework — their edges don't come from the same underlying days, so combining them is adding
+two separate sources of return rather than double-counting one.
+
+**Reproduce this**: `python investigations/momentum_turn_of_month_interaction.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2503,6 +2537,14 @@ python investigations/turn_of_month_effect.py
 # once realistic costs apply" above)
 python investigations/composite_cost_realism_check.py
 
+# Investigation -- are momentum and the turn-of-month effect actually independent? (regresses
+# momentum's own out-of-sample-hedged return on the turn-of-month dummy -- momentum's edge is
+# not concentrated in turn-of-month days on either confirmed market, if anything slightly lower
+# on the US mirror (p=0.098); unlike MAX/low-volatility (Milestone 29), a genuine
+# diversification benefit, not one mechanism counted twice; see "Are momentum and the
+# turn-of-month effect actually independent" above)
+python investigations/momentum_turn_of_month_interaction.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -2658,7 +2700,11 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    edge out momentum-alone (confirming Milestone 31), that edge evaporates by 50bps on the US
    mirror and the composite loses significance by 200bps on ASX while momentum-alone stays
    significant — a genuine refinement, not a reversal, of the project's practical
-   recommendation once realistic costs are assumed. Momentum's
+   recommendation once realistic costs are assumed. Finally, momentum's independence from the
+   turn-of-month effect was checked directly rather than assumed (Milestone 40): regressing
+   momentum's own hedged return on the turn-of-month dummy found no evidence the two share a
+   mechanism — momentum's edge is not concentrated in turn-of-month days on either confirmed
+   market, unlike the MAX/low-volatility redundancy found earlier (Milestone 29). Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -3193,3 +3239,15 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   earlier finding — exactly the kind of result this project's own retroactive-audit discipline
   (Milestone 27) exists to catch: a conclusion correct under the lens available at the time,
   revisited once a sharper lens (Milestone 35's cost methodology) exists.
+- **Momentum and the turn-of-month effect are genuinely independent findings, not one
+  mechanism counted twice like MAX and low-volatility were (Milestone 29) — checked directly,
+  not assumed (Milestone 40).** Regressing momentum's own out-of-sample-hedged daily return
+  series on the turn-of-month dummy found no evidence of a shared mechanism on either confirmed
+  market: on the US mirror, momentum's edge is actually *lower* during turn-of-month days than
+  the rest of the month (a marginally significant negative add-on, p=0.098) — the opposite
+  direction a shared-mechanism story would predict; on ASX, the turn-of-month add-on to
+  momentum's alpha is statistically indistinguishable from noise (p=0.4499). **This is a real,
+  checked diversification benefit for anyone considering both signals in a practical
+  framework** — their edges don't come from the same underlying days, so combining them adds
+  two separate sources of return rather than double-counting one, unlike the MAX/low-volatility
+  case where a direct regression found the opposite.

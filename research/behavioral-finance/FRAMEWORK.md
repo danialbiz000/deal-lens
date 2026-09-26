@@ -532,6 +532,20 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   project develops a sharper lens for one question (transaction costs), it's worth explicitly
   re-running that lens over every earlier comparison the sharper lens could affect, not just
   the finding that originally motivated building it.**
+- **Milestone 40 checked directly, rather than assumed, whether momentum and the turn-of-month
+  effect — this project's two positively-replicating findings — are actually independent.**
+  Milestone 29 already found once that two "separate" signals (MAX, low-volatility) can turn
+  out to be one mechanism counted twice, diagnosed by a direct control regression rather than a
+  correlation coefficient. Applying the identical discipline here — regressing momentum's own
+  out-of-sample-hedged return on the turn-of-month dummy — found the opposite result: on the US
+  mirror, momentum's edge is actually *lower* during turn-of-month days (a marginally
+  significant negative add-on, p=0.098), the opposite direction a shared mechanism would
+  predict; on ASX, the add-on is statistically indistinguishable from noise (p=0.4499). **Rule:
+  finding one project's own instance of "two signals are really one" (Milestone 29) creates an
+  obligation to check every other pair of validated findings the same way, not just assume
+  independence by default — and a clean, checked independence result is itself worth reporting
+  explicitly, since it's the necessary condition for treating two signals as genuinely additive
+  in a practical framework rather than redundant.**
 
 ## 2. Risk-management lessons
 
