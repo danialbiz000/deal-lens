@@ -1047,6 +1047,20 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     discipline: a single 99.9% VaR/CVaR number from a few thousand days of data is not a fact,
     it is a point estimate with real, sometimes wide, uncertainty around it, and a risk
     playbook should size against that range, not the point estimate alone.
+39. **A shared surface-level construction between two strategies does not imply a shared
+    crash-risk mechanism — check it directly, on the actual regime-interaction test, not by
+    analogy.** Low-volatility and MAX both share momentum's shape: a long-short book short
+    something plausibly higher-beta (the high-volatility leg, the high-lottery leg). Milestone
+    46 applied momentum's own Bear+HighVol regime-interaction test (Milestones 16-17) to both,
+    on every market and leg where either signal shows anything, and found every interaction
+    coefficient statistically indistinguishable from zero (p=0.41-0.98) — the known negative
+    results on these signals are a steady, persistent drag (Milestone 26: concentrated in one
+    decade), not a crash-conditional spike like momentum's own break. **Rule: a plausible
+    mechanism-level analogy between two strategies ("both short a high-beta-like leg, so both
+    should crash the same way") is a hypothesis worth testing, not a fact to assume — and a
+    clean null from testing it directly is itself worth recording, since it rules out a
+    specific, previously-untested channel by which two signals' risks could have been
+    correlated in a real portfolio.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

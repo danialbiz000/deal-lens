@@ -3897,6 +3897,68 @@ box(
     "diversification benefit rather than a merely assumed one.",
     title="THE FIRST PRACTICAL PRODUCT THIS PROJECT HAS ACTUALLY BUILT"
 )
+box(
+    "Section 5.47 tests whether momentum's own crash-risk mechanism "
+    "(Sections 5.17-5.18) generalizes to low-volatility and MAX, two "
+    "signals that share momentum's shape: short a plausibly "
+    "higher-beta leg.",
+    kind="fact", title="UPDATE FROM SECTION 5.47"
+)
+
+h1("5.47  Milestone 46 &mdash; Do low-volatility and MAX carry the same crash-risk mechanism as momentum?")
+p("This project's crash-mechanism test (Sections 5.17-5.18: a "
+  "Bear+HighVol regime-interaction regression that explains "
+  "momentum's 2008-09 break) has only ever been applied to momentum. "
+  "Two other signals share momentum's structural shape &mdash; a "
+  "long-short book that is short something plausibly high-beta: "
+  "low-volatility is short the high-volatility leg, MAX is short the "
+  "high-lottery leg, both typically higher-beta than their long-side "
+  "counterparts, the same setup Daniel &amp; Moskowitz (2016) "
+  "describe for momentum's own short leg. This has never been "
+  "checked: Section 5.27's decade breakdown of the US low-volatility "
+  "inversion asked <i>when</i> it concentrated (the 1990s), not "
+  "<i>whether</i> it concentrates in Bear+HighVol regimes "
+  "specifically &mdash; the mechanism-level question this project's "
+  "own crash-risk toolkit exists to answer.")
+p("Tested on the two markets where these signals actually show "
+  "something (low-volatility on the US mirror and ASX, MAX on the US "
+  "mirror), all three legs, since the theory specifically predicts "
+  "short-leg damage:")
+data_table(
+    ["Signal / market / leg", "Bear+HighVol interaction coef.", "p-value"],
+    [
+        ["Low-vol US, short leg", "+0.00010", "0.9461"],
+        ["Low-vol US, combined", "-0.00029", "0.8702"],
+        ["Low-vol ASX, short leg", "+0.00053", "0.7457"],
+        ["Low-vol ASX, combined", "+0.00005", "0.9836"],
+        ["MAX US, short leg", "+0.00059", "0.5831"],
+        ["MAX US, combined", "+0.00106", "0.5216"],
+    ],
+    col_widths=[2.6*inch, 2.2*inch, 1.4*inch], small=True,
+)
+p("<b>Every interaction coefficient, on every signal, market, and "
+  "leg, is statistically indistinguishable from zero "
+  "(p=0.41-0.98).</b> The only significant coefficients anywhere in "
+  "this test are the plain intercepts on the short legs already "
+  "known from Sections 5.26 and 5.29 (US low-vol short leg: "
+  "-0.035%/day, p=0.018; MAX US short leg: -0.032%/day, p=0.0087) "
+  "&mdash; the same persistent, regime-independent drag those "
+  "sections already characterized, not a crash-specific spike.")
+box(
+    "Momentum's crash-risk mechanism is specific to momentum, not a "
+    "general feature of any strategy that shorts a high-beta-like "
+    "leg. Low-volatility's US inversion and MAX's weaker echo of it "
+    "are real, persistent effects (Section 5.27: concentrated in the "
+    "1990s specifically) but structurally different from momentum's "
+    "crash risk &mdash; a steady drag rather than a regime-conditional "
+    "spike. This is a genuine, checked null result, not an untested "
+    "gap: sharing a superficial construction (short a high-beta-like "
+    "leg) does not imply sharing a crash mechanism, and this "
+    "project's crash-risk toolkit, applied honestly to two new "
+    "candidates, found nothing where the surface-level analogy might "
+    "have suggested there should be something.",
+    title="A CLEAN NULL: SHARED SHAPE DOES NOT MEAN SHARED CRASH RISK"
+)
 
 # MARKER_END_PART5
 
@@ -4415,6 +4477,15 @@ box(
     "(+0.02) correlation between them &mdash; a real, checked "
     "diversification benefit.",
     kind="fact", title="UPDATE FROM PART V.46"
+)
+box(
+    "Part V.47 tested whether momentum's own crash-risk mechanism "
+    "generalizes to low-volatility and MAX, which share momentum's "
+    "shape (short a plausibly higher-beta leg). Every Bear+HighVol "
+    "interaction coefficient, on every signal, market, and leg, was "
+    "statistically indistinguishable from zero (p=0.41-0.98) &mdash; a "
+    "clean null.",
+    kind="fact", title="UPDATE FROM PART V.47"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -5101,6 +5172,19 @@ bullets([
     "live in &mdash; independence between two signals says nothing about whether they happen "
     "to be live in the same place, and the naive same-market combination this project assumed "
     "at the outset turned out not to exist, while a better one (cross-market) did.",
+    "<b>A shared surface-level construction between two strategies does not imply a shared "
+    "crash-risk mechanism &mdash; check it directly, on the actual regime-interaction test, "
+    "not by analogy.</b> Low-volatility and MAX both share momentum's shape: a long-short book "
+    "short something plausibly higher-beta (the high-volatility leg, the high-lottery leg). "
+    "Part V.47 applied momentum's own Bear+HighVol regime-interaction test to both, on every "
+    "market and leg where either signal shows anything, and found every interaction "
+    "coefficient statistically indistinguishable from zero (p=0.41-0.98) &mdash; the known "
+    "negative results on these signals are a steady, persistent drag, not a crash-conditional "
+    "spike like momentum's own break. A plausible mechanism-level analogy between two "
+    "strategies is a hypothesis worth testing, not a fact to assume, and a clean null from "
+    "testing it directly is itself worth recording, since it rules out a specific, "
+    "previously-untested channel by which two signals' risks could have been correlated in a "
+    "real portfolio.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -5586,7 +5670,12 @@ bullets([
     "artifact. Read this as a genuine, concentrated 1990s-specific "
     "episode this dataset happens to contain, not as evidence that "
     "high-volatility stocks broadly outperformed low-volatility ones "
-    "across the full 1970-2017 sample.",
+    "across the full 1970-2017 sample. <b>Tested for a momentum-style "
+    "crash mechanism by Part V.47</b>: a decade concentration is not "
+    "the same claim as a regime-conditional one, and the Bear+HighVol "
+    "interaction that explains momentum's own crash risk is not "
+    "present here at all (p=0.41-0.98 in every cut) &mdash; this is a "
+    "steady, decade-level drag, not a crash-driven spike.",
     "<b>A retroactive audit of the project's older, cumulative-sweep-"
     "validated conclusions found no correction was needed, but "
     "surfaced one structural nuance worth keeping (Part V.28).</b> "
@@ -5949,6 +6038,21 @@ bullets([
     "the two return streams &mdash; a genuine, checked diversification benefit, not an "
     "assumed one, and the first time this project has actually built and tested a "
     "multi-signal position rather than described one in the abstract.</b>",
+    "<b>Momentum's crash-risk mechanism does not generalize to other signals with a "
+    "superficially similar construction &mdash; checked directly, not assumed (Part "
+    "V.47).</b> Low-volatility (short the high-volatility leg) and MAX (short the "
+    "high-lottery leg) both share momentum's shape: a long-short book short something "
+    "plausibly higher-beta. Applying momentum's own Bear+HighVol regime-interaction test "
+    "(Parts V.17-V.18) to both signals, on every market where either shows anything "
+    "(low-volatility on the US mirror and ASX, MAX on the US mirror) and every leg (long, "
+    "short, combined): every interaction coefficient is statistically indistinguishable from "
+    "zero (p=0.41-0.98). The only significant coefficients anywhere are the already-known "
+    "plain intercepts on the short legs (Parts V.26, V.29) &mdash; a steady, persistent drag, "
+    "not a crash-conditional spike. <b>A shared surface-level construction (shorting a "
+    "plausibly higher-beta leg) does not imply a shared crash mechanism; this project's "
+    "crash-risk toolkit, applied honestly to two new candidates that looked like natural "
+    "extensions, found nothing, and that clean null is itself worth recording rather than "
+    "leaving as an untested assumption.</b>",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -6083,7 +6187,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 45 then ran the India findings through "
+  "needed. Milestones 3 through 46 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -6199,7 +6303,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, forty-two times in a row "
+  "most recent, best-supported-looking result, forty-three times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -6444,14 +6548,20 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "calendar strategy paying full round-trip costs a dozen times a "
   "year gave back its entire US edge at the same baseline cost that "
   "barely dents momentum, and an already-marginal result on a third "
-  "market barely survived that same baseline at all, and finally ran "
+  "market barely survived that same baseline at all, ran "
   "a forty-second check (Part V.46) that tried to build something "
   "practical out of two findings proven separate rather than just "
   "leaving that proof in a table. The one combination the project "
   "had assumed existed &mdash; both signals live on the same market "
   "&mdash; turned out not to; the one that did exist, on two markets "
   "that share nothing, delivered exactly the diversification a real, "
-  "checked independence should. "
+  "checked independence should, and finally ran a forty-third check "
+  "(Part V.47) that took the one mechanism behind this project's "
+  "worst historical loss and asked whether two other signals built "
+  "the same way &mdash; short a leg the theory says should be "
+  "dangerous &mdash; were exposed to it too. Neither was, anywhere, "
+  "at any level of the same test that had found it so clearly for "
+  "momentum: a shared shape, it turns out, is not a shared risk. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -6518,13 +6628,16 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "a rebalance that only ever trades a slice of the book at once "
   "&mdash; a calendar strategy that trades the whole book, twice, a "
   "dozen times a year gave its entire edge back at the gentlest cost "
-  "assumption this project has ever used, and finally discovering "
+  "assumption this project has ever used, discovering "
   "that the one combination the project had assumed it could just "
   "build, two proven-independent findings sharing a market, was never "
   "actually there to build &mdash; and that the combination which "
   "WAS there, sitting in two markets with nothing in common, did "
   "exactly what independence is supposed to do to a portfolio instead "
-  "of just being asserted to, are "
+  "of just being asserted to, and finally discovering that the exact "
+  "test which had once explained this project's worst historical loss "
+  "found nothing at all when pointed at two signals that looked, on "
+  "paper, built the same dangerous way, are "
   "all "
   "findings: the project never "
   "found a result, an explanation, or even a way of testing an "
@@ -6779,14 +6892,21 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "It was the latter: the two other live findings this project still "
   "had left, tested the same way for the first time, did not share "
   "it, one of them losing its entire edge at the gentlest cost "
-  "assumption this project has ever applied. And Part V.46 finally "
+  "assumption this project has ever applied. Part V.46 then "
   "tried to spend two proven-independent findings on something a "
   "spreadsheet of p-values can't be: an actual combined position. The "
   "market they were assumed to share turned out not to exist; the "
   "market pair that did exist, sharing no stocks, no mechanism, and "
   "no calendar, produced a Sharpe ratio neither leg could reach alone "
-  "&mdash; independence, cashed out. What "
-  "remains open, after forty-two checks, is not a "
+  "&mdash; independence, cashed out. And Part V.47 finally took the "
+  "one test that had explained this project's worst historical loss "
+  "and pointed it at two signals whose only crime was looking, from a "
+  "distance, built the same dangerous way. Neither was: the same "
+  "regime interaction that lit up unmistakably for momentum came back "
+  "flat every time, on every market, on every leg, for signals that "
+  "share momentum's short-a-high-beta-leg shape but not, it turns "
+  "out, its risk. What "
+  "remains open, after forty-three checks, is not a "
   "specific finding still standing untested, but the same standing "
   "posture the project started with: no result here is treated as "
   "more final than the next check would find it to be, no comparison "
@@ -6810,7 +6930,9 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "another signal without checking that signal's own turnover and "
   "trading structure directly, no combined position is assumed "
   "buildable from two independent findings before checking which "
-  "markets each one is actually live in, and "
+  "markets each one is actually live in, no crash mechanism found for "
+  "one signal is assumed to extend to another signal that merely "
+  "looks built the same way, and "
   "the "
   "project's one surviving edge is exactly as well-supported, and "
   "exactly as fragile, as its "

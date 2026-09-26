@@ -2353,6 +2353,49 @@ genuine, measurable diversification benefit rather than a merely assumed one.
 
 **Reproduce this**: `python investigations/cross_market_combined_portfolio.py`.
 
+## Do low-volatility and MAX carry the same crash-risk mechanism as momentum? (Milestone 46)
+
+This project's crash-mechanism test (Milestones 16-17: a Bear+HighVol regime-interaction
+regression that explains momentum's 2008-09 break) has only ever been applied to momentum. Two
+other signals share momentum's structural shape — a long-short book that is short something
+plausibly high-beta: low-volatility is short the high-volatility leg, MAX is short the
+high-lottery leg, both typically higher-beta than their long-side counterparts, the same setup
+Daniel & Moskowitz (2016) describe for momentum's own short leg. This has never been checked:
+Milestone 26's decade breakdown of the US low-volatility inversion asked *when* it concentrated
+(the 1990s), not *whether* it concentrates in Bear+HighVol regimes specifically — the
+mechanism-level question this project's own crash-risk toolkit exists to answer.
+
+Tested on the two markets where these signals actually show something (low-volatility on the US
+mirror and ASX, MAX on the US mirror), all three legs, since the theory specifically predicts
+short-leg damage:
+
+| Signal / market / leg | Bear+HighVol interaction coefficient | p-value |
+|---|---|---|
+| Low-vol US, short leg | +0.00010 | 0.9461 |
+| Low-vol US, combined | -0.00029 | 0.8702 |
+| Low-vol ASX, short leg | +0.00053 | 0.7457 |
+| Low-vol ASX, combined | +0.00005 | 0.9836 |
+| MAX US, short leg | +0.00059 | 0.5831 |
+| MAX US, combined | +0.00106 | 0.5216 |
+
+**Every interaction coefficient, on every signal, market, and leg, is statistically
+indistinguishable from zero (p=0.41-0.98).** The only significant coefficients anywhere in this
+test are the plain intercepts on the short legs already known from Milestones 25 and 28 (US
+low-vol short leg: -0.035%/day, p=0.018; MAX US short leg: -0.032%/day, p=0.0087) — the same
+persistent, regime-independent drag those milestones already characterized, not a
+crash-specific spike.
+
+**Updated conclusion**: momentum's crash-risk mechanism is specific to momentum, not a general
+feature of any strategy that shorts a high-beta-like leg. Low-volatility's US inversion and
+MAX's weaker echo of it are real, persistent effects (Milestone 26: concentrated in the 1990s
+specifically) but structurally different from momentum's crash risk — a steady drag rather than
+a regime-conditional spike. This is a genuine, checked null result, not an untested gap:
+sharing a superficial construction (short a high-beta-like leg) does not imply sharing a crash
+mechanism, and this project's crash-risk toolkit, applied honestly to two new candidates, found
+nothing where the surface-level analogy might have suggested there should be something.
+
+**Reproduce this**: `python investigations/crash_mechanism_lottery_signals.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2844,6 +2887,12 @@ python investigations/cost_realism_remaining_signals.py
 # produce real diversification" above)
 python investigations/cross_market_combined_portfolio.py
 
+# Investigation -- does momentum's own crash-risk mechanism (Bear+HighVol regime interaction)
+# show up in low-volatility or MAX too, since both are short a high-beta-like leg the same way
+# momentum's short leg is (a clean null across every signal/market/leg tested, p=0.41-0.98; see
+# "Do low-volatility and MAX carry the same crash-risk mechanism as momentum" above)
+python investigations/crash_mechanism_lottery_signals.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -3034,7 +3083,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    project's own data actually supports (ASX has no turn-of-month edge, NSE has no momentum
    edge), combined into one cost-adjusted 50/50 book delivered a real diversification benefit
    — Sharpe +2.00 combined vs. +1.69 and +1.24 standalone, with near-zero (+0.02) correlation
-   between the two legs, exactly what genuine independence should produce. Momentum's
+   between the two legs, exactly what genuine independence should produce. Finally, momentum's
+   own crash-risk mechanism (Milestones 16-17) was tested on two other signals that share its
+   short-a-high-beta-leg construction (Milestone 46): low-volatility (short the high-vol leg)
+   and MAX (short the high-lottery leg). Every Bear+HighVol interaction coefficient, on every
+   signal, market, and leg, was statistically indistinguishable from zero (p=0.41-0.98) — a
+   clean null showing momentum's crash risk is specific to momentum, not a general property of
+   any strategy that shorts a high-beta-like leg. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -3386,7 +3441,11 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   ann. return -18.29%, p=0.0009 vs. the headline -20.70%, p=0.0002) — it is not purely a
   single-stock artifact. **Read this as a genuine, concentrated 1990s-specific episode this
   dataset happens to contain, not as evidence that high-volatility stocks broadly
-  outperformed low-volatility ones across the full 1970-2017 sample.**
+  outperformed low-volatility ones across the full 1970-2017 sample.** **Tested for a
+  momentum-style crash mechanism by Milestone 46**: a decade concentration is not the same
+  claim as a regime-conditional one, and the Bear+HighVol interaction that explains momentum's
+  own crash risk is not present here at all (p=0.41-0.98 in every cut) — this is a steady,
+  decade-level drag, not a crash-driven spike.
 - **A retroactive audit of the project's older, cumulative-sweep-validated conclusions found
   no correction was needed, but surfaced one structural nuance worth keeping (Milestone
   27).** Reversal's full retraction and momentum's pre-1994 significance (both validated via
@@ -3675,3 +3734,17 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   between the two return streams — a genuine, checked diversification benefit, not an assumed
   one, and the first time this project has actually built and tested a multi-signal position
   rather than described one in the abstract.**
+- **Momentum's crash-risk mechanism does not generalize to other signals with a superficially
+  similar construction — checked directly, not assumed (Milestone 46).** Low-volatility (short
+  the high-volatility leg) and MAX (short the high-lottery leg) both share momentum's shape: a
+  long-short book short something plausibly higher-beta. Applying momentum's own Bear+HighVol
+  regime-interaction test (Milestones 16-17) to both signals, on every market where either
+  shows anything (low-volatility on the US mirror and ASX, MAX on the US mirror) and every leg
+  (long, short, combined): every interaction coefficient is statistically indistinguishable
+  from zero (p=0.41-0.98). The only significant coefficients anywhere are the already-known
+  plain intercepts on the short legs (Milestones 25, 28) — a steady, persistent drag, not a
+  crash-conditional spike. **A shared surface-level construction (shorting a plausibly
+  higher-beta leg) does not imply a shared crash mechanism; this project's crash-risk toolkit,
+  applied honestly to two new candidates that looked like natural extensions, found nothing,
+  and that clean null is itself worth recording rather than leaving as an untested
+  assumption.**
