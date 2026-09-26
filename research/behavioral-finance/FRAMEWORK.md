@@ -546,6 +546,23 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   independence by default — and a clean, checked independence result is itself worth reporting
   explicitly, since it's the necessary condition for treating two signals as genuinely additive
   in a practical framework rather than redundant.**
+- **Milestone 41 assembled every "does signal X replicate on market Y" test this project has
+  ever run — 21 in total, across 6 cross-sectional signals and one calendar effect, each on 3
+  markets — into one pre-registered family and applied a formal multiple-testing correction for
+  the first time.** Only 4 of 21 tests survive Benjamini-Hochberg or Bonferroni correction at
+  α=0.05, and momentum on ASX is the only currently-live, positive, cross-sectional finding
+  among them — the other three survivors (turn-of-month on two markets, low-volatility's US
+  inversion) were each already independently qualified by their own dedicated milestone as
+  historical-only or decade-concentrated before this correction ever ran. Momentum on the US
+  mirror does not survive correction on this flat test, fully consistent with (not contradicted
+  by) the project's own era-split demonstration that a naive full-sample test dilutes a genuine
+  pre-2008-09 edge with a real decay. **Rule: a formal multiple-testing correction, run honestly
+  across a project's full discovery history, is a powerful independent check precisely because
+  it uses a completely different logic (statistical correction for the number of hypotheses
+  tested) than the project's own mechanism-level investigations — when the two independent
+  methods converge on the same set of fragile versus robust findings, that convergence is
+  stronger evidence than either method alone, and a project that has already been honest about
+  each individual finding's limitations should expect, not fear, this kind of check.**
 
 ## 2. Risk-management lessons
 
