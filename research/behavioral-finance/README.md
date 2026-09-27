@@ -2532,6 +2532,56 @@ improvement as a proven number until more overlapping history accumulates.
 
 **Reproduce this**: `python investigations/combined_portfolio_diversification_significance.py`.
 
+## Now that the crash mechanism doesn't survive correction, should its stress-test loss estimates carry wider uncertainty? (Milestone 50)
+
+Milestone 33's crash-duration stress simulation, and Milestone 42's crash-cost extension of it,
+both treat momentum's fitted post-2008-09 Bear+HighVol interaction coefficient as a fixed, known
+input: the simulation bootstraps day-to-day residual noise around a point-estimate daily drift,
+but never varies the drift itself. Milestone 47 later found that same coefficient does not
+survive a fuller multiple-testing correction (raw p=0.0081, BH-adjusted p=0.1384-0.1547) — a
+finding this milestone never fed back into the stress-test loss numbers that had already been
+reported as if the underlying coefficient were precisely known.
+
+This milestone re-runs Milestone 33's exact duration-multiplier simulation with one addition: a
+second uncertainty channel that draws the regression's coefficients from their fitted HAC
+sampling distribution once per simulated "world" (mean = the fitted point estimates, covariance
+= the fitted HAC covariance matrix), on top of the residual bootstrap Milestone 33 already ran.
+Nothing about the underlying model changes — only whether the interaction coefficient's own
+estimation uncertainty (exactly the uncertainty behind Milestone 47's correction result) is
+propagated through to the final loss range, rather than silently assumed away.
+
+| Duration | Point-estimate 90% interval (Milestone 33) | Propagated 90% interval | Widening |
+|---|---|---|---|
+| 1x worst (196d) | (-36.3%, -13.1%) | (-40.4%, -6.8%) | 1.45x |
+| 2x worst (392d) | (-55.6%, -31.1%) | (-62.2%, -18.3%) | 1.79x |
+| 3x worst (588d) | (-68.6%, -46.2%) | (-76.2%, -29.2%) | 2.10x |
+| 4x worst (784d) | (-77.5%, -58.4%) | (-84.9%, -37.5%) | 2.48x |
+
+The daily drift's own approximate 90% confidence interval, on the scale Milestone 33 reports in,
+is (-0.2299%, -0.0672%) around a point estimate of -0.1485%/day — a wide band relative to the
+point estimate itself, exactly consistent with Milestone 47's finding that this coefficient's
+significance is fragile under correction.
+
+**The mean loss estimate barely moves (e.g. -25.3% to -24.9% at 1x duration), but the honest
+uncertainty band around it widens substantially and asymmetrically as duration grows — from
+1.45x at the historical worst episode's own length to 2.48x at four times that length.** The
+widening is asymmetric in a specific, informative direction: the propagated 95th-percentile
+outcome (the "not so bad" end) is meaningfully less severe than Milestone 33's point-estimate
+number suggested (e.g. -37.5% vs. -58.4% at 4x duration), while the propagated worst-1% tail is
+correspondingly worse (-88.9% vs. -80.1%). A stress estimate built on a coefficient this
+uncertain should never have been reported as a single number with only residual noise around it.
+
+**Updated conclusion**: this does not retract Milestone 33 or Milestone 42's point estimates —
+they remain the best available reading of what the fitted model predicts. But anyone using this
+project's crash-duration stress numbers for actual risk budgeting should use the wider,
+propagated interval, not the narrower one built on treating a coefficient Milestone 47 already
+flagged as fragile as if it were known with certainty. This closes the loop this project's own
+capstone self-scrutiny phase opened: a multiple-testing correction that humbles a coefficient's
+significance should also humble any downstream number built by treating that coefficient as
+fixed.
+
+**Reproduce this**: `python investigations/crash_stress_test_uncertainty_propagation.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -3050,6 +3100,13 @@ python investigations/asx_momentum_crash_mechanism.py
 # book's diversification benefit itself statistically significant" above
 python investigations/combined_portfolio_diversification_significance.py
 
+# Investigation -- propagates the post-2008-09 interaction coefficient's own HAC estimation
+# uncertainty (the same uncertainty behind Milestone 47's correction result) through Milestone
+# 33's crash-duration stress simulation: mean loss barely moves, but the 90% interval widens
+# 1.45x-2.48x with duration -- see "should its stress-test loss estimates carry wider
+# uncertainty" above
+python investigations/crash_stress_test_uncertainty_propagation.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -3267,7 +3324,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    +0.07), but the +0.32 Sharpe improvement over the better single leg carried a 90% CI of
    (-0.14, +0.47) — including zero — with a one-sided P(improvement≤0)=0.108, over only ~5.25
    years of overlapping data. The diversification mechanism is real; the specific magnitude
-   Milestone 45 reported is a plausible but not yet statistically proven number. Momentum's
+   Milestone 45 reported is a plausible but not yet statistically proven number. Finally, the
+   crash-duration stress simulation (Milestone 33) was re-run with the interaction
+   coefficient's own HAC estimation uncertainty propagated through, rather than held fixed at
+   its point estimate (Milestone 50): the mean loss barely moved (-25.3% to -24.9% at 1x
+   duration), but the honest 90% uncertainty interval around it widened 1.45x to 2.48x as
+   duration grew, asymmetrically — the "not so bad" end became meaningfully less severe while
+   the worst-1% tail became correspondingly worse. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -3720,6 +3783,11 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   the worst case" alone. **Tested jointly with the cost-realism limitation below by Milestone
   42**: crossing crash duration with crash-time trading costs, held fixed here at the flat
   10bps rate, finds that assumption's effect on the stress estimate is small — see below.
+  *(Milestone 50 found the mean loss numbers above are robust, but their reported precision was
+  not: propagating the fitted interaction coefficient's own estimation uncertainty — the same
+  uncertainty behind Milestone 47's correction result — widens the honest 90% interval 1.45x to
+  2.48x as duration grows. Use that wider interval for risk budgeting, not the narrower one
+  above — see below.)*
 - **ASX momentum's sub-period stability, the last item this project's own Conclusions had
   carried as an untested open limitation, is now tested and reassuring, with one real nuance
   flagged (Milestone 34).** ASX's six-year sample was split into three ~2-year sub-periods
@@ -3981,3 +4049,23 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   plausible, not proven, until more overlapping history accumulates; five years of daily data
   is not enough to pin down a diversification benefit's exact size to the precision a single
   point estimate implies.**
+- **The crash-duration stress test's loss estimates (Milestone 33, extended by Milestone 42)
+  were reported with narrower uncertainty than the underlying coefficient actually supports —
+  fixed by propagating that coefficient's own estimation uncertainty through the simulation
+  (Milestone 50).** Milestone 47 found the fitted post-2008-09 Bear+HighVol interaction
+  coefficient does not survive a fuller multiple-testing correction (BH-adjusted p=0.1384-
+  0.1547), but Milestone 33's stress simulation had already treated that same coefficient as a
+  fixed, precisely-known input, bootstrapping only day-to-day residual noise around it. Adding
+  a second uncertainty channel — drawing the regression's coefficients from their fitted HAC
+  sampling distribution once per simulated "world," on top of the existing residual bootstrap —
+  leaves the mean loss estimate essentially unchanged (-25.3% to -24.9% at the historical worst
+  episode's own duration) but widens the honest 90% interval around it substantially and
+  asymmetrically: 1.45x at 1x duration, growing to 2.48x at 4x duration, with the "not so bad"
+  end of the range becoming meaningfully less severe (-58.4% to -37.5% at 4x duration) and the
+  worst-1% tail becoming correspondingly worse (-80.1% to -88.9%). **This does not retract
+  Milestone 33 or Milestone 42's point estimates, which remain the model's best single reading
+  — but anyone using this project's crash-duration numbers for actual risk budgeting should use
+  the wider, propagated interval, not the narrower one built on treating an already-fragile
+  coefficient as certain. A multiple-testing correction that humbles a coefficient's
+  significance should also humble any downstream stress estimate built by holding that
+  coefficient fixed.**

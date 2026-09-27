@@ -1117,6 +1117,23 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     the combined series is different from zero — those are different claims, and only a test
     built for the second one can tell you whether five years of daily data is actually enough
     to trust the size of a diversification benefit, not just its existence.**
+43. **A multiple-testing correction that humbles a coefficient's significance should also
+    humble any downstream number built by treating that coefficient as fixed.** Milestone 33's
+    crash-duration stress simulation bootstraps day-to-day residual noise around a fitted daily
+    drift, but held the drift itself — built from the post-2008-09 Bear+HighVol interaction
+    coefficient — as a precisely-known point estimate. Milestone 47 later found that same
+    coefficient does not survive a fuller multiple-testing correction, but that finding was
+    never fed back into the stress-loss numbers already reported. Milestone 50 closed the loop:
+    drawing the regression's coefficients from their fitted HAC sampling distribution once per
+    simulated "world," on top of the existing residual bootstrap, left the mean loss estimate
+    essentially unchanged but widened the honest 90% uncertainty interval 1.45x to 2.48x as
+    stress duration grew — asymmetrically, with the less-severe end of the range widening more
+    than the point estimate alone would suggest. **Rule: when a later milestone finds a
+    coefficient's significance is fragile, go back and check every earlier number built by
+    treating that same coefficient as fixed — a stress test's residual-noise bootstrap is not a
+    substitute for propagating the uncertainty in the parameter the noise sits on top of, and a
+    project that corrects a coefficient's significance but leaves its downstream point
+    estimates untouched has only done half the job.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

@@ -4159,6 +4159,76 @@ box(
     "number until more overlapping history accumulates.",
     title="A REAL MECHANISM, A NOT-YET-PROVEN MAGNITUDE"
 )
+box(
+    "Section 5.51 closes the loop this project's own capstone "
+    "self-scrutiny phase opened: Section 5.48 found the crash-mechanism "
+    "coefficient fragile under correction, but never fed that finding "
+    "back into the crash-duration stress-loss numbers built on it.",
+    kind="fact", title="UPDATE FROM SECTION 5.51"
+)
+
+h1("5.51  Milestone 50 &mdash; Now that the crash mechanism doesn't survive correction, should its stress-test loss estimates carry wider uncertainty?")
+p("Section 5.34's crash-duration stress simulation, and Section 5.43's "
+  "crash-cost extension of it, both treat momentum's fitted post-2008-09 "
+  "Bear+HighVol interaction coefficient as a fixed, known input: the "
+  "simulation bootstraps day-to-day residual noise around a "
+  "point-estimate daily drift, but never varies the drift itself. "
+  "Section 5.48 later found that same coefficient does not survive a "
+  "fuller multiple-testing correction (raw p=0.0081, BH-adjusted "
+  "p=0.1384-0.1547) &mdash; a finding this project never fed back into "
+  "the stress-test loss numbers that had already been reported as if "
+  "the underlying coefficient were precisely known. This section re-runs "
+  "Section 5.34's exact duration-multiplier simulation with one "
+  "addition: a second uncertainty channel that draws the regression's "
+  "coefficients from their fitted HAC sampling distribution once per "
+  "simulated &quot;world&quot; (mean = the fitted point estimates, "
+  "covariance = the fitted HAC covariance matrix), on top of the "
+  "residual bootstrap Section 5.34 already ran. Nothing about the "
+  "underlying model changes &mdash; only whether the interaction "
+  "coefficient's own estimation uncertainty is propagated through to "
+  "the final loss range, rather than silently assumed away.")
+data_table(
+    ["Duration", "Point-estimate 90% interval", "Propagated 90% interval", "Widening"],
+    [
+        ["1x worst (196d)", "(-36.3%, -13.1%)", "(-40.4%, -6.8%)", "1.45x"],
+        ["2x worst (392d)", "(-55.6%, -31.1%)", "(-62.2%, -18.3%)", "1.79x"],
+        ["3x worst (588d)", "(-68.6%, -46.2%)", "(-76.2%, -29.2%)", "2.10x"],
+        ["4x worst (784d)", "(-77.5%, -58.4%)", "(-84.9%, -37.5%)", "2.48x"],
+    ],
+    col_widths=[1.4*inch, 1.9*inch, 1.9*inch, 1.0*inch], small=True,
+)
+p("The daily drift's own approximate 90% confidence interval, on the "
+  "scale Section 5.34 reports in, is (-0.2299%, -0.0672%) around a "
+  "point estimate of -0.1485%/day &mdash; a wide band relative to the "
+  "point estimate itself, exactly consistent with Section 5.48's "
+  "finding that this coefficient's significance is fragile under "
+  "correction.")
+p("<b>The mean loss estimate barely moves (e.g. -25.3% to -24.9% at 1x "
+  "duration), but the honest uncertainty band around it widens "
+  "substantially and asymmetrically as duration grows &mdash; from "
+  "1.45x at the historical worst episode's own length to 2.48x at four "
+  "times that length.</b> The widening is asymmetric in a specific, "
+  "informative direction: the propagated 95th-percentile outcome (the "
+  "&quot;not so bad&quot; end) is meaningfully less severe than the "
+  "point-estimate number suggested (e.g. -37.5% vs. -58.4% at 4x "
+  "duration), while the propagated worst-1% tail is correspondingly "
+  "worse (-88.9% vs. -80.1%). A stress estimate built on a coefficient "
+  "this uncertain should never have been reported as a single number "
+  "with only residual noise around it.")
+box(
+    "This does not retract Section 5.34 or Section 5.43's point "
+    "estimates &mdash; they remain the best available reading of what "
+    "the fitted model predicts. But anyone using this project's "
+    "crash-duration stress numbers for actual risk budgeting should use "
+    "the wider, propagated interval, not the narrower one built on "
+    "treating a coefficient Section 5.48 already flagged as fragile as "
+    "if it were known with certainty. This closes the loop this "
+    "project's own capstone self-scrutiny phase opened: a "
+    "multiple-testing correction that humbles a coefficient's "
+    "significance should also humble any downstream number built by "
+    "treating that coefficient as fixed.",
+    title="A CORRECTION THAT WAS NEVER PROPAGATED, NOW IS"
+)
 
 # MARKER_END_PART5
 
@@ -4713,6 +4783,14 @@ box(
     "+0.47) includes zero &mdash; the mechanism is real, the exact "
     "magnitude is not yet statistically proven.",
     kind="fact", title="UPDATE FROM PART V.50"
+)
+box(
+    "Part V.51 propagated the post-2008-09 interaction coefficient's own "
+    "HAC estimation uncertainty (the same uncertainty behind Part V.48's "
+    "correction result) through Part V.34's crash-duration stress "
+    "simulation: mean loss barely moves, but the honest 90% interval "
+    "widens 1.45x-2.48x as duration grows.",
+    kind="fact", title="UPDATE FROM PART V.51"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -5458,6 +5536,22 @@ bullets([
     "&mdash; those are different claims, and only a test built for the second one can tell you "
     "whether five years of daily data is actually enough to trust the size of a "
     "diversification benefit, not just its existence.",
+    "<b>A multiple-testing correction that humbles a coefficient's significance should also "
+    "humble any downstream number built by treating that coefficient as fixed.</b> Part V.34's "
+    "crash-duration stress simulation bootstraps day-to-day residual noise around a fitted "
+    "daily drift, but held the drift itself &mdash; built from the post-2008-09 Bear+HighVol "
+    "interaction coefficient &mdash; as a precisely-known point estimate. Part V.48 later found "
+    "that same coefficient does not survive a fuller multiple-testing correction, but that "
+    "finding was never fed back into the stress-loss numbers already reported. Part V.51 closed "
+    "the loop: drawing the regression's coefficients from their fitted HAC sampling "
+    "distribution once per simulated &quot;world,&quot; on top of the existing residual "
+    "bootstrap, left the mean loss estimate essentially unchanged but widened the honest 90% "
+    "uncertainty interval 1.45x to 2.48x as stress duration grew &mdash; asymmetrically, with "
+    "the less-severe end of the range widening more than the point estimate alone would "
+    "suggest. When a later milestone finds a coefficient's significance is fragile, go back and "
+    "check every earlier number built by treating that same coefficient as fixed &mdash; a "
+    "stress test's residual-noise bootstrap is not a substitute for propagating the uncertainty "
+    "in the parameter the noise sits on top of.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -6079,7 +6173,12 @@ bullets([
     "around, not estimated from data &mdash; but it replaces an "
     "acknowledged-but-unquantified gap with an explicit, reproducible "
     "number for anyone sizing this strategy against &quot;2008-09 was "
-    "the worst case&quot; alone.",
+    "the worst case&quot; alone. <i>(Part V.51 found the mean loss "
+    "numbers above are robust, but their reported precision was not: "
+    "propagating the fitted interaction coefficient's own estimation "
+    "uncertainty widens the honest 90% interval 1.45x-2.48x as duration "
+    "grows &mdash; use that wider interval for risk budgeting, not the "
+    "narrower one above &mdash; see below.)</i>",
     "<b>ASX momentum's sub-period stability, the last item this "
     "project's own Conclusions had carried as an untested open "
     "limitation, is now tested and reassuring, with one real nuance "
@@ -6386,6 +6485,27 @@ bullets([
     "treated as plausible, not proven, until more overlapping history accumulates: five years "
     "of daily data is not enough to pin down a diversification benefit's exact size to the "
     "precision a single point estimate implies.",
+    "<b>The crash-duration stress test's loss estimates (Part V.34, extended by Part V.43) "
+    "were reported with narrower uncertainty than the underlying coefficient actually "
+    "supports &mdash; fixed by propagating that coefficient's own estimation uncertainty "
+    "through the simulation (Part V.51).</b> Part V.48 found the fitted post-2008-09 "
+    "Bear+HighVol interaction coefficient does not survive a fuller multiple-testing "
+    "correction (BH-adjusted p=0.1384-0.1547), but Part V.34's stress simulation had already "
+    "treated that same coefficient as a fixed, precisely-known input, bootstrapping only "
+    "day-to-day residual noise around it. Adding a second uncertainty channel &mdash; drawing "
+    "the regression's coefficients from their fitted HAC sampling distribution once per "
+    "simulated &quot;world,&quot; on top of the existing residual bootstrap &mdash; leaves the "
+    "mean loss estimate essentially unchanged (-25.3% to -24.9% at the historical worst "
+    "episode's own duration) but widens the honest 90% interval around it substantially and "
+    "asymmetrically: 1.45x at 1x duration, growing to 2.48x at 4x duration, with the &quot;not "
+    "so bad&quot; end of the range becoming meaningfully less severe (-58.4% to -37.5% at 4x "
+    "duration) and the worst-1% tail becoming correspondingly worse (-80.1% to -88.9%). "
+    "<b>This does not retract Part V.34 or Part V.43's point estimates, which remain the "
+    "model's best single reading</b> &mdash; but anyone using this project's crash-duration "
+    "numbers for actual risk budgeting should use the wider, propagated interval, not the "
+    "narrower one built on treating an already-fragile coefficient as certain. A "
+    "multiple-testing correction that humbles a coefficient's significance should also humble "
+    "any downstream stress estimate built by holding that coefficient fixed.",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -6520,7 +6640,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 49 then ran the India findings through "
+  "needed. Milestones 3 through 50 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -6636,7 +6756,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, forty-six times in a row "
+  "most recent, best-supported-looking result, forty-seven times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -6907,12 +7027,19 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "that had never needed a scare to earn the scrutiny: the project's "
   "own cleanest edge. It came back clean, on both legs, and folding "
   "it into the family the check before had just built changed "
-  "nothing about which single number survived, and finally ran a "
+  "nothing about which single number survived, ran a "
   "forty-sixth check (Part V.50) that went back to a diversification "
   "benefit the project had reported on a point estimate alone and "
   "asked whether it survived being resampled. The mechanism did; the "
   "specific size of the benefit didn't clear the same bar this "
-  "project applies to everything else. "
+  "project applies to everything else, and finally ran a forty-seventh "
+  "check (Part V.51) that took the one correction still sitting "
+  "unapplied &mdash; the crash mechanism's own humbled significance "
+  "&mdash; and asked what it should have changed about a stress-test "
+  "loss number built on that same mechanism months earlier. The answer "
+  "wasn't the number itself, which barely moved, but the honest range "
+  "around it, which had been narrower than the evidence supporting its "
+  "own key input ever actually was. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -6995,12 +7122,17 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "put through that exact crash test, because nothing had ever made "
   "anyone suspect it needed to be, came through clean anyway &mdash; "
   "and stayed exactly as clean once it took its place in the "
-  "corrected family the humbling had just built, and finally "
+  "corrected family the humbling had just built, "
   "discovering that a headline diversification number, tested for "
   "whether it was different from zero, was answering a different "
   "question than whether it was actually bigger than chance would "
   "produce, and that once asked properly, the mechanism behind it "
-  "held up far better than the specific number did, are "
+  "held up far better than the specific number did, and finally "
+  "discovering that a correction the project had already applied to a "
+  "coefficient's own significance had never been applied to the "
+  "numbers built on top of that coefficient, and that once it was, the "
+  "headline loss estimate barely changed but the honest range around "
+  "it did, are "
   "all "
   "findings: the project never "
   "found a result, an explanation, or even a way of testing an "
@@ -7289,8 +7421,17 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "claim in this guide had already survived or failed. The mechanism "
   "it rested on passed; the specific size of the benefit it was sold "
   "on did not, at least not yet, with only five years of overlapping "
-  "history to judge it by. What "
-  "remains open, after forty-six checks, is not a "
+  "history to judge it by. Part V.51 then closed a loop this project "
+  "had left open since Part V.48: a coefficient's significance had "
+  "already been humbled by correction, but the loss estimate built on "
+  "top of that same coefficient, months earlier, had never been "
+  "revisited in light of it. Propagating the coefficient's own "
+  "estimation uncertainty through the stress simulation that used it "
+  "left the headline loss number almost exactly where it started, but "
+  "widened the honest range around it by as much as two and a half "
+  "times &mdash; a correction that had already been applied to one "
+  "number, finally applied to everything downstream of it. What "
+  "remains open, after forty-seven checks, is not a "
   "specific finding still standing untested, but the same standing "
   "posture the project started with: no result here is treated as "
   "more final than the next check would find it to be, no comparison "
@@ -7323,6 +7464,9 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "one goes unchecked, no diversification benefit reported on a single "
   "point estimate is treated as proven until it has been resampled to "
   "see whether the sample size underneath it could support the claim, "
+  "no coefficient whose significance a correction has already humbled "
+  "is left holding up an earlier stress estimate as if it were still "
+  "certain, "
   "and "
   "the "
   "project's one surviving edge is exactly as well-supported, and "
