@@ -2484,6 +2484,54 @@ unaddressed this project's confidence in ASX momentum as its most robust survivi
 
 **Reproduce this**: `python investigations/asx_momentum_crash_mechanism.py`.
 
+## Is the combined book's diversification benefit itself statistically significant, or just Sharpe-ratio arithmetic? (Milestone 49)
+
+Milestone 45 reported the combined ASX-momentum + NSE-turn-of-month book's Sharpe (+2.00)
+beating both legs' own Sharpes (+1.69, +1.24) and its own formal HAC test on the combined book's
+mean return (p=0.0001). That headline test, on inspection, does not actually answer the question
+it looks like it answers: a book that is 50% ASX momentum — already significant on its own
+(p=0.0007) — is mechanically likely to test significant for "mean ≠ 0" whether or not combining
+it with NSE turn-of-month adds anything real. The genuinely open question is narrower: is the
+Sharpe *improvement* over just holding the better single leg (+0.32) distinguishable from what
+resampling noise alone would produce over this short, 5.25-year (n=1,321-day) window — or is
+Milestone 45's near-zero correlation estimate (+0.0200) itself just a lucky draw from only 1,160
+overlapping days?
+
+This milestone runs a block bootstrap (21-trading-day blocks, matching this project's own
+Newey-West lag convention, to preserve within-month serial dependence), 5,000 draws, resampling
+the aligned (ASX, NSE) return pairs over the exact same window Milestone 45 used.
+
+| | Point estimate | 90% bootstrap CI | One-sided bootstrap p |
+|---|---|---|---|
+| Sharpe improvement over better single leg | +0.32 | (-0.14, +0.47) | P(≤0) = 0.1078 |
+| Combined book Sharpe | +2.00 | (+1.11, +2.83) | — |
+| Correlation between legs | +0.0197 | (-0.0307, +0.0688) | P(≥0.30) = 0.0000 |
+
+**Two different parts of Milestone 45's claim hold up differently under resampling.** The
+near-zero correlation is robust: its 90% CI stays tight around zero (-0.03 to +0.07), nowhere
+near the range that would indicate a hidden shared mechanism — genuine cross-market
+independence, not just a favorable point estimate. But the specific *Sharpe improvement* Milestone
+45 highlighted as "the real, checked consequence" of that independence carries much wider
+uncertainty than its point estimate suggested: the 90% CI (-0.14, +0.47) includes zero, and a
+one-sided bootstrap test puts a 10.8% probability on the improvement being zero or negative —
+not below this project's own 5% threshold. Over only ~5.25 years of overlapping data, "the
+combined book's Sharpe beats both legs" is a real, honest point estimate, but not yet a
+statistically proven diversification benefit at conventional significance.
+
+**Updated conclusion**: this is not a reversal of Milestone 45 — the mechanism (near-zero,
+tightly-bounded correlation between two structurally unrelated bets) is exactly as advertised,
+and remains this project's best evidence for genuine diversification. What changes is the
+confidence attached to the specific magnitude: Milestone 45's Sharpe-ratio table read as more
+settled than the underlying sample size supports, and this milestone's own headline HAC p-value
+(reproduced above, p=0.0001) tested the wrong thing for the diversification question — it mostly
+detects that ASX momentum alone is significant, not that combining it with NSE turn-of-month
+adds anything beyond what ASX momentum already delivers. Anyone building on Milestone 45 should
+treat the combined book as *plausibly* better than holding ASX momentum alone, backed by a
+genuinely independent-looking second leg, but should not treat the specific +0.32 Sharpe
+improvement as a proven number until more overlapping history accumulates.
+
+**Reproduce this**: `python investigations/combined_portfolio_diversification_significance.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2996,6 +3044,12 @@ python investigations/crash_mechanism_multiple_testing.py
 # momentum carry the Bear+HighVol crash mechanism" above)
 python investigations/asx_momentum_crash_mechanism.py
 
+# Investigation -- block-bootstraps the Milestone 45 combined book's Sharpe improvement and
+# leg correlation (5,000 draws, 21-day blocks): correlation stays robustly near zero, but the
+# Sharpe improvement's 90% CI includes zero (one-sided P(<=0)=0.108) -- see "Is the combined
+# book's diversification benefit itself statistically significant" above
+python investigations/combined_portfolio_diversification_significance.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -3207,7 +3261,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    p=0.39 combined), and folding both tests into a re-corrected 19-test family left the overall
    picture unchanged (still 0 survivors) — reinforcing, rather than merely leaving
    unaddressed, this project's confidence in ASX momentum as robust to the one crash mechanism
-   this project actually understands. Momentum's
+   this project actually understands. Finally, Milestone 45's own combined-book Sharpe
+   improvement was put through a block bootstrap rather than accepted on its point estimate
+   alone (Milestone 49): the near-zero leg correlation held up robustly (90% CI -0.03 to
+   +0.07), but the +0.32 Sharpe improvement over the better single leg carried a 90% CI of
+   (-0.14, +0.47) — including zero — with a one-sided P(improvement≤0)=0.108, over only ~5.25
+   years of overlapping data. The diversification mechanism is real; the specific magnitude
+   Milestone 45 reported is a plausible but not yet statistically proven number. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -3855,7 +3915,9 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   legs (+1.69, +1.24) and their simple average (+1.46), with near-zero correlation (+0.0200)
   between the two return streams — a genuine, checked diversification benefit, not an assumed
   one, and the first time this project has actually built and tested a multi-signal position
-  rather than described one in the abstract.**
+  rather than described one in the abstract.** *(Milestone 49 block-bootstraps this point
+  estimate: the near-zero correlation holds up robustly, but the specific +0.32 Sharpe
+  improvement over the better single leg carries a 90% CI that includes zero — see below.)*
 - **Momentum's crash-risk mechanism does not generalize to other signals with a superficially
   similar construction — checked directly, not assumed (Milestone 46).** Low-volatility (short
   the high-volatility leg) and MAX (short the high-lottery leg) both share momentum's shape: a
@@ -3903,3 +3965,19 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   has survived every other stress test this project has run against it — also shows no
   evidence of the specific crash-risk mechanism that damaged its US counterpart, a genuine,
   checked absence rather than an untested gap.**
+- **Milestone 45's combined-book diversification benefit is a real mechanism but not yet a
+  statistically proven magnitude — checked with a block bootstrap rather than accepted on a
+  point estimate (Milestone 49).** Milestone 45's own HAC significance test on the combined
+  book's mean return (p=0.0001) mostly detects that ASX momentum alone is significant, not that
+  the combination itself adds anything — a book that is 50% an already-significant position is
+  mechanically likely to test significant regardless. The sharper question is whether the
+  Sharpe *improvement* over holding ASX momentum alone (+0.32) survives resampling: a 21-day
+  block bootstrap (5,000 draws, preserving within-month serial dependence) over the same
+  5.25-year window puts a 90% CI of (-0.14, +0.47) on that improvement — including zero — with
+  a one-sided P(improvement≤0)=0.108. The near-zero leg correlation itself holds up far better
+  (90% CI: -0.03 to +0.07, nowhere near a level implying a shared mechanism). **This is not a
+  retraction of Milestone 45 — genuine cross-market independence between the two legs is
+  robustly confirmed — but the specific Sharpe-improvement number should be treated as
+  plausible, not proven, until more overlapping history accumulates; five years of daily data
+  is not enough to pin down a diversification benefit's exact size to the precision a single
+  point estimate implies.**

@@ -606,6 +606,17 @@ actually deploy signals like this (see `case_studies/behavioral_funds.md`):
   they happen to be live in the same place, and the naive same-market combination this
   project assumed at the outset turned out not to exist, while a better one (cross-market)
   did.**
+- **Milestone 49 put Milestone 45's combined-book Sharpe improvement through a block
+  bootstrap, and found the mechanism (near-zero leg correlation) holds up far better than the
+  specific magnitude (a +0.32 Sharpe improvement) does.** Over the ~5.25-year overlapping
+  window, a 90% bootstrap CI on the improvement (-0.14, +0.47) includes zero, while the
+  correlation's own CI (-0.03, +0.07) stays tight around zero. **Rule: anyone building the
+  cross-market ASX-momentum + NSE-turn-of-month book as a practical position should treat the
+  diversification mechanism as real and trust-worthy, but size the position expecting the
+  actual realized Sharpe improvement to plausibly land anywhere in a wide range around the
+  historical point estimate, not at exactly +0.32 — five years of daily data pins down whether
+  two return streams are correlated far more precisely than it pins down the exact payoff of
+  combining them.**
 
 ## 2. Risk-management lessons
 
@@ -1091,6 +1102,21 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     applicability — apply the same scrutiny to your best-looking position, not just your
     worst-looking ones, and treat a clean result there as a real, reportable finding rather
     than a formality not worth running.**
+42. **A significance test on a combined position can pass for the wrong reason — test the
+    specific claim you're actually making, not the closest test that happens to be lying
+    around.** Milestone 45's own HAC test on its combined book's mean return (p=0.0001) looked
+    like it validated the diversification benefit the milestone was reporting, but it mostly
+    just detects that one leg (ASX momentum) is already significant on its own — a book that's
+    50% an already-significant position will clear a "mean ≠ 0" bar almost mechanically,
+    whether or not the combination adds anything. Milestone 49 isolated the actual claim — is
+    the Sharpe *improvement* over the better single leg distinguishable from resampling noise —
+    with a 21-day block bootstrap, and found a 90% CI of (-0.14, +0.47) on that improvement,
+    including zero, even though the near-zero leg correlation itself (the real mechanism behind
+    the claim) held up robustly under the same resampling. **Rule: when a milestone's headline
+    number is "the combination beats its parts," test the improvement itself, not just whether
+    the combined series is different from zero — those are different claims, and only a test
+    built for the second one can tell you whether five years of daily data is actually enough
+    to trust the size of a diversification benefit, not just its existence.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

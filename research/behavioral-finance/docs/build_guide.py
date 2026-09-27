@@ -4091,6 +4091,74 @@ box(
     "most robust surviving edge.",
     title="A CLEAN RESULT FOR THIS PROJECT'S BEST-LOOKING FINDING"
 )
+box(
+    "Section 5.50 goes back to Section 5.46's combined book and asks "
+    "whether its headline Sharpe improvement, not just its combined "
+    "mean return, actually survives a block bootstrap.",
+    kind="fact", title="UPDATE FROM SECTION 5.50"
+)
+
+h1("5.50  Milestone 49 &mdash; Is the combined book's diversification benefit itself statistically significant, or just Sharpe-ratio arithmetic?")
+p("Section 5.46 reported the combined ASX-momentum + NSE-turn-of-month "
+  "book's Sharpe (+2.00) beating both legs' own Sharpes (+1.69, +1.24) "
+  "and a formal HAC test on the combined book's own mean return "
+  "(p=0.0001). That headline test, on inspection, does not actually "
+  "answer the question it looks like it answers: a book that is 50% "
+  "ASX momentum &mdash; already significant on its own (p=0.0007) "
+  "&mdash; is mechanically likely to test significant for “mean "
+  "&ne; 0” whether or not combining it with NSE turn-of-month "
+  "adds anything real. The genuinely open question is narrower: is "
+  "the Sharpe <i>improvement</i> over just holding the better single "
+  "leg (+0.32) distinguishable from what resampling noise alone would "
+  "produce over this short, 5.25-year (n=1,321-day) window &mdash; or "
+  "is Section 5.46's near-zero correlation estimate (+0.0200) itself "
+  "just a lucky draw from only 1,160 overlapping days? This section "
+  "runs a block bootstrap (21-trading-day blocks, matching this "
+  "project's own Newey-West lag convention, to preserve within-month "
+  "serial dependence), 5,000 draws, resampling the aligned (ASX, NSE) "
+  "return pairs over the exact same window Section 5.46 used.")
+data_table(
+    ["", "Point estimate", "90% bootstrap CI", "One-sided bootstrap p"],
+    [
+        ["Sharpe improvement vs. better leg", "+0.32", "(-0.14, +0.47)", "P(≤0)=0.1078"],
+        ["Combined book Sharpe", "+2.00", "(+1.11, +2.83)", "—"],
+        ["Correlation between legs", "+0.0197", "(-0.0307, +0.0688)", "P(≥0.30)=0.0000"],
+    ],
+    col_widths=[2.3*inch, 1.3*inch, 1.6*inch, 1.4*inch], small=True,
+)
+p("<b>Two different parts of Section 5.46's claim hold up differently "
+  "under resampling.</b> The near-zero correlation is robust: its 90% "
+  "CI stays tight around zero (-0.03 to +0.07), nowhere near the range "
+  "that would indicate a hidden shared mechanism &mdash; genuine "
+  "cross-market independence, not just a favorable point estimate. But "
+  "the specific Sharpe improvement Section 5.46 highlighted as “the "
+  "real, checked consequence” of that independence carries much "
+  "wider uncertainty than its point estimate suggested: the 90% CI "
+  "(-0.14, +0.47) includes zero, and a one-sided bootstrap test puts a "
+  "10.8% probability on the improvement being zero or negative &mdash; "
+  "not below this project's own 5% threshold. Over only ~5.25 years of "
+  "overlapping data, “the combined book's Sharpe beats both "
+  "legs” is a real, honest point estimate, but not yet a "
+  "statistically proven diversification benefit at conventional "
+  "significance.")
+box(
+    "This is not a reversal of Section 5.46 &mdash; the mechanism "
+    "(near-zero, tightly-bounded correlation between two structurally "
+    "unrelated bets) is exactly as advertised, and remains this "
+    "project's best evidence for genuine diversification. What "
+    "changes is the confidence attached to the specific magnitude: "
+    "Section 5.46's Sharpe-ratio table read as more settled than the "
+    "underlying sample size supports, and this section's own headline "
+    "HAC p-value (reproduced above, p=0.0001) tested the wrong thing "
+    "for the diversification question &mdash; it mostly detects that "
+    "ASX momentum alone is significant, not that combining it with "
+    "NSE turn-of-month adds anything beyond what ASX momentum already "
+    "delivers. Treat the combined book as plausibly better than ASX "
+    "momentum alone, backed by a genuinely independent-looking second "
+    "leg, but not the specific +0.32 Sharpe improvement as a proven "
+    "number until more overlapping history accumulates.",
+    title="A REAL MECHANISM, A NOT-YET-PROVEN MAGNITUDE"
+)
 
 # MARKER_END_PART5
 
@@ -4636,6 +4704,15 @@ box(
     "combined), reinforcing confidence in this project's cleanest "
     "surviving edge once folded into a re-corrected 19-test family.",
     kind="fact", title="UPDATE FROM PART V.49"
+)
+box(
+    "Part V.50 block-bootstrapped Part V.46's combined-book Sharpe "
+    "improvement rather than accepting its point estimate: the "
+    "near-zero leg correlation holds up robustly (90% CI -0.03 to "
+    "+0.07), but the +0.32 Sharpe improvement's own 90% CI (-0.14, "
+    "+0.47) includes zero &mdash; the mechanism is real, the exact "
+    "magnitude is not yet statistically proven.",
+    kind="fact", title="UPDATE FROM PART V.50"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -5365,6 +5442,22 @@ bullets([
     "its own applicability &mdash; apply the same scrutiny to your best-looking position, not "
     "just your worst-looking ones, and treat a clean result there as a real, reportable "
     "finding rather than a formality not worth running.",
+    "<b>A significance test on a combined position can pass for the wrong reason &mdash; test "
+    "the specific claim you're actually making, not the closest test that happens to be lying "
+    "around.</b> Part V.46's own HAC test on its combined book's mean return (p=0.0001) looked "
+    "like it validated the diversification benefit being reported, but it mostly just detects "
+    "that one leg (ASX momentum) is already significant on its own &mdash; a book that's 50% "
+    "an already-significant position will clear a &quot;mean &ne; 0&quot; bar almost "
+    "mechanically, whether or not the combination adds anything. Part V.50 isolated the actual "
+    "claim &mdash; is the Sharpe improvement over the better single leg distinguishable from "
+    "resampling noise &mdash; with a 21-day block bootstrap, and found a 90% CI of (-0.14, "
+    "+0.47) on that improvement, including zero, even though the near-zero leg correlation "
+    "itself (the real mechanism behind the claim) held up robustly under the same resampling. "
+    "When a milestone's headline number is &quot;the combination beats its parts,&quot; test "
+    "the improvement itself, not just whether the combined series is different from zero "
+    "&mdash; those are different claims, and only a test built for the second one can tell you "
+    "whether five years of daily data is actually enough to trust the size of a "
+    "diversification benefit, not just its existence.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -6222,7 +6315,10 @@ bullets([
     "+1.24) and their simple average (+1.46), with near-zero correlation (+0.0200) between "
     "the two return streams &mdash; a genuine, checked diversification benefit, not an "
     "assumed one, and the first time this project has actually built and tested a "
-    "multi-signal position rather than described one in the abstract.</b>",
+    "multi-signal position rather than described one in the abstract.</b> <i>(Part V.50 "
+    "block-bootstraps this point estimate: the near-zero correlation holds up robustly, but "
+    "the specific +0.32 Sharpe improvement over the better single leg carries a 90% CI that "
+    "includes zero &mdash; see below.)</i>",
     "<b>Momentum's crash-risk mechanism does not generalize to other signals with a "
     "superficially similar construction &mdash; checked directly, not assumed (Part "
     "V.47).</b> Low-volatility (short the high-volatility leg) and MAX (short the "
@@ -6273,6 +6369,23 @@ bullets([
     "every other stress test this project has run against it &mdash; also shows no evidence "
     "of the specific crash-risk mechanism that damaged its US counterpart, a genuine, checked "
     "absence rather than an untested gap.</b>",
+    "<b>Part V.46's combined-book diversification benefit is a real mechanism but not yet a "
+    "statistically proven magnitude &mdash; checked with a block bootstrap rather than "
+    "accepted on a point estimate (Part V.50).</b> Part V.46's own HAC significance test on "
+    "the combined book's mean return (p=0.0001) mostly detects that ASX momentum alone is "
+    "significant, not that the combination itself adds anything &mdash; a book that is 50% an "
+    "already-significant position is mechanically likely to test significant regardless. The "
+    "sharper question is whether the Sharpe <i>improvement</i> over holding ASX momentum "
+    "alone (+0.32) survives resampling: a 21-day block bootstrap (5,000 draws, preserving "
+    "within-month serial dependence) over the same 5.25-year window puts a 90% CI of (-0.14, "
+    "+0.47) on that improvement &mdash; including zero &mdash; with a one-sided "
+    "P(improvement&le;0)=0.108. The near-zero leg correlation itself holds up far better (90% "
+    "CI: -0.03 to +0.07, nowhere near a level implying a shared mechanism). <b>This is not a "
+    "retraction of Part V.46</b> &mdash; genuine cross-market independence between the two "
+    "legs is robustly confirmed &mdash; but the specific Sharpe-improvement number should be "
+    "treated as plausible, not proven, until more overlapping history accumulates: five years "
+    "of daily data is not enough to pin down a diversification benefit's exact size to the "
+    "precision a single point estimate implies.",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -6407,7 +6520,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 48 then ran the India findings through "
+  "needed. Milestones 3 through 49 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -6523,7 +6636,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, forty-five times in a row "
+  "most recent, best-supported-looking result, forty-six times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -6789,12 +6902,17 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "else's replication claim. The single number that had justified "
   "trusting this project's account of its worst loss did not survive "
   "the same scrutiny that had already been applied to everything "
-  "else, and finally ran a forty-fifth check (Part V.49) that pointed "
+  "else, ran a forty-fifth check (Part V.49) that pointed "
   "the exact same crash test, for the first time, at the one position "
   "that had never needed a scare to earn the scrutiny: the project's "
   "own cleanest edge. It came back clean, on both legs, and folding "
   "it into the family the check before had just built changed "
-  "nothing about which single number survived. "
+  "nothing about which single number survived, and finally ran a "
+  "forty-sixth check (Part V.50) that went back to a diversification "
+  "benefit the project had reported on a point estimate alone and "
+  "asked whether it survived being resampled. The mechanism did; the "
+  "specific size of the benefit didn't clear the same bar this "
+  "project applies to everything else. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -6873,11 +6991,16 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "paper, built the same dangerous way, discovering that "
   "the same correction the project had used to humble its best "
   "replication result, turned at last on its own risk explanation, "
-  "humbled that too, and finally discovering that the one edge never "
+  "humbled that too, discovering that the one edge never "
   "put through that exact crash test, because nothing had ever made "
   "anyone suspect it needed to be, came through clean anyway &mdash; "
   "and stayed exactly as clean once it took its place in the "
-  "corrected family the humbling had just built, are "
+  "corrected family the humbling had just built, and finally "
+  "discovering that a headline diversification number, tested for "
+  "whether it was different from zero, was answering a different "
+  "question than whether it was actually bigger than chance would "
+  "produce, and that once asked properly, the mechanism behind it "
+  "held up far better than the specific number did, are "
   "all "
   "findings: the project never "
   "found a result, an explanation, or even a way of testing an "
@@ -7154,12 +7277,20 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "not clear the bar either &mdash; not disproven, since it echoes a "
   "mechanism documented outside this project entirely, but no longer "
   "resting on this project's own arithmetic alone. And Part V.49 "
-  "finally ran that same humbling test on the one position that had "
+  "ran that same humbling test on the one position that had "
   "never been given a reason to need it: ASX momentum, still standing "
   "after everything else in this guide. It stood after this too, on "
   "both legs, and the corrected family it joined stayed exactly as "
-  "empty of survivors as it was before. What "
-  "remains open, after forty-five checks, is not a "
+  "empty of survivors as it was before. Part V.50 then went back to a "
+  "different number the project had reported without the same "
+  "scrutiny &mdash; not a significance test at all, but a "
+  "diversification benefit measured on a single point estimate &mdash; "
+  "and put it through the resampling discipline every other headline "
+  "claim in this guide had already survived or failed. The mechanism "
+  "it rested on passed; the specific size of the benefit it was sold "
+  "on did not, at least not yet, with only five years of overlapping "
+  "history to judge it by. What "
+  "remains open, after forty-six checks, is not a "
   "specific finding still standing untested, but the same standing "
   "posture the project started with: no result here is treated as "
   "more final than the next check would find it to be, no comparison "
@@ -7189,7 +7320,10 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "worst result is held to a looser standard than the replication "
   "claims it corrects everyone else's with, no stress test is applied "
   "only to positions that already look shaky while the best-looking "
-  "one goes unchecked, and "
+  "one goes unchecked, no diversification benefit reported on a single "
+  "point estimate is treated as proven until it has been resampled to "
+  "see whether the sample size underneath it could support the claim, "
+  "and "
   "the "
   "project's one surviving edge is exactly as well-supported, and "
   "exactly as fragile, as its "
