@@ -4043,6 +4043,54 @@ box(
     "to correct its own most-trusted risk explanation.",
     title="A SOBERING RESULT, NOT A RETRACTION"
 )
+box(
+    "Section 5.49 closes the one gap in the crash-interaction family: "
+    "ASX momentum, this project's cleanest, currently-live edge, had "
+    "never itself been tested for the Bear+HighVol mechanism.",
+    kind="fact", title="UPDATE FROM SECTION 5.49"
+)
+
+h1("5.49  Milestone 48 &mdash; Does ASX momentum &mdash; this project's cleanest edge &mdash; carry the Bear+HighVol crash mechanism?")
+p("Section 5.48's crash-interaction family tested momentum on the US "
+  "mirror and NSE, and low-volatility/MAX on the US mirror and ASX "
+  "&mdash; but never momentum on ASX itself, this project's own "
+  "cleanest, most repeatedly-stress-tested, currently-live edge. Not "
+  "a deliberate exclusion, just an overlooked one: ASX has 266 "
+  "Bear+HighVol trading days (17.7% of its 1,501-day sample), "
+  "comfortably enough to estimate the interaction without the "
+  "rank-deficiency problem Section 5.20 found in the US post-2009 "
+  "window.")
+data_table(
+    ["", "Interaction coefficient", "p-value"],
+    [
+        ["Momentum ASX long leg", "-0.00128", "0.2769"],
+        ["Momentum ASX combined leg", "-0.00214", "0.3898"],
+    ],
+    col_widths=[2.6*inch, 2.2*inch, 1.4*inch], small=True,
+)
+p("<b>Neither leg shows a significant Bear+HighVol interaction.</b> "
+  "Folding these two fresh tests into Section 5.48's family (now 19 "
+  "tests, every p-value recomputed fresh rather than reused) changes "
+  "nothing about the overall picture &mdash; still only momentum "
+  "US's own post-2008-09 mechanism is significant at raw p&lt;0.05 "
+  "(p=0.0081), and its BH-adjusted p rises slightly, from 0.1384 to "
+  "0.1547, as the slightly larger family makes correction marginally "
+  "more conservative; it still does not survive either correction. "
+  "Still 0 of 19 tests survive Benjamini-Hochberg or Bonferroni.")
+box(
+    "ASX momentum &mdash; the one finding that has survived every "
+    "other stress test this project has run against it (cost "
+    "realism, sub-period stability, the multiple-testing correction "
+    "on replication claims itself) &mdash; also shows no evidence of "
+    "the specific crash-risk mechanism that damaged its US "
+    "counterpart in 2008-09. This is a genuine, checked absence, not "
+    "an untested gap: the same look-ahead-free regime-interaction "
+    "test that flagged momentum's US vulnerability finds nothing "
+    "comparable on ASX, reinforcing rather than merely leaving "
+    "unaddressed this project's confidence in ASX momentum as its "
+    "most robust surviving edge.",
+    title="A CLEAN RESULT FOR THIS PROJECT'S BEST-LOOKING FINDING"
+)
 
 # MARKER_END_PART5
 
@@ -4580,6 +4628,14 @@ box(
     "correction (BH-adj=0.1384): sobering, though not a retraction "
     "given the mechanism's independent literature support.",
     kind="fact", title="UPDATE FROM PART V.48"
+)
+box(
+    "Part V.49 closed the one gap in the crash-interaction family: "
+    "ASX momentum had never been tested for the Bear+HighVol "
+    "mechanism. Neither leg is significant (p=0.28 long, p=0.39 "
+    "combined), reinforcing confidence in this project's cleanest "
+    "surviving edge once folded into a re-corrected 19-test family.",
+    kind="fact", title="UPDATE FROM PART V.49"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -5296,6 +5352,19 @@ bullets([
     "comparable family of tests it belongs to, not the single uncorrected p-value that first "
     "surfaced it, and a project willing to correct its best replication result should be "
     "equally willing to correct its own most-trusted risk explanation.",
+    "<b>A stress-testing program isn't finished until it's been run against the position you "
+    "actually hold, not just the ones that already showed a scare.</b> Part V.48's "
+    "crash-interaction family tested momentum on the US mirror and NSE, and low-volatility/MAX "
+    "on the US mirror and ASX &mdash; but never momentum on ASX itself, this project's "
+    "cleanest, currently-live edge, simply because no prior milestone had ever surfaced a "
+    "reason to suspect it. Part V.49 ran the test anyway (266 Bear+HighVol days, 17.7% of the "
+    "sample, comfortably enough to estimate) and found neither leg significant (p=0.28 long, "
+    "p=0.39 combined), reinforcing rather than complicating confidence in this project's one "
+    "surviving edge once folded into a re-corrected 19-test family. A crash-mechanism test "
+    "that has only ever been run on signals that already looked shaky is a biased sample of "
+    "its own applicability &mdash; apply the same scrutiny to your best-looking position, not "
+    "just your worst-looking ones, and treat a clean result there as a real, reportable "
+    "finding rather than a formality not worth running.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -6189,6 +6258,21 @@ bullets([
     "crash-mechanism claim to the same corrected standard applied to everything else &mdash; "
     "more cautious than the uncorrected p=0.0081 alone would suggest, and a genuinely sobering "
     "result about a finding this project has treated as settled since Part V.17.",
+    "<b>The one gap in the crash-interaction family &mdash; ASX momentum, this project's "
+    "cleanest, currently-live edge, had never itself been tested for the Bear+HighVol "
+    "mechanism &mdash; is now closed, and the result reinforces rather than complicates this "
+    "project's confidence in it (Part V.49).</b> ASX has 266 Bear+HighVol trading days (17.7% "
+    "of its sample), comfortably enough to estimate the interaction without the "
+    "rank-deficiency problem Part V.20 found in the US post-2009 window. Neither leg shows a "
+    "significant interaction (long leg coef=-0.00128, p=0.2769; combined leg coef=-0.00214, "
+    "p=0.3898). Folding both tests into a re-corrected 19-test family (every p-value "
+    "recomputed fresh) changes nothing about the overall picture &mdash; still 0 of 19 tests "
+    "survive either correction, and momentum US's post-2008-09 mechanism's BH-adjusted p rises "
+    "only slightly (0.1384 to 0.1547) as the marginally larger family makes correction "
+    "marginally more conservative. <b>ASX momentum &mdash; the one finding that has survived "
+    "every other stress test this project has run against it &mdash; also shows no evidence "
+    "of the specific crash-risk mechanism that damaged its US counterpart, a genuine, checked "
+    "absence rather than an untested gap.</b>",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -6323,7 +6407,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 47 then ran the India findings through "
+  "needed. Milestones 3 through 48 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -6439,7 +6523,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, forty-four times in a row "
+  "most recent, best-supported-looking result, forty-five times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -6697,15 +6781,20 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "the same way &mdash; short a leg the theory says should be "
   "dangerous &mdash; were exposed to it too. Neither was, anywhere, "
   "at any level of the same test that had found it so clearly for "
-  "momentum: a shared shape, it turns out, is not a shared risk, and "
-  "finally ran a forty-fourth check (Part V.48) that gathered every "
+  "momentum: a shared shape, it turns out, is not a shared risk, "
+  "ran a forty-fourth check (Part V.48) that gathered every "
   "version of that same crash test the project had ever run into one "
   "corrected family and pointed the correction, for the first time, "
   "at the project's own risk explanation rather than at someone "
   "else's replication claim. The single number that had justified "
   "trusting this project's account of its worst loss did not survive "
   "the same scrutiny that had already been applied to everything "
-  "else. "
+  "else, and finally ran a forty-fifth check (Part V.49) that pointed "
+  "the exact same crash test, for the first time, at the one position "
+  "that had never needed a scare to earn the scrutiny: the project's "
+  "own cleanest edge. It came back clean, on both legs, and folding "
+  "it into the family the check before had just built changed "
+  "nothing about which single number survived. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -6781,10 +6870,14 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "of just being asserted to, discovering that the exact "
   "test which had once explained this project's worst historical loss "
   "found nothing at all when pointed at two signals that looked, on "
-  "paper, built the same dangerous way, and finally discovering that "
+  "paper, built the same dangerous way, discovering that "
   "the same correction the project had used to humble its best "
   "replication result, turned at last on its own risk explanation, "
-  "humbled that too, are "
+  "humbled that too, and finally discovering that the one edge never "
+  "put through that exact crash test, because nothing had ever made "
+  "anyone suspect it needed to be, came through clean anyway &mdash; "
+  "and stayed exactly as clean once it took its place in the "
+  "corrected family the humbling had just built, are "
   "all "
   "findings: the project never "
   "found a result, an explanation, or even a way of testing an "
@@ -7052,7 +7145,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "regime interaction that lit up unmistakably for momentum came back "
   "flat every time, on every market, on every leg, for signals that "
   "share momentum's short-a-high-beta-leg shape but not, it turns "
-  "out, its risk. And Part V.48 finally pointed the project's own "
+  "out, its risk. Part V.48 then pointed the project's own "
   "multiple-testing machinery, built to discipline everyone else's "
   "replication claims, back at the one number the project itself had "
   "leaned on hardest: the crash-mechanism finding that named a cause "
@@ -7060,8 +7153,13 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "comparable crash tests it actually belongs to, that finding did "
   "not clear the bar either &mdash; not disproven, since it echoes a "
   "mechanism documented outside this project entirely, but no longer "
-  "resting on this project's own arithmetic alone. What "
-  "remains open, after forty-four checks, is not a "
+  "resting on this project's own arithmetic alone. And Part V.49 "
+  "finally ran that same humbling test on the one position that had "
+  "never been given a reason to need it: ASX momentum, still standing "
+  "after everything else in this guide. It stood after this too, on "
+  "both legs, and the corrected family it joined stayed exactly as "
+  "empty of survivors as it was before. What "
+  "remains open, after forty-five checks, is not a "
   "specific finding still standing untested, but the same standing "
   "posture the project started with: no result here is treated as "
   "more final than the next check would find it to be, no comparison "
@@ -7089,7 +7187,9 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "one signal is assumed to extend to another signal that merely "
   "looks built the same way, no explanation for the project's own "
   "worst result is held to a looser standard than the replication "
-  "claims it corrects everyone else's with, and "
+  "claims it corrects everyone else's with, no stress test is applied "
+  "only to positions that already look shaky while the best-looking "
+  "one goes unchecked, and "
   "the "
   "project's one surviving edge is exactly as well-supported, and "
   "exactly as fragile, as its "

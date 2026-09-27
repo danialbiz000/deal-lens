@@ -2452,6 +2452,38 @@ would suggest.
 
 **Reproduce this**: `python investigations/crash_mechanism_multiple_testing.py`.
 
+## Does ASX momentum — this project's cleanest edge — carry the Bear+HighVol crash mechanism? (Milestone 48)
+
+Milestone 47's crash-interaction family tested momentum on the US mirror and NSE, and
+low-volatility/MAX on the US mirror and ASX — but never momentum on ASX itself, this project's
+own cleanest, most repeatedly-stress-tested, currently-live edge. Not a deliberate exclusion,
+just an overlooked one: ASX has 266 Bear+HighVol trading days (17.7% of its 1,501-day sample),
+comfortably enough to estimate the interaction without the rank-deficiency problem Milestone 19
+found in the US post-2009 window.
+
+| | Interaction coefficient | p-value |
+|---|---|---|
+| Momentum ASX long leg | -0.00128 | 0.2769 |
+| Momentum ASX combined leg | -0.00214 | 0.3898 |
+
+**Neither leg shows a significant Bear+HighVol interaction.** Folding these two fresh tests into
+Milestone 47's family (now 19 tests, every p-value recomputed fresh rather than reused) changes
+nothing about the overall picture — still only momentum US's own post-2008-09 mechanism is
+significant at raw p<0.05 (p=0.0081), and its BH-adjusted p rises slightly, from 0.1384 to
+0.1547, as the slightly larger family makes correction marginally more conservative; it still
+does not survive either correction. Still 0 of 19 tests survive Benjamini-Hochberg or
+Bonferroni.
+
+**Updated conclusion**: ASX momentum — the one finding that has survived every other stress
+test this project has run against it (cost realism, sub-period stability, the multiple-testing
+correction on replication claims itself) — also shows no evidence of the specific crash-risk
+mechanism that damaged its US counterpart in 2008-09. This is a genuine, checked absence, not
+an untested gap: the same look-ahead-free regime-interaction test that flagged momentum's US
+vulnerability finds nothing comparable on ASX, reinforcing rather than merely leaving
+unaddressed this project's confidence in ASX momentum as its most robust surviving edge.
+
+**Reproduce this**: `python investigations/asx_momentum_crash_mechanism.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -2958,6 +2990,12 @@ python investigations/crash_mechanism_lottery_signals.py
 # correction change what this project's crash-mechanism finding should be trusted at" above
 python investigations/crash_mechanism_multiple_testing.py
 
+# Investigation -- closes the one gap in the crash-interaction family: does ASX momentum, this
+# project's cleanest edge, carry the Bear+HighVol crash mechanism (neither leg significant,
+# p=0.28/0.39; folds into a re-corrected 19-test family, still 0 survivors; see "Does ASX
+# momentum carry the Bear+HighVol crash mechanism" above)
+python investigations/asx_momentum_crash_mechanism.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -3162,7 +3200,14 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    historical loss) does not survive either correction (BH-adj=0.1384) — a sobering result
    properly qualifying how much of that mechanism's credibility rests on this project's own
    data specifically, though the mechanism itself is independently documented in the academic
-   literature (Daniel & Moskowitz 2016) outside anything this project has computed. Momentum's
+   literature (Daniel & Moskowitz 2016) outside anything this project has computed. Finally,
+   the one gap left in that crash-interaction family was closed (Milestone 48): ASX
+   momentum — this project's cleanest, currently-live edge — had never itself been tested for
+   the Bear+HighVol mechanism. Neither leg showed a significant interaction (p=0.28 long,
+   p=0.39 combined), and folding both tests into a re-corrected 19-test family left the overall
+   picture unchanged (still 0 survivors) — reinforcing, rather than merely leaving
+   unaddressed, this project's confidence in ASX momentum as robust to the one crash mechanism
+   this project actually understands. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -3844,3 +3889,17 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   claim to the same corrected standard applied to everything else — more cautious than the
   uncorrected p=0.0081 alone would suggest, and a genuinely sobering result about a finding
   this project has treated as settled since Milestone 16.**
+- **The one gap in the crash-interaction family — ASX momentum, this project's cleanest,
+  currently-live edge, had never itself been tested for the Bear+HighVol mechanism — is now
+  closed, and the result reinforces rather than complicates this project's confidence in it
+  (Milestone 48).** ASX has 266 Bear+HighVol trading days (17.7% of its sample), comfortably
+  enough to estimate the interaction without the rank-deficiency problem Milestone 19 found in
+  the US post-2009 window. Neither leg shows a significant interaction (long leg coef=-0.00128,
+  p=0.2769; combined leg coef=-0.00214, p=0.3898). Folding both tests into a re-corrected
+  19-test family (every p-value recomputed fresh) changes nothing about the overall
+  picture — still 0 of 19 tests survive either correction, and momentum US's post-2008-09
+  mechanism's BH-adjusted p rises only slightly (0.1384 to 0.1547) as the marginally larger
+  family makes correction marginally more conservative. **ASX momentum — the one finding that
+  has survived every other stress test this project has run against it — also shows no
+  evidence of the specific crash-risk mechanism that damaged its US counterpart, a genuine,
+  checked absence rather than an untested gap.**

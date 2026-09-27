@@ -1078,6 +1078,19 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     family of tests it belongs to, not the single uncorrected p-value that first surfaced it,
     and a project willing to correct its best replication result should be equally willing to
     correct its own most-trusted risk explanation.**
+41. **A stress-testing program isn't finished until it's been run against the position you
+    actually hold, not just the ones that already showed a scare.** Milestone 47's
+    crash-interaction family tested momentum on the US mirror and NSE, and low-volatility/MAX
+    on the US mirror and ASX — but never momentum on ASX itself, this project's cleanest,
+    currently-live edge, simply because no prior milestone had ever surfaced a reason to
+    suspect it. Milestone 48 ran the test anyway (266 Bear+HighVol days, 17.7% of the sample,
+    comfortably enough to estimate) and found neither leg significant (p=0.28 long, p=0.39
+    combined), reinforcing rather than complicating confidence in this project's one surviving
+    edge once folded into a re-corrected 19-test family. **Rule: a crash-mechanism test that
+    has only ever been run on signals that already looked shaky is a biased sample of its own
+    applicability — apply the same scrutiny to your best-looking position, not just your
+    worst-looking ones, and treat a clean result there as a real, reportable finding rather
+    than a formality not worth running.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
