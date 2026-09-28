@@ -4374,6 +4374,77 @@ box(
     "its data allows, and no more.",
     title="VALIDATED WHERE IT CAN BE, HONEST WHERE IT CAN'T"
 )
+box(
+    "Section 5.54 closes the last gap in this project's crash-risk "
+    "toolkit: it has never been pointed at turn-of-month, a signal "
+    "with no short leg at all.",
+    kind="fact", title="UPDATE FROM SECTION 5.54"
+)
+
+h1("5.54  Milestone 53 &mdash; Does turn-of-month carry the same crash risk, or the same fat-tail risk, as this project's other signals?")
+p("This project's crash-risk toolkit &mdash; the Bear+HighVol "
+  "regime-interaction test (Sections 5.17-5.19, 5.21, 5.47-5.49) and "
+  "the VaR/CVaR fat-tail profile (Section 5.44) &mdash; has only ever "
+  "been applied to cross-sectional long-short strategies. Turn-of-"
+  "month, now half of this project's own current recommendation, is "
+  "structurally different: a long-only, calendar-timing strategy with "
+  "no short leg at all, so momentum's own crash mechanism (a short "
+  "leg that snaps back violently in a rebound) has no obvious "
+  "analogue here. Whether turn-of-month carries any comparable "
+  "regime-conditional risk, or a different kind of tail risk "
+  "altogether, has never been checked.")
+p("<b>Part 1 &mdash; does the turn-of-month add-on itself shrink or "
+  "reverse during Bear+HighVol regimes?</b> A three-way HAC "
+  "regression (turn-of-month &times; Bear+HighVol interaction) on "
+  "both markets where turn-of-month is a genuinely live, "
+  "walk-forward-validated finding:")
+data_table(
+    ["Market", "Baseline add-on", "Crash interaction", "Add-on in a crash"],
+    [
+        ["NSE", "+0.2210%/day, p=0.0000***", "+0.2319%/day, p=0.4126", "+0.4529%/day"],
+        ["US mirror", "+0.0885%/day, p=0.0006***", "-0.0709%/day, p=0.7121", "+0.0176%/day"],
+    ],
+    col_widths=[0.9*inch, 1.8*inch, 1.8*inch, 1.5*inch], small=True,
+)
+p("Neither interaction is significant &mdash; a clean null, "
+  "structurally consistent with turn-of-month having no short leg to "
+  "expose to a crash rebound. The point estimates even point in "
+  "opposite directions across markets, reinforcing that this is "
+  "noise, not a hidden effect.")
+p("<b>Part 2 &mdash; a different question: what does turn-of-month's "
+  "OWN tail risk look like on the days it's actually invested?</b> "
+  "Profiling empirical vs. Gaussian VaR/CVaR directly on the market's "
+  "returns during turn-of-month days (not the zero-heavy "
+  "invested-or-cash series):")
+data_table(
+    ["Market", "99.9% CVaR ratio", "90% bootstrap CI", "Tail obs."],
+    [
+        ["NSE", "1.37x", "(4.919%, 6.191%)", "2"],
+        ["US mirror", "1.89x", "(5.320%, 7.799%)", "3"],
+    ],
+    col_widths=[0.9*inch, 1.5*inch, 2.1*inch, 1.1*inch], small=True,
+)
+p("<b>Turn-of-month's own fat-tail understatement is real, and on "
+  "the US mirror it is even larger than momentum's own documented gap "
+  "(Section 5.44's 1.71x).</b> Turn-of-month days carry essentially "
+  "the same day-to-day volatility as rest-of-month days "
+  "(0.98x-1.00x) &mdash; the excess mean return this strategy "
+  "captures is not compensated by higher point-estimate risk on "
+  "those specific days, but the fat tail shows real downside "
+  "exposure a simple volatility comparison would miss.")
+box(
+    "These two parts answer genuinely different questions, and "
+    "turn-of-month's risk profile splits cleanly between them. It "
+    "shows no evidence of momentum's specific crash-regime mechanism "
+    "&mdash; a clean, structurally sensible null, not an untested "
+    "gap. But it does carry real, unconditional fat-tail risk on its "
+    "own invested days, comparable to or larger than momentum's. "
+    "Anyone treating turn-of-month as a &quot;safer&quot; component "
+    "of the combined book because it lacks a short leg should size it "
+    "against its own tail risk, not assume the absence of one risk "
+    "mechanism means the absence of all of them.",
+    title="TWO DIFFERENT RISK QUESTIONS, TWO DIFFERENT ANSWERS"
+)
 
 # MARKER_END_PART5
 
@@ -4953,6 +5024,14 @@ box(
     "own walk-forward test is blocked by a genuine data constraint, "
     "stated honestly.",
     kind="fact", title="UPDATE FROM PART V.53"
+)
+box(
+    "Part V.54 pointed this project's crash-risk toolkit at "
+    "turn-of-month for the first time: a clean null on Bear+HighVol "
+    "crash-regime risk (no short leg to expose), but real fat-tail "
+    "risk on its own invested days, larger on the US mirror (1.89x) "
+    "than momentum's own documented gap (1.71x).",
+    kind="fact", title="UPDATE FROM PART V.54"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -5749,6 +5828,23 @@ bullets([
     "generic split &mdash; and when a leg genuinely cannot support the same test, say so "
     "explicitly rather than silently limiting the check to whichever leg happens to be "
     "checkable.",
+    "<b>The absence of one risk mechanism does not imply the absence of all of them &mdash; a "
+    "signal that passes a crash-regime test still needs its own tail-risk check.</b> This "
+    "project's Bear+HighVol regime-interaction test and VaR/CVaR fat-tail profile had only ever "
+    "been applied to cross-sectional long-short strategies. Turn-of-month has no short leg at "
+    "all, so momentum's specific crash mechanism has no analogue here &mdash; and, as expected, "
+    "a three-way interaction test found a clean null on both markets (p=0.41, p=0.71). It would "
+    "have been easy to stop there and conclude turn-of-month carries no meaningful risk this "
+    "project's toolkit can detect. It does: profiling VaR/CVaR directly on the days turn-of-month "
+    "is actually invested found real fat-tail understatement, a 99.9% CVaR ratio as high as "
+    "1.89x on the US mirror &mdash; larger than momentum's own documented 1.71x gap &mdash; even "
+    "though those days carry essentially the same point-estimate volatility as any other day. A "
+    "clean result on one risk test (here, regime-conditional crash sensitivity) is not a clean "
+    "bill of health &mdash; different strategy structures carry different KINDS of risk, and a "
+    "signal with no short leg to expose to a crash rebound can still carry real, unconditional "
+    "fat-tail risk that only a separate test, aimed at the right question, will ever surface. "
+    "Run every risk tool your toolkit has, not just the one that happens to apply most "
+    "obviously to a signal's surface-level shape.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -6749,6 +6845,25 @@ bullets([
     "forward &mdash; stated honestly here rather than silently narrowing the check to only the "
     "leg that can support one. The project's current recommendation is exactly as validated as "
     "its data allows, and no more.</b>",
+    "<b>This project's crash-risk toolkit had never been pointed at turn-of-month &mdash; "
+    "checked, and found a clean null on crash-regime risk but a real, previously-unmeasured "
+    "fat-tail risk on the days it's actually invested (Part V.54).</b> The Bear+HighVol "
+    "regime-interaction test (Parts V.17-V.19, V.21, V.47-V.49) and the VaR/CVaR fat-tail "
+    "profile (Part V.44) have only ever been applied to cross-sectional long-short strategies "
+    "&mdash; turn-of-month, now half of this project's own current recommendation, has no short "
+    "leg at all, so momentum's own crash mechanism (a short leg snapping back in a rebound) has "
+    "no obvious analogue here. A three-way HAC interaction test confirms exactly that: no "
+    "significant Bear+HighVol interaction on either NSE (p=0.4126) or the US mirror (p=0.7121), "
+    "a structurally sensible clean null. But profiling empirical vs. Gaussian VaR/CVaR directly "
+    "on the market's returns during turn-of-month days finds real fat-tail understatement "
+    "&mdash; a 99.9% CVaR ratio of 1.37x on NSE and <b>1.89x on the US mirror, larger than "
+    "momentum's own documented 1.71x gap (Part V.44)</b> &mdash; even though turn-of-month days "
+    "carry essentially the same day-to-day volatility as rest-of-month days (0.98x-1.00x). "
+    "<b>The absence of one risk mechanism (crash-regime sensitivity) does not imply the absence "
+    "of all of them: turn-of-month should not be treated as the &quot;safer&quot; half of the "
+    "combined book simply because it lacks a short leg &mdash; it carries its own real, "
+    "unconditional tail risk that a regime-interaction test alone would never surface, which is "
+    "exactly why this project's two crash-risk tools are complementary, not redundant.</b>",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -6883,7 +6998,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 52 then ran the India findings through "
+  "needed. Milestones 3 through 53 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -6999,7 +7114,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, forty-nine times in a row "
+  "most recent, best-supported-looking result, fifty times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -7287,13 +7402,20 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "built and pointed it at two more numbers built the identical way. "
   "One survived intact; the other, a difference this project had "
   "called real but second-order, turned out to be no difference at "
-  "all once the same honesty was applied to it, and finally ran a "
+  "all once the same honesty was applied to it, ran a "
   "forty-ninth check (Part V.53) that pointed this project's own "
   "walk-forward instinct, used for years on findings already settled, "
   "at the one recommendation still actively in use. Where the check "
   "could be run at all, it passed twice over &mdash; forward and back "
   "&mdash; and where it couldn't be run, that was said plainly instead "
-  "of quietly skipped. "
+  "of quietly skipped, and finally ran a fiftieth check (Part V.54) "
+  "that took the same instrument this project had used many times on "
+  "one shape of strategy and pointed it, for the first time, at a "
+  "strategy built nothing like the others: no short leg, no stock "
+  "selection at all, just a calendar window. The specific mechanism "
+  "this project already understood did not apply, and said so "
+  "cleanly &mdash; but a different mechanism, one that same signal's "
+  "own quiet days had been carrying the whole time, did. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -7391,12 +7513,18 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "checking both rather than stopping at one showed a fat-tail finding "
   "was sturdier than its own thin tail suggested while a difference "
   "this project had called modest but real turned out, once actually "
-  "tested, to not be a difference at all, and finally discovering that "
+  "tested, to not be a difference at all, "
+  "discovering that "
   "a generic sub-period boundary, built for a different question, can "
   "make a live signal look decayed simply by not lining up with the "
   "window actually being used, and that testing the real window "
   "instead found this project's own current recommendation exactly as "
   "sound in advance as it was during the years it was actually run, "
+  "and finally discovering that a signal built nothing like any "
+  "other in this project could still fail the one crash test "
+  "cleanly, for a reason that made structural sense, and still turn "
+  "out to be carrying a completely different risk that same clean "
+  "result would have hidden from anyone who stopped looking there, "
   "are "
   "all "
   "findings: the project never "
@@ -7715,8 +7843,17 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "unrepresentative era. Where the check could not be run &mdash; one "
   "leg of the book has no data left over to test against, in either "
   "direction &mdash; that was named as a limit on what this project "
-  "can know, not smoothed over. What "
-  "remains open, after forty-nine checks, is not a "
+  "can know, not smoothed over. Part V.54 then pointed this project's "
+  "crash-risk toolkit, exercised many times on strategies built the "
+  "same underlying way, at the one signal built nothing like them: no "
+  "short leg, no stock selection, just a calendar window. The specific "
+  "test this project already trusted came back clean, exactly as the "
+  "signal's own structure predicted it should &mdash; but a second, "
+  "different test, aimed at a different kind of risk entirely, found "
+  "real exposure sitting in the same signal's own quiet days, larger "
+  "than the exposure this project's best-known finding already carries. "
+  "What "
+  "remains open, after fifty checks, is not a "
   "specific finding still standing untested, but the same standing "
   "posture the project started with: no result here is treated as "
   "more final than the next check would find it to be, no comparison "
@@ -7755,7 +7892,8 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "retired the day it fixes the one result that motivated building it, "
   "no current recommendation is treated as validated by a walk-forward "
   "discipline that has only ever been pointed at findings already "
-  "settled, "
+  "settled, no signal that clears one risk test is assumed clear of "
+  "every risk this project knows how to check for, "
   "and "
   "the "
   "project's one surviving edge is exactly as well-supported, and "

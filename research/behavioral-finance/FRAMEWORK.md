@@ -1169,6 +1169,23 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     recommendation lives in, not the nearest pre-existing generic split -- and when a leg
     genuinely cannot support the same test, say so explicitly rather than silently limiting the
     check to whichever leg happens to be checkable.**
+46. **The absence of one risk mechanism does not imply the absence of all of them -- a signal
+    that passes a crash-regime test still needs its own tail-risk check.** This project's
+    Bear+HighVol regime-interaction test and VaR/CVaR fat-tail profile had only ever been
+    applied to cross-sectional long-short strategies. Turn-of-month has no short leg at all, so
+    momentum's specific crash mechanism (a short leg snapping back in a rebound) has no
+    analogue here -- and, as expected, a three-way interaction test found a clean null on both
+    markets (p=0.41, p=0.71). It would have been easy to stop there and conclude turn-of-month
+    carries no meaningful risk this project's toolkit can detect. It does: profiling VaR/CVaR
+    directly on the days turn-of-month is actually invested found real fat-tail understatement,
+    a 99.9% CVaR ratio as high as 1.89x on the US mirror -- larger than momentum's own
+    documented 1.71x gap -- even though those days carry essentially the same point-estimate
+    volatility as any other day. **Rule: a clean result on one risk test (here, regime-
+    conditional crash sensitivity) is not a clean bill of health -- different strategy
+    structures carry different KINDS of risk, and a signal with no short leg to expose to a
+    crash rebound can still carry real, unconditional fat-tail risk that only a separate test,
+    aimed at the right question, will ever surface. Run every risk tool your toolkit has, not
+    just the one that happens to apply most obviously to a signal's surface-level shape.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

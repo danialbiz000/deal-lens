@@ -2681,6 +2681,54 @@ more.
 
 **Reproduce this**: `python investigations/turn_of_month_walkforward_consistency.py`.
 
+## Does turn-of-month carry the same crash risk, or the same fat-tail risk, as this project's other signals? (Milestone 53)
+
+This project's crash-risk toolkit — the Bear+HighVol regime-interaction test (Milestones 16-18,
+20, 46-48) and the VaR/CVaR fat-tail profile (Milestone 43) — has only ever been applied to
+cross-sectional long-short strategies. Turn-of-month, now half of this project's own current
+recommendation, is structurally different: a long-only, calendar-timing strategy with no short
+leg at all, so momentum's own crash mechanism (a short leg that snaps back violently in a
+rebound) has no obvious analogue here. Whether turn-of-month carries any comparable
+regime-conditional risk, or a different kind of tail risk altogether, has never been checked.
+
+**Part 1 — does the turn-of-month add-on itself shrink or reverse during Bear+HighVol
+regimes?** A three-way HAC regression (turn-of-month × Bear+HighVol interaction) on both markets
+where turn-of-month is a genuinely live, walk-forward-validated finding:
+
+| Market | Baseline add-on | Crash-regime interaction | Add-on during a crash |
+|---|---|---|---|
+| NSE | +0.2210%/day, p=0.0000*** | +0.2319%/day, p=0.4126 | +0.4529%/day |
+| US mirror | +0.0885%/day, p=0.0006*** | -0.0709%/day, p=0.7121 | +0.0176%/day |
+
+Neither interaction is significant — a clean null, structurally consistent with turn-of-month
+having no short leg to expose to a crash rebound. The point estimates even point in opposite
+directions across markets, reinforcing that this is noise, not a hidden effect.
+
+**Part 2 — a different question: what does turn-of-month's OWN tail risk look like on the days
+it's actually invested?** Profiling empirical vs. Gaussian VaR/CVaR directly on the market's
+returns during turn-of-month days (not the zero-heavy invested-or-cash series):
+
+| Market | 99.9% CVaR ratio (empirical/Gaussian) | 90% bootstrap CI | Tail observations |
+|---|---|---|---|
+| NSE | 1.37x | (4.919%, 6.191%) | 2 |
+| US mirror | 1.89x | (5.320%, 7.799%) | 3 |
+
+**Turn-of-month's own fat-tail understatement is real, and on the US mirror it is even larger
+than momentum's own documented gap (Milestone 43's 1.71x).** Turn-of-month days carry
+essentially the same day-to-day volatility as rest-of-month days (0.98x-1.00x) — the excess mean
+return this strategy captures is not compensated by higher point-estimate risk on those specific
+days, but the fat tail shows real downside exposure a simple volatility comparison would miss.
+
+**Updated conclusion**: these two parts answer genuinely different questions, and turn-of-month's
+risk profile splits cleanly between them. It shows no evidence of momentum's specific
+crash-regime mechanism — a clean, structurally sensible null, not an untested gap. But it does
+carry real, unconditional fat-tail risk on its own invested days, comparable to or larger than
+momentum's. Anyone treating turn-of-month as a "safer" component of the combined book because it
+lacks a short leg should size it against its own tail risk, not assume the absence of one risk
+mechanism means the absence of all of them.
+
+**Reproduce this**: `python investigations/turn_of_month_crash_tail_profile.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -3221,6 +3269,13 @@ python investigations/uncertainty_propagation_audit.py
 # walk-forward and sub-period discipline" above
 python investigations/turn_of_month_walkforward_consistency.py
 
+# Investigation -- points this project's crash-risk toolkit at turn-of-month for the first
+# time: no Bear+HighVol crash-regime interaction (clean null on both NSE and US, p=0.41/0.71),
+# but real fat-tail risk on its own invested days (99.9% CVaR ratio 1.37x NSE, 1.89x US --
+# larger than momentum's own 1.71x) -- see "Does turn-of-month carry the same crash risk, or
+# the same fat-tail risk" above
+python investigations/turn_of_month_crash_tail_profile.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -3455,7 +3510,12 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    selectable using only data available before the combined book's window began (p<0.0001) and
    holds up within the specific window actually traded (p=0.0023), while ASX momentum's own
    walk-forward test is blocked by a genuine data constraint — its window already is essentially
-   ASX's full usable sample — stated honestly rather than skipped. Momentum's
+   ASX's full usable sample — stated honestly rather than skipped. Finally, this project's
+   crash-risk toolkit was pointed at turn-of-month for the first time (Milestone 53): no
+   Bear+HighVol crash-regime interaction on either market (clean null, p=0.41 NSE, p=0.71 US),
+   structurally sensible since turn-of-month has no short leg to expose to a crash rebound — but
+   real, unconditional fat-tail risk on its own invested days, with a 99.9% CVaR ratio (1.89x on
+   the US mirror) even larger than momentum's own documented gap. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -4238,3 +4298,21 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   the pick held up going forward — stated honestly here rather than silently narrowing the check
   to only the leg that can support one. The project's current recommendation is exactly as
   validated as its data allows, and no more.**
+- **This project's crash-risk toolkit had never been pointed at turn-of-month — checked, and
+  found a clean null on crash-regime risk but a real, previously-unmeasured fat-tail risk on the
+  days it's actually invested (Milestone 53).** The Bear+HighVol regime-interaction test
+  (Milestones 16-18, 20, 46-48) and the VaR/CVaR fat-tail profile (Milestone 43) have only ever
+  been applied to cross-sectional long-short strategies — turn-of-month, now half of this
+  project's own current recommendation, has no short leg at all, so momentum's own crash
+  mechanism (a short leg snapping back in a rebound) has no obvious analogue here. A three-way
+  HAC interaction test confirms exactly that: no significant Bear+HighVol interaction on either
+  NSE (p=0.4126) or the US mirror (p=0.7121), a structurally sensible clean null. But profiling
+  empirical vs. Gaussian VaR/CVaR directly on the market's returns during turn-of-month days
+  finds real fat-tail understatement — a 99.9% CVaR ratio of 1.37x on NSE and **1.89x on the US
+  mirror, larger than momentum's own documented 1.71x gap (Milestone 43)** — even though
+  turn-of-month days carry essentially the same day-to-day volatility as rest-of-month days
+  (0.98x-1.00x). **The absence of one risk mechanism (crash-regime sensitivity) does not imply
+  the absence of all of them: turn-of-month should not be treated as the "safer" half of the
+  combined book simply because it lacks a short leg — it carries its own real, unconditional
+  tail risk that a regime-interaction test alone would never surface, which is exactly why this
+  project's two crash-risk tools are complementary, not redundant.**
