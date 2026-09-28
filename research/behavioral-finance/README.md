@@ -2582,6 +2582,61 @@ fixed.
 
 **Reproduce this**: `python investigations/crash_stress_test_uncertainty_propagation.py`.
 
+## Does the same uncertainty-propagation discipline change two other headline point estimates? (Milestone 51)
+
+Milestone 50 built a specific technique — draw a fitted coefficient from its own HAC sampling
+distribution rather than treating it as certain — and applied it to one number (Milestone 33's
+crash-duration stress loss). Two other headline point estimates in this project's history are
+built the same way, from a fitted or resampled quantity, without ever having that quantity's own
+estimation uncertainty carried through to the final reported number: Milestone 43's "99.9% CVaR
+understated by 1.71x" ratio, and Milestone 42's crash-cost-multiplier sweep (-25.6% to -26.7%
+across 1.0x-5.0x costs). This milestone applies the same discipline to both.
+
+**Part 1 — the CVaR ratio itself.** Milestone 43 bootstrapped confidence intervals on the
+empirical VaR and CVaR separately, but never on their ratio to the Gaussian CVaR — the actual
+headline number. Resampling days once per draw and computing both the empirical and Gaussian
+CVaR from that same draw (so the ratio's genuine joint sampling distribution is captured, not two
+independent intervals):
+
+| Series | Point ratio | 90% bootstrap CI | Raw tail observations |
+|---|---|---|---|
+| US mirror, from 1978 (Milestone 43's headline series) | 1.71x | (1.52x, 1.86x) | 11 |
+| ASX mirror, full sample | 1.21x | (1.00x, 1.30x) | 2 |
+
+The US ratio holds up well: a 0.34x-wide 90% interval that stays clearly above 1.0x even at its
+low end — the fat-tail understatement is real, not a statistical artifact of a single unlucky
+resample, despite resting on only 11 raw observations beyond the threshold. ASX's ratio is a
+different story: its 90% CI reaches all the way down to 1.00x (no understatement at all) from
+just 2 raw tail observations — that number should be read as evidence the point estimate is
+essentially unusable at this confidence level on this sample size, not as a precise 1.21x.
+
+**Part 2 — the crash-cost-multiplier sweep.** Refitting Milestone 42's post-2008 regression at
+each cost multiplier and running both the original point-estimate simulation and Milestone 50's
+parameter-uncertainty-propagated one:
+
+| Multiplier | Point mean | Propagated mean | Propagated 90% interval |
+|---|---|---|---|
+| 1.0x | -25.7% | -25.2% | (-40.9%, -7.2%) |
+| 5.0x | -26.8% | -26.4% | (-41.7%, -8.7%) |
+
+**The 1.16-percentage-point point-estimate gap Milestone 42 reported between 1.0x and 5.0x
+costs is completely swamped by each fit's own parameter uncertainty — the propagated 90%
+intervals overlap almost entirely.** Milestone 42's own point estimates are not wrong, and the
+ordering (higher cost multiplier → worse mean loss) holds throughout — but the specific claim
+that crash-time cost inflation is a "real but second-order amplifier" rests on a difference this
+small that it cannot actually be distinguished from noise once the same estimation uncertainty
+Milestone 50 applied elsewhere is applied here too.
+
+**Updated conclusion**: the two headline numbers this milestone re-examined do not survive the
+same scrutiny equally. The CVaR-understatement ratio on the project's main (US) series is
+robust — a real, resampling-confirmed effect, even from a thin tail. But the crash-cost
+multiplier's reported differences were never distinguishable from parameter noise in the first
+place, a finding Milestone 42 could not have surfaced without the exact technique Milestone 50
+built one milestone later. Applying a new diagnostic tool retroactively, the moment it exists,
+is itself the standing practice this project keeps re-learning is worth the extra milestone.
+
+**Reproduce this**: `python investigations/uncertainty_propagation_audit.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -3107,6 +3162,13 @@ python investigations/combined_portfolio_diversification_significance.py
 # uncertainty" above
 python investigations/crash_stress_test_uncertainty_propagation.py
 
+# Investigation -- applies Milestone 50's uncertainty-propagation technique to two other
+# headline numbers: Milestone 43's CVaR ratio (US series robust, 90% CI (1.52x, 1.86x); ASX's
+# CI reaches down to 1.00x from only 2 tail observations) and Milestone 42's crash-cost sweep
+# (the 1.0x-5.0x point-estimate gap is fully swamped by parameter uncertainty) -- see "Does the
+# same uncertainty-propagation discipline change two other headline point estimates" above
+python investigations/uncertainty_propagation_audit.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -3330,7 +3392,12 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    its point estimate (Milestone 50): the mean loss barely moved (-25.3% to -24.9% at 1x
    duration), but the honest 90% uncertainty interval around it widened 1.45x to 2.48x as
    duration grew, asymmetrically — the "not so bad" end became meaningfully less severe while
-   the worst-1% tail became correspondingly worse. Momentum's
+   the worst-1% tail became correspondingly worse. Finally, that same uncertainty-propagation
+   technique was applied to two other headline point estimates (Milestone 51): Milestone 43's
+   99.9% CVaR-understatement ratio held up well on its main US series (90% CI (1.52x, 1.86x),
+   still clearly above 1.0x), but Milestone 42's crash-cost-multiplier sweep did not — the
+   1.16-percentage-point gap it reported between 1.0x and 5.0x costs turned out to be fully
+   swamped by each fit's own parameter uncertainty once the same scrutiny was applied. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -3934,7 +4001,10 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   dominates the loss estimate regardless of the cost assumption layered on top. **Rising
   trading costs during a crisis are real but second-order for this strategy's crash risk —
   the dominant driver remains the regime-return effect Milestone 17 already identified, not
-  the cost of trading through it.**
+  the cost of trading through it.** *(Milestone 51 found this 1.1-point gap does not survive
+  the same parameter-uncertainty propagation applied elsewhere — the 1.0x and 5.0x multipliers'
+  propagated 90% intervals overlap almost entirely, so "second-order but real" should be read
+  as "second-order and not statistically distinguishable from noise" — see below.)*
 - **The Q1 simulation's central risk finding — Gaussian VaR understates real tail risk — was
   never tested against a real position, only a hypothetical one, until Milestone 43.**
   Computing empirical vs. Gaussian VaR/CVaR directly on momentum's actual out-of-sample-hedged
@@ -3951,7 +4021,10 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   much a far-tail number can actually be trusted given each sample's real size — even the US
   mirror's ~9,000-day cleaned series gives a 99.9% CVaR estimate with a genuinely wide
   interval (roughly 8%-10%), and this project's risk playbook should size against that
-  empirical range, not a single Gaussian point estimate.**
+  empirical range, not a single Gaussian point estimate.** *(Milestone 51 put a bootstrap CI on
+  the CVaR RATIO itself, not just each side separately: the US 1.71x holds up well — 90% CI
+  (1.52x, 1.86x), clearly above 1.0x — but ASX's 1.21x has a CI reaching down to 1.00x from
+  only 2 tail observations, essentially uninformative at this confidence level — see below.)*
 - **Momentum's relative robustness to realistic trading costs (Milestone 35) is the exception
   in this project, not the norm — every other live positive finding is meaningfully or
   completely cost-fragile at levels well inside a realistic range (Milestone 44).** MAX
@@ -4069,3 +4142,21 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   coefficient as certain. A multiple-testing correction that humbles a coefficient's
   significance should also humble any downstream stress estimate built by holding that
   coefficient fixed.**
+- **Milestone 50's uncertainty-propagation technique, applied to two other headline point
+  estimates, finds one robust and one not — the CVaR-understatement ratio (Milestone 43)
+  survives; the crash-cost-multiplier gap (Milestone 42) does not (Milestone 51).** Resampling
+  days once per draw and computing empirical and Gaussian CVaR from the same draw puts a 90%
+  bootstrap CI directly on the RATIO Milestone 43 reported (not just each side separately): the
+  US mirror's 1.71x holds up well (90% CI (1.52x, 1.86x), staying clearly above 1.0x even from
+  only 11 raw tail observations), while ASX's 1.21x has a CI reaching all the way to 1.00x from
+  just 2 tail observations — essentially unusable at this confidence level. Refitting
+  Milestone 42's cost-multiplier sweep with Milestone 50's own parameter-uncertainty-propagated
+  simulation at every multiplier finds the reported 1.16-percentage-point gap between 1.0x and
+  5.0x costs is fully swamped by each fit's own estimation uncertainty — the propagated 90%
+  intervals overlap almost entirely, even though the point-estimate ordering (higher cost →
+  worse loss) still holds. **Neither result retracts the milestone it re-examines: Milestone
+  43's fat-tail finding on the project's main series is more robust than its short 11-day tail
+  sample might suggest, and Milestone 42's "second-order effect" conclusion, while directionally
+  correct, was never actually statistically distinguishable from noise in the first place — a
+  gap this project could not have known about before Milestone 50 built the tool that found
+  it.**

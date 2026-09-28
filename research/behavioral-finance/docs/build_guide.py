@@ -4229,6 +4229,85 @@ box(
     "treating that coefficient as fixed.",
     title="A CORRECTION THAT WAS NEVER PROPAGATED, NOW IS"
 )
+box(
+    "Section 5.52 sweeps Section 5.51's new technique back across two "
+    "other headline numbers built the same way: Section 5.44's CVaR "
+    "ratio and Section 5.43's crash-cost-multiplier sweep.",
+    kind="fact", title="UPDATE FROM SECTION 5.52"
+)
+
+h1("5.52  Milestone 51 &mdash; Does the same uncertainty-propagation discipline change two other headline point estimates?")
+p("Section 5.51 built a specific technique &mdash; draw a fitted "
+  "coefficient from its own HAC sampling distribution rather than "
+  "treating it as certain &mdash; and applied it to one number "
+  "(Section 5.34's crash-duration stress loss). Two other headline "
+  "point estimates in this project's history are built the same way, "
+  "from a fitted or resampled quantity, without ever having that "
+  "quantity's own estimation uncertainty carried through to the final "
+  "reported number: Section 5.44's &quot;99.9% CVaR understated by "
+  "1.71x&quot; ratio, and Section 5.43's crash-cost-multiplier sweep "
+  "(-25.6% to -26.7% across 1.0x-5.0x costs). This section applies the "
+  "same discipline to both.")
+p("<b>Part 1 &mdash; the CVaR ratio itself.</b> Section 5.44 "
+  "bootstrapped confidence intervals on the empirical VaR and CVaR "
+  "separately, but never on their ratio to the Gaussian CVaR &mdash; "
+  "the actual headline number. Resampling days once per draw and "
+  "computing both the empirical and Gaussian CVaR from that same draw "
+  "(so the ratio's genuine joint sampling distribution is captured, "
+  "not two independent intervals):")
+data_table(
+    ["Series", "Point ratio", "90% bootstrap CI", "Tail obs."],
+    [
+        ["US mirror, from 1978 (headline series)", "1.71x", "(1.52x, 1.86x)", "11"],
+        ["ASX mirror, full sample", "1.21x", "(1.00x, 1.30x)", "2"],
+    ],
+    col_widths=[2.4*inch, 1.1*inch, 1.7*inch, 1.0*inch], small=True,
+)
+p("The US ratio holds up well: a 0.34x-wide 90% interval that stays "
+  "clearly above 1.0x even at its low end &mdash; the fat-tail "
+  "understatement is real, not a statistical artifact of a single "
+  "unlucky resample, despite resting on only 11 raw observations "
+  "beyond the threshold. ASX's ratio is a different story: its 90% CI "
+  "reaches all the way down to 1.00x (no understatement at all) from "
+  "just 2 raw tail observations &mdash; that number should be read as "
+  "evidence the point estimate is essentially unusable at this "
+  "confidence level on this sample size, not as a precise 1.21x.")
+p("<b>Part 2 &mdash; the crash-cost-multiplier sweep.</b> Refitting "
+  "Section 5.43's post-2008 regression at each cost multiplier and "
+  "running both the original point-estimate simulation and Section "
+  "5.51's parameter-uncertainty-propagated one:")
+data_table(
+    ["Multiplier", "Point mean", "Propagated mean", "Propagated 90% interval"],
+    [
+        ["1.0x", "-25.7%", "-25.2%", "(-40.9%, -7.2%)"],
+        ["5.0x", "-26.8%", "-26.4%", "(-41.7%, -8.7%)"],
+    ],
+    col_widths=[1.1*inch, 1.2*inch, 1.5*inch, 2.1*inch], small=True,
+)
+p("<b>The 1.16-percentage-point point-estimate gap Section 5.43 "
+  "reported between 1.0x and 5.0x costs is completely swamped by each "
+  "fit's own parameter uncertainty &mdash; the propagated 90% intervals "
+  "overlap almost entirely.</b> Section 5.43's own point estimates are "
+  "not wrong, and the ordering (higher cost multiplier means worse "
+  "mean loss) holds throughout &mdash; but the specific claim that "
+  "crash-time cost inflation is a &quot;real but second-order "
+  "amplifier&quot; rests on a difference this small that it cannot "
+  "actually be distinguished from noise once the same estimation "
+  "uncertainty Section 5.51 applied elsewhere is applied here too.")
+box(
+    "The two headline numbers this section re-examined do not survive "
+    "the same scrutiny equally. The CVaR-understatement ratio on the "
+    "project's main (US) series is robust &mdash; a real, "
+    "resampling-confirmed effect, even from a thin tail. But the "
+    "crash-cost multiplier's reported differences were never "
+    "distinguishable from parameter noise in the first place, a "
+    "finding Section 5.43 could not have surfaced without the exact "
+    "technique Section 5.51 built one section later. Applying a new "
+    "diagnostic tool retroactively, the moment it exists, is itself "
+    "the standing practice this project keeps re-learning is worth "
+    "the extra milestone.",
+    title="ONE NUMBER HOLDS UP, ONE DOESN'T"
+)
 
 # MARKER_END_PART5
 
@@ -4791,6 +4870,14 @@ box(
     "simulation: mean loss barely moves, but the honest 90% interval "
     "widens 1.45x-2.48x as duration grows.",
     kind="fact", title="UPDATE FROM PART V.51"
+)
+box(
+    "Part V.52 swept Part V.51's own technique back across two other "
+    "headline numbers built the same way: Part V.44's CVaR ratio held "
+    "up under a bootstrap CI on the ratio itself, but Part V.43's "
+    "crash-cost-multiplier gap turned out to be fully swamped by "
+    "parameter uncertainty.",
+    kind="fact", title="UPDATE FROM PART V.52"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -5552,6 +5639,22 @@ bullets([
     "check every earlier number built by treating that same coefficient as fixed &mdash; a "
     "stress test's residual-noise bootstrap is not a substitute for propagating the uncertainty "
     "in the parameter the noise sits on top of.",
+    "<b>A newly-built diagnostic tool's job isn't finished the day it fixes the finding that "
+    "motivated it &mdash; sweep it back across every other number built the same way.</b> Part "
+    "V.51 built a specific technique to fix one number (Part V.34's crash-duration loss "
+    "estimate). Two other headline point estimates in this project's history were built the "
+    "identical way &mdash; a ratio or sweep computed from a fitted or resampled quantity, with "
+    "that quantity's own estimation uncertainty never carried through. Part V.52 pointed the "
+    "same technique at both and got two different answers: Part V.44's CVaR-understatement "
+    "ratio on the project's main US series held up well under a bootstrap CI on the ratio "
+    "itself (90% CI (1.52x, 1.86x), clearly above 1.0x), while Part V.43's crash-cost-multiplier "
+    "gap did not &mdash; its reported 1.16-percentage-point difference between 1.0x and 5.0x "
+    "costs turned out to be fully swamped by each fit's own parameter uncertainty, a fact Part "
+    "V.43 had no way to know before the tool that could check it existed. The moment this "
+    "project builds a genuinely new way of stress-testing a number's precision, the obligation "
+    "isn't just to fix the one result that prompted it &mdash; every other number in the "
+    "project's history built the same structural way is a candidate the new tool should be run "
+    "against, and some will survive while others won't; both outcomes are worth knowing.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -6362,7 +6465,11 @@ bullets([
     "of the cost assumption layered on top. <b>Rising trading costs during a crisis are real "
     "but second-order for this strategy's crash risk &mdash; the dominant driver remains the "
     "regime-return effect Part V.17 already identified, not the cost of trading through "
-    "it.</b>",
+    "it.</b> <i>(Part V.52 found this 1.1-point gap does not survive the same "
+    "parameter-uncertainty propagation applied elsewhere &mdash; the 1.0x and 5.0x "
+    "multipliers' propagated 90% intervals overlap almost entirely, so &quot;second-order but "
+    "real&quot; should be read as &quot;second-order and not statistically distinguishable "
+    "from noise&quot; &mdash; see below.)</i>",
     "<b>The Q1 simulation's central risk finding &mdash; Gaussian VaR understates real tail "
     "risk &mdash; was never tested against a real position, only a hypothetical one, until "
     "Part V.44.</b> Computing empirical vs. Gaussian VaR/CVaR directly on momentum's actual "
@@ -6380,7 +6487,11 @@ bullets([
     "how much a far-tail number can actually be trusted given each sample's real size "
     "&mdash; even the US mirror's ~9,000-day cleaned series gives a 99.9% CVaR estimate with "
     "a genuinely wide interval (roughly 8%-10%), and this project's risk playbook should "
-    "size against that empirical range, not a single Gaussian point estimate.</b>",
+    "size against that empirical range, not a single Gaussian point estimate.</b> <i>(Part "
+    "V.52 put a bootstrap CI on the CVaR RATIO itself, not just each side separately: the US "
+    "1.71x holds up well &mdash; 90% CI (1.52x, 1.86x), clearly above 1.0x &mdash; but ASX's "
+    "1.21x has a CI reaching down to 1.00x from only 2 tail observations, essentially "
+    "uninformative at this confidence level &mdash; see below.)</i>",
     "<b>Momentum's relative robustness to realistic trading costs (Part V.36) is the "
     "exception in this project, not the norm &mdash; every other live positive finding is "
     "meaningfully or completely cost-fragile at levels well inside a realistic range (Part "
@@ -6506,6 +6617,24 @@ bullets([
     "narrower one built on treating an already-fragile coefficient as certain. A "
     "multiple-testing correction that humbles a coefficient's significance should also humble "
     "any downstream stress estimate built by holding that coefficient fixed.",
+    "<b>Part V.51's uncertainty-propagation technique, applied to two other headline point "
+    "estimates, finds one robust and one not &mdash; the CVaR-understatement ratio (Part V.44) "
+    "survives; the crash-cost-multiplier gap (Part V.43) does not (Part V.52).</b> Resampling "
+    "days once per draw and computing empirical and Gaussian CVaR from the same draw puts a "
+    "90% bootstrap CI directly on the RATIO Part V.44 reported (not just each side separately): "
+    "the US mirror's 1.71x holds up well (90% CI (1.52x, 1.86x), staying clearly above 1.0x "
+    "even from only 11 raw tail observations), while ASX's 1.21x has a CI reaching all the way "
+    "to 1.00x from just 2 tail observations &mdash; essentially unusable at this confidence "
+    "level. Refitting Part V.43's cost-multiplier sweep with Part V.51's own "
+    "parameter-uncertainty-propagated simulation at every multiplier finds the reported "
+    "1.16-percentage-point gap between 1.0x and 5.0x costs is fully swamped by each fit's own "
+    "estimation uncertainty &mdash; the propagated 90% intervals overlap almost entirely, even "
+    "though the point-estimate ordering (higher cost means worse loss) still holds. <b>Neither "
+    "result retracts the section it re-examines: Part V.44's fat-tail finding on the project's "
+    "main series is more robust than its short 11-day tail sample might suggest, and Part "
+    "V.43's &quot;second-order effect&quot; conclusion, while directionally correct, was never "
+    "actually statistically distinguishable from noise in the first place &mdash; a gap this "
+    "project could not have known about before Part V.51 built the tool that found it.</b>",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -6640,7 +6769,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 50 then ran the India findings through "
+  "needed. Milestones 3 through 51 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -6756,7 +6885,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, forty-seven times in a row "
+  "most recent, best-supported-looking result, forty-eight times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -7032,14 +7161,19 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "benefit the project had reported on a point estimate alone and "
   "asked whether it survived being resampled. The mechanism did; the "
   "specific size of the benefit didn't clear the same bar this "
-  "project applies to everything else, and finally ran a forty-seventh "
+  "project applies to everything else, ran a forty-seventh "
   "check (Part V.51) that took the one correction still sitting "
   "unapplied &mdash; the crash mechanism's own humbled significance "
   "&mdash; and asked what it should have changed about a stress-test "
   "loss number built on that same mechanism months earlier. The answer "
   "wasn't the number itself, which barely moved, but the honest range "
   "around it, which had been narrower than the evidence supporting its "
-  "own key input ever actually was. "
+  "own key input ever actually was, and finally ran a forty-eighth "
+  "check (Part V.52) that took the tool the check before had just "
+  "built and pointed it at two more numbers built the identical way. "
+  "One survived intact; the other, a difference this project had "
+  "called real but second-order, turned out to be no difference at "
+  "all once the same honesty was applied to it. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -7127,12 +7261,17 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "whether it was different from zero, was answering a different "
   "question than whether it was actually bigger than chance would "
   "produce, and that once asked properly, the mechanism behind it "
-  "held up far better than the specific number did, and finally "
+  "held up far better than the specific number did, "
   "discovering that a correction the project had already applied to a "
   "coefficient's own significance had never been applied to the "
   "numbers built on top of that coefficient, and that once it was, the "
   "headline loss estimate barely changed but the honest range around "
-  "it did, are "
+  "it did, and finally discovering that the very tool built to fix "
+  "that one number had two more numbers waiting for it, and that "
+  "checking both rather than stopping at one showed a fat-tail finding "
+  "was sturdier than its own thin tail suggested while a difference "
+  "this project had called modest but real turned out, once actually "
+  "tested, to not be a difference at all, are "
   "all "
   "findings: the project never "
   "found a result, an explanation, or even a way of testing an "
@@ -7430,8 +7569,17 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "left the headline loss number almost exactly where it started, but "
   "widened the honest range around it by as much as two and a half "
   "times &mdash; a correction that had already been applied to one "
-  "number, finally applied to everything downstream of it. What "
-  "remains open, after forty-seven checks, is not a "
+  "number, finally applied to everything downstream of it. Part V.52 "
+  "then took that same newly-built tool and pointed it at two more "
+  "numbers this guide had reported without ever asking the question, "
+  "rather than stopping the moment it had fixed the one that prompted "
+  "it. The answers were not the same: a fat-tail ratio this project "
+  "had worried was resting on too thin a tail turned out to hold up "
+  "well under the exact scrutiny that worry called for, while a "
+  "cost-during-crisis effect this project had called real but "
+  "secondary turned out, once measured against its own estimation "
+  "noise, to be indistinguishable from no effect at all. What "
+  "remains open, after forty-eight checks, is not a "
   "specific finding still standing untested, but the same standing "
   "posture the project started with: no result here is treated as "
   "more final than the next check would find it to be, no comparison "
@@ -7466,7 +7614,8 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "see whether the sample size underneath it could support the claim, "
   "no coefficient whose significance a correction has already humbled "
   "is left holding up an earlier stress estimate as if it were still "
-  "certain, "
+  "certain, no new tool for measuring a number's own precision is "
+  "retired the day it fixes the one result that motivated building it, "
   "and "
   "the "
   "project's one surviving edge is exactly as well-supported, and "

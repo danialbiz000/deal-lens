@@ -1134,6 +1134,23 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     substitute for propagating the uncertainty in the parameter the noise sits on top of, and a
     project that corrects a coefficient's significance but leaves its downstream point
     estimates untouched has only done half the job.**
+44. **A newly-built diagnostic tool's job isn't finished the day it fixes the finding that
+    motivated it — sweep it back across every other number built the same way.** Milestone 50
+    built a specific technique to fix one number (Milestone 33's crash-duration loss estimate).
+    Two other headline point estimates in this project's history were built the identical
+    way — a ratio or sweep computed from a fitted or resampled quantity, with that quantity's
+    own estimation uncertainty never carried through. Milestone 51 pointed the same technique at
+    both and got two different answers: Milestone 43's CVaR-understatement ratio on the
+    project's main US series held up well under a bootstrap CI on the ratio itself (90% CI
+    (1.52x, 1.86x), clearly above 1.0x), while Milestone 42's crash-cost-multiplier gap did
+    not — its reported 1.16-percentage-point difference between 1.0x and 5.0x costs turned out
+    to be fully swamped by each fit's own parameter uncertainty, a fact Milestone 42 had no way
+    to know before the tool that could check it existed. **Rule: the moment this project builds
+    a genuinely new way of stress-testing a number's precision, the obligation isn't just to fix
+    the one result that prompted it — every other number in the project's history built the same
+    structural way (a fitted coefficient, a resampled ratio, a sweep of point estimates) is a
+    candidate the new tool should be run against, and some will survive while others won't; both
+    outcomes are worth knowing.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 
