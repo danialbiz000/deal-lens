@@ -2637,6 +2637,50 @@ is itself the standing practice this project keeps re-learning is worth the extr
 
 **Reproduce this**: `python investigations/uncertainty_propagation_audit.py`.
 
+## Does the project's current recommendation survive its own walk-forward and sub-period discipline? (Milestone 52)
+
+Milestone 37 asked whether a naive selection process, run on only pre-1994 US data, would have
+picked momentum over low-volatility — a question about the past. This milestone asks the
+analogous question about the present: does the cross-market combined book (Milestones 45, 49,
+50, 51 — ASX momentum + NSE turn-of-month) actually survive the same walk-forward and
+sub-period discipline this project applies to everything else, or was it quietly built on a
+shortcut? Two specific gaps motivate this. Milestone 38's own generic tercile split flagged NSE
+turn-of-month's most recent third (2014-03-03 to 2021-04-30) as insignificant (p=0.125) — but
+that boundary was never checked against the specific window the combined book actually uses
+(2010-11-01 to 2015-11-30, from Milestone 45's ASX-date-range clipping), which only partially
+overlaps it. And no milestone ever asked whether turn-of-month would have been selectable
+walk-forward, using only data available before that window began, or whether it was only
+visible in hindsight — the exact failure mode Milestone 37 found for low-volatility.
+
+| Check | Window | Add-on | p-value |
+|---|---|---|---|
+| Part 1: true walk-forward (pre-window NSE data) | 2000-01-04 to 2010-11-01 | +0.3405%/day | 0.0000*** |
+| Part 2: post-hoc consistency (exact combined-book window) | 2010-11-01 to 2015-11-30 | +0.2229%/day | 0.0023*** |
+
+**Both parts hold up.** Using only NSE data available before the combined book's window even
+began, the turn-of-month add-on is strongly significant (p<0.0001) — a selection process run at
+that point in time, with no benefit of hindsight, would have flagged the signal as worth
+including. And within the exact window the combined book actually traded, the add-on remains
+significant (p=0.0023) — Milestone 38's own generic tercile split only flagged its most recent
+third as decayed because that boundary doesn't align with the window this project's
+recommendation actually uses; testing the real window directly gives a reassuring answer.
+
+**Part 3 — a genuine constraint, stated rather than skipped.** ASX momentum's own window
+(2010-11-01 to 2015-11-30) already is essentially ASX's full usable sample once the 12-1 month
+signal's own lookback is applied to ASX's 2010-2015 data. There is no earlier ASX data to run a
+true walk-forward selection against on that leg, and no later ASX data (this project's ASX
+mirror ends 2015-12-30) to test whether the pick would have held up going forward. This is a
+hard data constraint this project has named before (Milestone 34) and cannot get around here.
+
+**Updated conclusion**: the half of the combined book that CAN be walk-forward-tested passes
+both directions of scrutiny — it would have been selectable in advance and it held up during its
+actual live window, not merely in a full-sample number that could have been hiding a decayed
+recent reality. The half that can't be tested (ASX momentum) is a stated, honest limitation, not
+a silent gap — this project's recommendation is exactly as validated as its data allows, and no
+more.
+
+**Reproduce this**: `python investigations/turn_of_month_walkforward_consistency.py`.
+
 ## Data provenance: the NSE GitHub mirror
 
 `load_nse_github_mirror()` pulls
@@ -3169,6 +3213,14 @@ python investigations/crash_stress_test_uncertainty_propagation.py
 # same uncertainty-propagation discipline change two other headline point estimates" above
 python investigations/uncertainty_propagation_audit.py
 
+# Investigation -- walk-forward and post-hoc consistency check on the project's current
+# recommendation (ASX momentum + NSE turn-of-month): NSE turn-of-month would have been
+# selectable using only pre-window data (p<0.0001) and holds up within its actual live window
+# (p=0.0023); ASX momentum's own walk-forward test is blocked by a genuine data constraint,
+# stated honestly -- see "Does the project's current recommendation survive its own
+# walk-forward and sub-period discipline" above
+python investigations/turn_of_month_walkforward_consistency.py
+
 # Tests (synthetic fixtures — no internet needed)
 pytest tests/ -v
 ```
@@ -3397,7 +3449,13 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
    99.9% CVaR-understatement ratio held up well on its main US series (90% CI (1.52x, 1.86x),
    still clearly above 1.0x), but Milestone 42's crash-cost-multiplier sweep did not — the
    1.16-percentage-point gap it reported between 1.0x and 5.0x costs turned out to be fully
-   swamped by each fit's own parameter uncertainty once the same scrutiny was applied. Momentum's
+   swamped by each fit's own parameter uncertainty once the same scrutiny was applied. Finally,
+   the project's own current recommendation was put through the walk-forward and sub-period
+   discipline applied to every past finding (Milestone 52): NSE turn-of-month would have been
+   selectable using only data available before the combined book's window began (p<0.0001) and
+   holds up within the specific window actually traded (p=0.0023), while ASX momentum's own
+   walk-forward test is blocked by a genuine data constraint — its window already is essentially
+   ASX's full usable sample — stated honestly rather than skipped. Momentum's
    pre-2008-09 alpha is this repo's one surviving, repeatedly-stress-tested finding.
    **Short-term reversal's
    apparent pre-2005 alpha (Milestones 9, 12-14) has since been retracted (Milestone 15):
@@ -4058,7 +4116,11 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   one, and the first time this project has actually built and tested a multi-signal position
   rather than described one in the abstract.** *(Milestone 49 block-bootstraps this point
   estimate: the near-zero correlation holds up robustly, but the specific +0.32 Sharpe
-  improvement over the better single leg carries a 90% CI that includes zero — see below.)*
+  improvement over the better single leg carries a 90% CI that includes zero — see below.
+  Milestone 52 separately checked whether the NSE leg's specific window rests on data Milestone
+  38 itself flagged as decayed — it does not: the exact window is significant at p=0.0023, and
+  the signal would have been selectable walk-forward before that window even began — see
+  below.)*
 - **Momentum's crash-risk mechanism does not generalize to other signals with a superficially
   similar construction — checked directly, not assumed (Milestone 46).** Low-volatility (short
   the high-volatility leg) and MAX (short the high-lottery leg) both share momentum's shape: a
@@ -4160,3 +4222,19 @@ This research is designed to feed three deliverables (full detail in `../FRAMEWO
   correct, was never actually statistically distinguishable from noise in the first place — a
   gap this project could not have known about before Milestone 50 built the tool that found
   it.**
+- **The project's own current recommendation (Milestones 45, 49, 50, 51's cross-market combined
+  book) had never itself been put through the walk-forward and sub-period discipline applied to
+  every past finding — checked, and it holds up where it can be checked (Milestone 52).**
+  Milestone 38's generic tercile split flagged NSE turn-of-month's most recent third
+  (2014-03-03 to 2021-04-30) as insignificant (p=0.125), a boundary that only partially overlaps
+  the specific window the combined book actually uses (2010-11-01 to 2015-11-30). Testing that
+  exact window directly, rather than relying on a generic split that doesn't align to it, finds
+  a strongly significant add-on (p=0.0023) — not a lucky draw from a decayed signal. And using
+  only NSE data available before that window began, the same add-on is even more strongly
+  significant (p<0.0001) — a selection process run at that point in time, with no benefit of
+  hindsight, would have flagged the signal as worth including. **ASX momentum's own equivalent
+  test is blocked by a genuine data constraint: its window already is essentially ASX's full
+  usable sample, leaving no earlier data to walk forward from and no later data to test whether
+  the pick held up going forward — stated honestly here rather than silently narrowing the check
+  to only the leg that can support one. The project's current recommendation is exactly as
+  validated as its data allows, and no more.**

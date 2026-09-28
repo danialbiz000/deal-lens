@@ -1151,6 +1151,24 @@ Derived directly from `risk_simulation/fat_tails_vs_normal.py` and
     structural way (a fitted coefficient, a resampled ratio, a sweep of point estimates) is a
     candidate the new tool should be run against, and some will survive while others won't; both
     outcomes are worth knowing.**
+45. **A project's walk-forward discipline is only doing its job if it's eventually pointed at
+    the project's own current recommendation, not just at the past.** Milestone 37 asked whether
+    a naive selection process would have picked this project's own trusted finding using only
+    earlier data -- but that question was only ever asked about history. Milestone 52 finally
+    asked it about the present: does the cross-market combined book (Milestones 45, 49, 50, 51)
+    actually survive the same scrutiny? It found two things worth separating cleanly. First, a
+    generic sub-period split (Milestone 38's tercile boundaries) can flag a real, currently-valid
+    window as decayed simply because the split doesn't align with the specific window a later
+    milestone actually uses -- testing the SPECIFIC window directly, not the nearest generic
+    boundary, found the combined book's NSE leg strongly significant both in its own live window
+    (p=0.0023) and, walk-forward, using only data available before that window began (p<0.0001).
+    Second, one leg of that same book (ASX momentum) genuinely cannot be walk-forward-tested at
+    all -- its live window already consumes essentially the entirety of ASX's usable sample, a
+    hard data constraint rather than an oversight. **Rule: when checking whether a current
+    recommendation would survive walk-forward or sub-period scrutiny, test the actual window the
+    recommendation lives in, not the nearest pre-existing generic split -- and when a leg
+    genuinely cannot support the same test, say so explicitly rather than silently limiting the
+    check to whichever leg happens to be checkable.**
 
 ## 3. Business / product idea: a standalone Behavioral Signal & Stress-Risk analytics service
 

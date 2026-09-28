@@ -4308,6 +4308,72 @@ box(
     "the extra milestone.",
     title="ONE NUMBER HOLDS UP, ONE DOESN'T"
 )
+box(
+    "Section 5.53 finally points this project's own walk-forward "
+    "discipline at its CURRENT recommendation, not just at the past "
+    "&mdash; and finds the half that can be tested holds up, while the "
+    "other half is a stated, honest data constraint.",
+    kind="fact", title="UPDATE FROM SECTION 5.53"
+)
+
+h1("5.53  Milestone 52 &mdash; Does the project's current recommendation survive its own walk-forward and sub-period discipline?")
+p("Section 5.38 asked whether a naive selection process, run on only "
+  "pre-1994 US data, would have picked momentum over low-volatility "
+  "&mdash; a question about the past. This section asks the analogous "
+  "question about the present: does the cross-market combined book "
+  "(Sections 5.46, 5.50, 5.51, 5.52 &mdash; ASX momentum + NSE "
+  "turn-of-month) actually survive the same walk-forward and "
+  "sub-period discipline this project applies to everything else, or "
+  "was it quietly built on a shortcut? Two specific gaps motivate "
+  "this. Section 5.39's own generic tercile split flagged NSE "
+  "turn-of-month's most recent third (2014-03-03 to 2021-04-30) as "
+  "insignificant (p=0.125) &mdash; but that boundary was never "
+  "checked against the specific window the combined book actually "
+  "uses (2010-11-01 to 2015-11-30, from Section 5.46's ASX-date-range "
+  "clipping), which only partially overlaps it. And no section ever "
+  "asked whether turn-of-month would have been selectable "
+  "walk-forward, using only data available before that window began, "
+  "or whether it was only visible in hindsight &mdash; the exact "
+  "failure mode Section 5.38 found for low-volatility.")
+data_table(
+    ["Check", "Window", "Add-on", "p-value"],
+    [
+        ["Part 1: true walk-forward", "2000-01 to 2010-11", "+0.3405%/day", "0.0000***"],
+        ["Part 2: post-hoc consistency", "2010-11 to 2015-11", "+0.2229%/day", "0.0023***"],
+    ],
+    col_widths=[2.1*inch, 1.6*inch, 1.3*inch, 1.2*inch], small=True,
+)
+p("<b>Both parts hold up.</b> Using only NSE data available before the "
+  "combined book's window even began, the turn-of-month add-on is "
+  "strongly significant (p&lt;0.0001) &mdash; a selection process run "
+  "at that point in time, with no benefit of hindsight, would have "
+  "flagged the signal as worth including. And within the exact window "
+  "the combined book actually traded, the add-on remains significant "
+  "(p=0.0023) &mdash; Section 5.39's own generic tercile split only "
+  "flagged its most recent third as decayed because that boundary "
+  "doesn't align with the window this project's recommendation "
+  "actually uses; testing the real window directly gives a "
+  "reassuring answer.")
+p("<b>Part 3 &mdash; a genuine constraint, stated rather than "
+  "skipped.</b> ASX momentum's own window (2010-11-01 to 2015-11-30) "
+  "already is essentially ASX's full usable sample once the 12-1 "
+  "month signal's own lookback is applied to ASX's 2010-2015 data. "
+  "There is no earlier ASX data to run a true walk-forward selection "
+  "against on that leg, and no later ASX data (this project's ASX "
+  "mirror ends 2015-12-30) to test whether the pick would have held "
+  "up going forward. This is a hard data constraint this project has "
+  "named before (Section 5.35) and cannot get around here.")
+box(
+    "The half of the combined book that CAN be walk-forward-tested "
+    "passes both directions of scrutiny &mdash; it would have been "
+    "selectable in advance and it held up during its actual live "
+    "window, not merely in a full-sample number that could have been "
+    "hiding a decayed recent reality. The half that can't be tested "
+    "(ASX momentum) is a stated, honest limitation, not a silent gap "
+    "&mdash; this project's recommendation is exactly as validated as "
+    "its data allows, and no more.",
+    title="VALIDATED WHERE IT CAN BE, HONEST WHERE IT CAN'T"
+)
 
 # MARKER_END_PART5
 
@@ -4878,6 +4944,15 @@ box(
     "crash-cost-multiplier gap turned out to be fully swamped by "
     "parameter uncertainty.",
     kind="fact", title="UPDATE FROM PART V.52"
+)
+box(
+    "Part V.53 finally pointed this project's own walk-forward "
+    "discipline at its current recommendation: NSE turn-of-month would "
+    "have been selectable before its window began (p&lt;0.0001) and "
+    "holds up within its actual live window (p=0.0023); ASX momentum's "
+    "own walk-forward test is blocked by a genuine data constraint, "
+    "stated honestly.",
+    kind="fact", title="UPDATE FROM PART V.53"
 )
 
 h1("6.2  A risk-management playbook, from the Q1 simulation")
@@ -5655,6 +5730,25 @@ bullets([
     "isn't just to fix the one result that prompted it &mdash; every other number in the "
     "project's history built the same structural way is a candidate the new tool should be run "
     "against, and some will survive while others won't; both outcomes are worth knowing.",
+    "<b>A project's walk-forward discipline is only doing its job if it's eventually pointed at "
+    "the project's own current recommendation, not just at the past.</b> Part V.38 asked whether "
+    "a naive selection process would have picked this project's own trusted finding using only "
+    "earlier data &mdash; but that question was only ever asked about history. Part V.53 finally "
+    "asked it about the present: does the cross-market combined book (Parts V.46, V.50, V.51, "
+    "V.52) actually survive the same scrutiny? It found two things worth separating cleanly. "
+    "First, a generic sub-period split (Part V.39's tercile boundaries) can flag a real, "
+    "currently-valid window as decayed simply because the split doesn't align with the specific "
+    "window a later section actually uses &mdash; testing the SPECIFIC window directly, not the "
+    "nearest generic boundary, found the combined book's NSE leg strongly significant both in "
+    "its own live window (p=0.0023) and, walk-forward, using only data available before that "
+    "window began (p&lt;0.0001). Second, one leg of that same book (ASX momentum) genuinely "
+    "cannot be walk-forward-tested at all &mdash; its live window already consumes essentially "
+    "the entirety of ASX's usable sample, a hard data constraint rather than an oversight. When "
+    "checking whether a current recommendation would survive walk-forward or sub-period "
+    "scrutiny, test the actual window the recommendation lives in, not the nearest pre-existing "
+    "generic split &mdash; and when a leg genuinely cannot support the same test, say so "
+    "explicitly rather than silently limiting the check to whichever leg happens to be "
+    "checkable.",
 ])
 
 h1("6.3  A standalone business idea: decomposed behavioral signal analytics")
@@ -6528,7 +6622,10 @@ bullets([
     "multi-signal position rather than described one in the abstract.</b> <i>(Part V.50 "
     "block-bootstraps this point estimate: the near-zero correlation holds up robustly, but "
     "the specific +0.32 Sharpe improvement over the better single leg carries a 90% CI that "
-    "includes zero &mdash; see below.)</i>",
+    "includes zero &mdash; see below. Part V.53 separately checked whether the NSE leg's "
+    "specific window rests on data Part V.39 itself flagged as decayed &mdash; it does not: the "
+    "exact window is significant at p=0.0023, and the signal would have been selectable "
+    "walk-forward before that window even began &mdash; see below.)</i>",
     "<b>Momentum's crash-risk mechanism does not generalize to other signals with a "
     "superficially similar construction &mdash; checked directly, not assumed (Part "
     "V.47).</b> Low-volatility (short the high-volatility leg) and MAX (short the "
@@ -6635,6 +6732,23 @@ bullets([
     "V.43's &quot;second-order effect&quot; conclusion, while directionally correct, was never "
     "actually statistically distinguishable from noise in the first place &mdash; a gap this "
     "project could not have known about before Part V.51 built the tool that found it.</b>",
+    "<b>The project's own current recommendation (Parts V.46, V.50, V.51, V.52's cross-market "
+    "combined book) had never itself been put through the walk-forward and sub-period "
+    "discipline applied to every past finding &mdash; checked, and it holds up where it can be "
+    "checked (Part V.53).</b> Part V.39's generic tercile split flagged NSE turn-of-month's "
+    "most recent third (2014-03-03 to 2021-04-30) as insignificant (p=0.125), a boundary that "
+    "only partially overlaps the specific window the combined book actually uses (2010-11-01 "
+    "to 2015-11-30). Testing that exact window directly, rather than relying on a generic split "
+    "that doesn't align to it, finds a strongly significant add-on (p=0.0023) &mdash; not a "
+    "lucky draw from a decayed signal. And using only NSE data available before that window "
+    "began, the same add-on is even more strongly significant (p&lt;0.0001) &mdash; a selection "
+    "process run at that point in time, with no benefit of hindsight, would have flagged the "
+    "signal as worth including. <b>ASX momentum's own equivalent test is blocked by a genuine "
+    "data constraint: its window already is essentially ASX's full usable sample, leaving no "
+    "earlier data to walk forward from and no later data to test whether the pick held up going "
+    "forward &mdash; stated honestly here rather than silently narrowing the check to only the "
+    "leg that can support one. The project's current recommendation is exactly as validated as "
+    "its data allows, and no more.</b>",
 ])
 
 # ============================================================ CONCLUSIONS
@@ -6769,7 +6883,7 @@ p("The practical output (Part VI) turns that into three concrete artifacts: an "
   "decomposing it; a risk-management playbook built directly from a "
   "real simulated result, not a generic checklist; and a business idea whose "
   "differentiation <i>is</i> the decomposition discipline the research itself "
-  "needed. Milestones 3 through 51 then ran the India findings through "
+  "needed. Milestones 3 through 52 then ran the India findings through "
   "increasingly rigorous versions of the same skepticism the project "
   "applies to everything else, and at every step a stronger method found "
   "something the weaker one had missed or overclaimed: momentum and "
@@ -6885,7 +6999,7 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "hypothesis until it survives testing at every level of rigor "
   "available, and the single most important thread running through this "
   "entire guide is a project that kept correcting or deepening its own "
-  "most recent, best-supported-looking result, forty-eight times in a row "
+  "most recent, best-supported-looking result, forty-nine times in a row "
   "&mdash; six outright retractions or downward revisions, one nuanced "
   "check (Part V.10) that briefly looked like a stopping point before "
   "Part V.11 showed it wasn't, an eighth check (Part V.12) built "
@@ -7168,12 +7282,18 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "loss number built on that same mechanism months earlier. The answer "
   "wasn't the number itself, which barely moved, but the honest range "
   "around it, which had been narrower than the evidence supporting its "
-  "own key input ever actually was, and finally ran a forty-eighth "
+  "own key input ever actually was, ran a forty-eighth "
   "check (Part V.52) that took the tool the check before had just "
   "built and pointed it at two more numbers built the identical way. "
   "One survived intact; the other, a difference this project had "
   "called real but second-order, turned out to be no difference at "
-  "all once the same honesty was applied to it. "
+  "all once the same honesty was applied to it, and finally ran a "
+  "forty-ninth check (Part V.53) that pointed this project's own "
+  "walk-forward instinct, used for years on findings already settled, "
+  "at the one recommendation still actively in use. Where the check "
+  "could be run at all, it passed twice over &mdash; forward and back "
+  "&mdash; and where it couldn't be run, that was said plainly instead "
+  "of quietly skipped. "
   "Not finding an escape hatch, finding the "
   "same shape twice in independent places, discovering the two "
   "places didn't actually share a shape after all, discovering that "
@@ -7266,12 +7386,18 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "coefficient's own significance had never been applied to the "
   "numbers built on top of that coefficient, and that once it was, the "
   "headline loss estimate barely changed but the honest range around "
-  "it did, and finally discovering that the very tool built to fix "
+  "it did, discovering that the very tool built to fix "
   "that one number had two more numbers waiting for it, and that "
   "checking both rather than stopping at one showed a fat-tail finding "
   "was sturdier than its own thin tail suggested while a difference "
   "this project had called modest but real turned out, once actually "
-  "tested, to not be a difference at all, are "
+  "tested, to not be a difference at all, and finally discovering that "
+  "a generic sub-period boundary, built for a different question, can "
+  "make a live signal look decayed simply by not lining up with the "
+  "window actually being used, and that testing the real window "
+  "instead found this project's own current recommendation exactly as "
+  "sound in advance as it was during the years it was actually run, "
+  "are "
   "all "
   "findings: the project never "
   "found a result, an explanation, or even a way of testing an "
@@ -7578,8 +7704,19 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "well under the exact scrutiny that worry called for, while a "
   "cost-during-crisis effect this project had called real but "
   "secondary turned out, once measured against its own estimation "
-  "noise, to be indistinguishable from no effect at all. What "
-  "remains open, after forty-eight checks, is not a "
+  "noise, to be indistinguishable from no effect at all. Part V.53 "
+  "then pointed this project's walk-forward instinct, exercised many "
+  "times on findings already settled, at the one recommendation still "
+  "actually in use. Where the check could be run, it passed both "
+  "directions at once &mdash; the signal would have been chosen in "
+  "advance, with no benefit of hindsight, and it held up during the "
+  "exact years it was actually traded, not merely in a full-sample "
+  "number that could have been quietly resting on an earlier, "
+  "unrepresentative era. Where the check could not be run &mdash; one "
+  "leg of the book has no data left over to test against, in either "
+  "direction &mdash; that was named as a limit on what this project "
+  "can know, not smoothed over. What "
+  "remains open, after forty-nine checks, is not a "
   "specific finding still standing untested, but the same standing "
   "posture the project started with: no result here is treated as "
   "more final than the next check would find it to be, no comparison "
@@ -7616,6 +7753,9 @@ p("The fix that survived all of that scrutiny is more modest, and "
   "is left holding up an earlier stress estimate as if it were still "
   "certain, no new tool for measuring a number's own precision is "
   "retired the day it fixes the one result that motivated building it, "
+  "no current recommendation is treated as validated by a walk-forward "
+  "discipline that has only ever been pointed at findings already "
+  "settled, "
   "and "
   "the "
   "project's one surviving edge is exactly as well-supported, and "
