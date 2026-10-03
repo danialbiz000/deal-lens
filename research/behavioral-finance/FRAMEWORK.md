@@ -1245,6 +1245,30 @@ Sharpe/drawdown on that universe (not a pre-blended score), plus a portfolio-
 level calm-vs-stress VaR comparison. Buildable directly on the code already
 in this repo folder.
 
+**The risk side of this is no longer just a pitch — it exists.** `toolkit/`
+extracts this project's own crash-regime-interaction test, VaR/CVaR
+fat-tail profile (with Milestone 51's bootstrap CI on the CVaR ratio itself
+built in from the start, not added later), and Milestone 50's
+uncertainty-propagated stress simulation into a signal-agnostic library:
+point `toolkit.full_report(label, hedged_returns, prices)` at any
+out-of-sample-hedged return series and it runs all three checks, in the
+same sequence this project learned the hard way to run them in (tail risk
+always; a stress projection only downstream of a significant crash
+interaction, never speculatively). `toolkit/demo_52w_high_asx.py` proves
+this generalizes, not just refactors: it runs the full pipeline against
+ASX 52-week-high, a signal that has been in this project since Milestone
+23 but had never once been put through the crash-interaction or VaR/CVaR
+tests, and gets a clean, sensible result (no crash-regime interaction,
+p=0.53; modest fat-tail risk, 99.9% CVaR ratio 1.16x with a wide CI from
+only 2 tail observations — in the same range as ASX momentum's own
+profile) on the very first run against a genuinely new signal. The signal
+side of the pitch (per-client backtests, beta decomposition, publication-
+decay checks) is still a description, not code — `toolkit/` is
+deliberately scoped to the risk side only, the half of this project's
+own methodology that generalizes cleanly to an arbitrary return series
+without first needing a client's own universe and rebalance rules wired
+in.
+
 **Target customer**: small-to-mid systematic equity funds, family offices,
 and independent RIAs — priced out of institutional factor-data tiers but
 sophisticated enough to want decomposed, re-validated signals rather than a

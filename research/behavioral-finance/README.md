@@ -7,6 +7,14 @@
 > findings; the PDF states its own "as of" scope, this README is the always-current
 > source if the two ever drift.
 
+> **Want to apply this rather than keep reading about it?** `PLAYBOOK.md` translates
+> every uncertainty finding below into concrete position-sizing, circuit-breaker, and
+> execution rules for this project's one standing recommendation — sizing against the
+> confidence intervals this project actually measured, not the point estimates. `toolkit/`
+> extracts the crash-regime, VaR/CVaR, and uncertainty-propagation machinery behind
+> Milestones 46-53 into a signal-agnostic library anyone can point at their own return
+> series (`toolkit/README.md`, worked example in `toolkit/demo_52w_high_asx.py`).
+
 ## Research question
 
 Markets are conventionally modeled as (weak-form to semi-strong-form) informationally

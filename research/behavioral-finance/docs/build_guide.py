@@ -5905,6 +5905,64 @@ p("<b>Moat:</b> not the signals themselves (all public, published research) "
   "larger vendor selling a standardized product across all clients "
   "structurally cannot do cheaply.")
 
+h1("6.4  The risk side of the analytics pitch now exists as code")
+p("Section 6.3's risk side was, until now, a description, not code. "
+  "<b>toolkit/</b> (in this project's own repository) extracts the "
+  "crash-regime-interaction test, the VaR/CVaR fat-tail profile (with "
+  "Section 5.52's bootstrap CI on the CVaR ratio itself built in from "
+  "the start), and Section 5.51's uncertainty-propagated stress "
+  "simulation into a signal-agnostic library: "
+  "<b>toolkit.full_report(label, hedged_returns, prices)</b> runs all "
+  "three checks, in the same sequence this project learned to run them "
+  "in, against any out-of-sample-hedged return series. "
+  "<b>toolkit/demo_52w_high_asx.py</b> proves the extraction actually "
+  "generalizes rather than merely refactors: it runs the full pipeline "
+  "against ASX 52-week-high, a signal this project coded in Section "
+  "5.23 but had never once put through the crash-interaction or "
+  "VaR/CVaR tests, and returns a clean, sensible result (no "
+  "crash-regime interaction, p=0.53; modest fat-tail risk, 99.9% CVaR "
+  "ratio 1.16x) on its very first run against a signal the toolkit had "
+  "never seen. The signal-construction side of the pitch &mdash; "
+  "per-client backtests, beta decomposition, publication-decay checks "
+  "&mdash; remains a description; the risk side does not.")
+
+h1("6.5  Position-sizing &amp; risk-budget playbook")
+p("Every milestone in this guide answers a statistical question: is a "
+  "signal real, does it survive correction, how uncertain is a given "
+  "number. None of them answer the question a capital allocator "
+  "actually has to answer &mdash; how much, how, and with what stop "
+  "rules. <b>PLAYBOOK.md</b> (in this project's own repository) is "
+  "that translation: no new statistical test, every number already "
+  "published in this guide, but reorganized around a single "
+  "discipline &mdash; size against the confidence interval this "
+  "project actually measured, never against the point estimate alone.")
+data_table(
+    ["Decision", "Playbook rule", "Grounded in"],
+    [
+        ["Leverage", "None recommended", "Combined book's own unlevered vol (9.28%) already sits in a typical satellite-sleeve range; levering an unproven Sharpe improvement compounds Part V.50's own finding"],
+        ["Sizing Sharpe", "Size to the worse leg's own Sharpe (+1.24), not the combined +2.00", "The +0.32 improvement's 90% CI reaches -0.14 (Part V.50)"],
+        ["Allocation range", "5-15% of an alternatives sleeve, starting at 5%", "A judgment call stated as such, not a formula output"],
+        ["Drawdown review", "Rolling drawdown > ~-13.5% (1.5x historical -9.01%)", "Section 6.2's own stress-testing precedent"],
+        ["Turn-of-month tail trigger", "Single-day loss > 6% on a turn-of-month day", "Part V.54's 99.9% CVaR bootstrap CI, (4.9%, 6.2%) on NSE"],
+        ["Execution", "Turn-of-month leg needs sub-25bps round-trip cost", "Part V.45's own cost-fragility finding (crosses zero 25-50bps)"],
+    ],
+    col_widths=[1.5*inch, 2.5*inch, 2.5*inch], small=True,
+)
+box(
+    "The playbook's own standing rule, restated: a clean statistical "
+    "finding (independence, no shared crash risk) justifies building "
+    "this combined book at all; an UNPROVEN magnitude (the specific "
+    "Sharpe improvement, the specific crash-mechanism explanation) "
+    "justifies sizing it conservatively and monitoring it, not trusting "
+    "it. The full document also sets forward-monitoring triggers (track "
+    "the realized correlation and Sharpe improvement against their own "
+    "established CIs) and an explicit do-not list, including: never "
+    "read the crash-duration stress table as a forecast, and never "
+    "treat a clean crash-regime result as a clean bill of health for "
+    "any leg's tail risk.",
+    title="SIZE AGAINST THE UNCERTAINTY, NOT THE POINT ESTIMATE"
+)
+
 # MARKER_END_PART6
 
 # ============================================================ PART VII
